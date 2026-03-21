@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { MapPin, Calendar, Clock, Users, Car, MessageSquare } from "lucide-react";
+import { MapPin, Calendar, Clock, Users, Car, MessageSquare, Plane, Luggage, Baby } from "lucide-react";
 
 const popularLocations = [
   "Heraklion Airport (HER)",
@@ -26,6 +27,8 @@ const popularLocations = [
   "Other (specify in notes)",
 ];
 
+const airportValues = ["Heraklion Airport (HER)", "Chania Airport (CHQ)"];
+
 const BookingForm = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -37,8 +40,13 @@ const BookingForm = () => {
     time: "",
     passengers: "",
     vehicleType: "",
+    flightNumber: "",
+    luggage: "",
+    childSeat: false,
     notes: "",
   });
+
+  const isAirportTransfer = airportValues.includes(formData.pickup) || airportValues.includes(formData.dropoff);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +55,7 @@ const BookingForm = () => {
       return;
     }
     toast.success("Booking request sent! We'll contact you shortly to confirm.");
-    setFormData({ name: "", email: "", phone: "", pickup: "", dropoff: "", date: "", time: "", passengers: "", vehicleType: "", notes: "" });
+    setFormData({ name: "", email: "", phone: "", pickup: "", dropoff: "", date: "", time: "", passengers: "", vehicleType: "", flightNumber: "", luggage: "", childSeat: false, notes: "" });
   };
 
   return (
@@ -127,9 +135,42 @@ const BookingForm = () => {
         </div>
       </div>
 
+      {/* Extra fields: flight number, luggage, child seat */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        {isAirportTransfer && (
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2"><Plane className="h-4 w-4 text-accent" /> Flight Number</Label>
+            <Input placeholder="e.g. FR1234" value={formData.flightNumber} onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value })} />
+          </div>
+        )}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2"><Luggage className="h-4 w-4 text-accent" /> Luggage</Label>
+          <Select value={formData.luggage} onValueChange={(v) => setFormData({ ...formData, luggage: v })}>
+            <SelectTrigger><SelectValue placeholder="Select luggage" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No luggage</SelectItem>
+              <SelectItem value="1-small">1 small bag</SelectItem>
+              <SelectItem value="1-large">1 large suitcase</SelectItem>
+              <SelectItem value="2-large">2 large suitcases</SelectItem>
+              <SelectItem value="3+">3+ pieces</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-3 h-10">
+          <Checkbox
+            id="childSeat"
+            checked={formData.childSeat}
+            onCheckedChange={(checked) => setFormData({ ...formData, childSeat: checked === true })}
+          />
+          <Label htmlFor="childSeat" className="flex items-center gap-2 cursor-pointer">
+            <Baby className="h-4 w-4 text-accent" /> Child seat needed
+          </Label>
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-accent" /> Additional Notes</Label>
-        <Textarea placeholder="Flight number, child seats, extra luggage, special requests..." value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={3} />
+        <Textarea placeholder="Special requests, extra info..." value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={3} />
       </div>
 
       <Button type="submit" size="lg" className="w-full text-lg font-display font-semibold tracking-wide">
