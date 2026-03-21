@@ -6,7 +6,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero with logo watermark */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden py-12 px-4">
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-28 md:pt-32 pb-12 px-4">
         {/* Giant logo watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <img
