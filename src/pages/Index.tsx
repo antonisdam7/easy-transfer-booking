@@ -6,7 +6,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero with logo watermark */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-28 md:pt-32 pb-12 px-4">
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden py-12 px-4">
         {/* Giant logo watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <img
@@ -17,25 +17,8 @@ const Index = () => {
           />
         </div>
 
-        {/* Logo + title top-left */}
-        <div className="absolute top-6 left-6 md:top-10 md:left-10 z-10 flex items-center gap-3 animate-fade-in-up">
-          <img
-            src={logo}
-            alt="Habibi Come to Crete Transfers"
-            className="w-14 h-14 md:w-20 md:h-20 rounded-full shadow-card object-cover"
-          />
-          <div>
-            <h1 className="text-lg md:text-2xl font-display font-bold text-primary tracking-tight">
-              Habibi Come to Crete
-            </h1>
-            <p className="text-muted-foreground text-xs md:text-sm">
-              Premium Transfers · Mercedes Fleet · 24/7
-            </p>
-          </div>
-        </div>
-
         {/* Booking form card - semi-transparent */}
-        <div className="relative z-10 w-full max-w-4xl bg-card/80 backdrop-blur-md rounded-lg shadow-card p-6 md:p-10 border border-border/50 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+        <div className="relative z-10 w-full max-w-4xl bg-card/80 backdrop-blur-md rounded-lg shadow-card p-6 md:p-10 border border-border/50 animate-fade-in-up">
           <h2 className="text-xl font-display font-bold text-primary mb-1">Book Your Transfer</h2>
           <p className="text-muted-foreground text-sm mb-6">Fill in the details and we'll confirm your ride.</p>
           <BookingForm />
