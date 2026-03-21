@@ -6,7 +6,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero with logo watermark */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden py-12 px-4">
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-28 md:pt-32 pb-12 px-4">
         {/* Giant logo watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <img
@@ -17,19 +17,21 @@ const Index = () => {
           />
         </div>
 
-        {/* Small logo + title */}
-        <div className="relative z-10 text-center mb-8">
+        {/* Logo + title top-left */}
+        <div className="absolute top-6 left-6 md:top-10 md:left-10 z-10 flex items-center gap-3 animate-fade-in-up">
           <img
             src={logo}
             alt="Habibi Come to Crete Transfers"
-            className="w-20 h-20 rounded-full shadow-card object-cover mx-auto mb-4 animate-fade-in-up"
+            className="w-14 h-14 md:w-20 md:h-20 rounded-full shadow-card object-cover"
           />
-          <h1 className="text-2xl md:text-4xl font-display font-bold text-primary tracking-tight animate-fade-in-up">
-            Habibi Come to Crete
-          </h1>
-          <p className="text-muted-foreground mt-1 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-            Premium Transfers · Mercedes Fleet · 24/7
-          </p>
+          <div>
+            <h1 className="text-lg md:text-2xl font-display font-bold text-primary tracking-tight">
+              Habibi Come to Crete
+            </h1>
+            <p className="text-muted-foreground text-xs md:text-sm">
+              Premium Transfers · Mercedes Fleet · 24/7
+            </p>
+          </div>
         </div>
 
         {/* Booking form card - semi-transparent */}
