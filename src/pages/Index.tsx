@@ -71,11 +71,11 @@ const Index = () => {
             <p className="text-primary-foreground/70 text-sm mt-1">Professional transfers in Crete, Greece</p>
           </div>
           <div className="flex flex-col items-center md:items-end gap-2 text-sm">
-            <a href="mailto:info@habibicrete.com" className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-              <Mail className="h-4 w-4" /> info@habibicrete.com
+            <a href="mailto:habibitransferscrete@gmail.com" className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+              <Mail className="h-4 w-4" /> habibitransferscrete@gmail.com
             </a>
-            <a href="tel:+306900000000" className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-              <Phone className="h-4 w-4" /> +30 690 000 0000
+            <a href="tel:+306976263677" className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+              <Phone className="h-4 w-4" /> +30 697 626 3677
             </a>
           </div>
         </div>
