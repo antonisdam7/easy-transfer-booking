@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,28 +6,125 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { MapPin, Calendar, Clock, Users, Car, MessageSquare, Plane, Luggage, Baby } from "lucide-react";
+import { MapPin, Calendar, Clock, Users, Car, MessageSquare, Plane, Luggage, Baby, Euro } from "lucide-react";
 
 const popularLocations = [
   "Heraklion Airport (HER)",
   "Chania Airport (CHQ)",
   "Heraklion Port",
   "Chania Port (Souda)",
-  "Rethymno",
-  "Agios Nikolaos",
-  "Elounda",
-  "Hersonissos",
+  "Heraklio",
+  "Amnissos / Karteros",
+  "Kokkini Hani / Gournes",
+  "Gouves",
+  "Analipsi / Anissaras",
+  "Hersonissos / Koutouloufari",
+  "Stalida",
   "Malia",
-  "Plakias",
-  "Matala",
-  "Sitia",
+  "Sissi",
+  "Milatos",
+  "Agios Nikolaos",
+  "Amoudara Ag. Nikolaos",
+  "Elounda",
+  "Plaka Eloundas",
+  "Istron / Kalo Horio",
   "Ierapetra",
+  "Ferma / Koutsounari",
+  "Makri Gialos",
+  "Sitia",
+  "Palekastro",
+  "Amoudara / Linoperamata",
+  "Arolitos",
+  "Lygaria",
+  "Agia Pelagia / Fodele",
   "Bali",
-  "Agia Pelagia",
+  "Panormo",
+  "Scaleta",
+  "Adele",
+  "Rethymno",
+  "Georgioupoli",
+  "Kalibes / Almyrida",
+  "Chania",
+  "Chania A/R",
+  "Agia Marina Chania",
+  "Platanias Chania",
+  "Maleme",
+  "Kolimbari",
+  "Kasteli Kissamou",
+  "Paleochora",
+  "Plakias",
+  "Fragkokastelo",
+  "Hora Sfakion",
+  "Matala",
+  "Agia Galini",
+  "Archanes",
+  "P.A.G.N.I",
   "Other (specify in notes)",
 ];
 
 const airportValues = ["Heraklion Airport (HER)", "Chania Airport (CHQ)"];
+
+// Prices from Heraklion Airport with 24% markup, rounded to nearest euro
+const herAirportPrices: Record<string, number> = {
+  "Heraklio": 17,
+  "Amnissos / Karteros": 19,
+  "Kokkini Hani / Gournes": 27,
+  "Gouves": 31,
+  "Analipsi / Anissaras": 37,
+  "Hersonissos / Koutouloufari": 41,
+  "Stalida": 43,
+  "Malia": 47,
+  "Sissi": 55,
+  "Milatos": 67,
+  "Agios Nikolaos": 81,
+  "Amoudara Ag. Nikolaos": 81,
+  "Elounda": 87,
+  "Plaka Eloundas": 93,
+  "Istron / Kalo Horio": 93,
+  "Ierapetra": 118,
+  "Ferma / Koutsounari": 126,
+  "Makri Gialos": 139,
+  "Sitia": 186,
+  "Palekastro": 193,
+  "Amoudara / Linoperamata": 27,
+  "Arolitos": 31,
+  "Lygaria": 33,
+  "Agia Pelagia / Fodele": 42,
+  "Bali": 72,
+  "Panormo": 77,
+  "Scaleta": 83,
+  "Adele": 93,
+  "Rethymno": 97,
+  "Georgioupoli": 122,
+  "Kalibes / Almyrida": 136,
+  "Chania": 174,
+  "Chania A/R": 180,
+  "Agia Marina Chania": 180,
+  "Platanias Chania": 180,
+  "Maleme": 182,
+  "Kolimbari": 188,
+  "Kasteli Kissamou": 201,
+  "Paleochora": 260,
+  "Plakias": 136,
+  "Fragkokastelo": 149,
+  "Hora Sfakion": 164,
+  "Matala": 81,
+  "Agia Galini": 97,
+  "Archanes": 31,
+  "P.A.G.N.I": 25,
+  "Heraklion Port": 17,
+  "Chania Port (Souda)": 174,
+};
+
+function getPrice(pickup: string, dropoff: string): number | null {
+  if (pickup === "Heraklion Airport (HER)" && herAirportPrices[dropoff]) {
+    return herAirportPrices[dropoff];
+  }
+  if (dropoff === "Heraklion Airport (HER)" && herAirportPrices[pickup]) {
+    return herAirportPrices[pickup];
+  }
+  return null;
+}
 
 const BookingForm = () => {
   const [formData, setFormData] = useState({
@@ -47,6 +144,13 @@ const BookingForm = () => {
   });
 
   const isAirportTransfer = airportValues.includes(formData.pickup) || airportValues.includes(formData.dropoff);
+
+  const price = useMemo(() => {
+    if (formData.pickup && formData.dropoff) {
+      return getPrice(formData.pickup, formData.dropoff);
+    }
+    return null;
+  }, [formData.pickup, formData.dropoff]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +206,22 @@ const BookingForm = () => {
         </div>
       </div>
 
+      {/* Price display */}
+      {formData.pickup && formData.dropoff && (
+        <div className="rounded-lg border border-border bg-secondary/50 p-4 flex items-center gap-3">
+          <Euro className="h-5 w-5 text-primary" />
+          {price ? (
+            <div>
+              <span className="text-lg font-display font-bold text-primary">€{price}</span>
+              <span className="text-sm text-muted-foreground ml-2">Sedan (1-4 passengers)</span>
+              <p className="text-xs text-muted-foreground mt-1">Minivan/Van prices may vary. Final price confirmed upon booking.</p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Price on request — we'll send you a quote after booking.</p>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="space-y-2">
           <Label className="flex items-center gap-2"><Calendar className="h-4 w-4 text-accent" /> Date *</Label>
@@ -135,7 +255,7 @@ const BookingForm = () => {
         </div>
       </div>
 
-      {/* Extra fields: flight number, luggage, child seat */}
+      {/* Extra fields */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
         {isAirportTransfer && (
           <div className="space-y-2">
