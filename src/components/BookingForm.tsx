@@ -248,7 +248,6 @@ const BookingForm = () => {
             <SelectTrigger><SelectValue placeholder="Any" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="sedan">Sedan (1-4)</SelectItem>
-              <SelectItem value="minivan">Minivan (1-6)</SelectItem>
               <SelectItem value="van">Van (1-8)</SelectItem>
             </SelectContent>
           </Select>
