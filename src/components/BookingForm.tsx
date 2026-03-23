@@ -212,9 +212,17 @@ const BookingForm = () => {
           <Euro className="h-5 w-5 text-primary" />
           {price ? (
             <div>
-              <span className="text-lg font-display font-bold text-primary">€{price}</span>
-              <span className="text-sm text-muted-foreground ml-2">Sedan (1-4 passengers)</span>
-              <p className="text-xs text-muted-foreground mt-1">Minivan/Van prices may vary. Final price confirmed upon booking.</p>
+              <div className="flex flex-wrap gap-4">
+                <div>
+                  <span className="text-lg font-display font-bold text-primary">€{price}</span>
+                  <span className="text-sm text-muted-foreground ml-2">Sedan (1-4)</span>
+                </div>
+                <div>
+                  <span className="text-lg font-display font-bold text-primary">€{Math.round(price * 1.3)}</span>
+                  <span className="text-sm text-muted-foreground ml-2">Van (1-8)</span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Final price confirmed upon booking.</p>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">Price on request — we'll send you a quote after booking.</p>
@@ -248,7 +256,6 @@ const BookingForm = () => {
             <SelectTrigger><SelectValue placeholder="Any" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="sedan">Sedan (1-4)</SelectItem>
-              <SelectItem value="minivan">Minivan (1-6)</SelectItem>
               <SelectItem value="van">Van (1-8)</SelectItem>
             </SelectContent>
           </Select>
