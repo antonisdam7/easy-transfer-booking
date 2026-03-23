@@ -24,6 +24,7 @@ const SMTP_USER = process.env.SMTP_USER || "";
 const SMTP_PASS = process.env.SMTP_PASS || "";
 const MAIL_FROM = process.env.MAIL_FROM || SMTP_USER;
 const MAIL_TO = process.env.MAIL_TO || "";
+const EMAIL_SEND_TIMEOUT_MS = Number(process.env.EMAIL_SEND_TIMEOUT_MS || 8000);
 
 app.use(cors());
 app.use(express.json());
@@ -104,6 +105,28 @@ async function sendTransferNotification(transfer) {
   });
 }
 
+async function sendTransferNotificationWithTimeout(transfer) {
+  const timeoutPromise = new Promise((_, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error(`Email send timed out after ${EMAIL_SEND_TIMEOUT_MS}ms`));
+    }, EMAIL_SEND_TIMEOUT_MS);
+    timeoutId.unref?.();
+  });
+
+  await Promise.race([sendTransferNotification(transfer), timeoutPromise]);
+}
+
+function queueTransferNotification(transfer) {
+  // Do not block API response on SMTP delays.
+  setImmediate(async () => {
+    try {
+      await sendTransferNotificationWithTimeout(transfer);
+    } catch (error) {
+      console.error("Failed to send transfer notification email:", error);
+    }
+  });
+}
+
 function requireAdmin(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
@@ -154,11 +177,7 @@ app.post("/api/transfers", async (req, res) => {
   transfers.unshift(newTransfer);
   await writeTransfers(transfers);
 
-  try {
-    await sendTransferNotification(newTransfer);
-  } catch (error) {
-    console.error("Failed to send transfer notification email:", error);
-  }
+  queueTransferNotification(newTransfer);
 
   return res.status(201).json({ id: newTransfer.id });
 });
