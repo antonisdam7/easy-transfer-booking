@@ -215,7 +215,7 @@ const BookingForm = () => {
           <Label className="flex items-center gap-2"><MapPin className="h-4 w-4 text-accent" /> Pick-up Location *</Label>
           <Select value={formData.pickup} onValueChange={(v) => setFormData({ ...formData, pickup: v })}>
             <SelectTrigger><SelectValue placeholder="Select pick-up" /></SelectTrigger>
-            <SelectContent>
+            <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
               {popularLocations.map((loc) => (
                 <SelectItem key={loc} value={loc}>{loc}</SelectItem>
               ))}
@@ -226,7 +226,7 @@ const BookingForm = () => {
           <Label className="flex items-center gap-2"><MapPin className="h-4 w-4 text-accent" /> Drop-off Location *</Label>
           <Select value={formData.dropoff} onValueChange={(v) => setFormData({ ...formData, dropoff: v })}>
             <SelectTrigger><SelectValue placeholder="Select drop-off" /></SelectTrigger>
-            <SelectContent>
+            <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
               {popularLocations.map((loc) => (
                 <SelectItem key={loc} value={loc}>{loc}</SelectItem>
               ))}
