@@ -1,6 +1,6 @@
 import logo from "@/assets/logo.jpeg";
 import BookingForm from "@/components/BookingForm";
-import { Phone, Mail, Star, MapPin } from "lucide-react";
+import { Phone, Mail, Star, MapPin, Facebook } from "lucide-react";
 import { useSeo } from "@/hooks/useSeo";
 
 const Index = () => {
@@ -18,6 +18,7 @@ const Index = () => {
         telephone: "+30 697 626 3677",
         email: "habibitransferscrete@gmail.com",
         areaServed: "Crete, Greece",
+        sameAs: ["https://www.facebook.com/profile.php?id=61575578152214"],
       },
       {
         "@context": "https://schema.org",
@@ -84,6 +85,14 @@ const Index = () => {
             <p className="text-primary-foreground/70 text-sm mt-1">Professional transfers in Crete, Greece</p>
           </div>
           <div className="flex flex-col items-center md:items-end gap-2 text-sm">
+            <a
+              href="https://www.facebook.com/profile.php?id=61575578152214"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 transition-colors font-medium"
+            >
+              <Facebook className="h-4 w-4" /> Visit us on Facebook
+            </a>
             <a href="mailto:habibitransferscrete@gmail.com" className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
               <Mail className="h-4 w-4" /> habibitransferscrete@gmail.com
             </a>
