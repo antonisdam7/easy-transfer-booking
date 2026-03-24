@@ -3,20 +3,14 @@ import express from "express";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
-import fs from "node:fs/promises";
-import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { fileURLToPath } from "node:url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { getStorageMode, getTransfers, initStorage, saveTransfer } from "./storage.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || "change-me-super-secret";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
-const TRANSFERS_FILE = path.join(__dirname, "data", "transfers.json");
 const SMTP_HOST = process.env.SMTP_HOST || "";
 const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
 const SMTP_SECURE = process.env.SMTP_SECURE === "true";
@@ -41,26 +35,6 @@ const mailTransporter =
         },
       })
     : null;
-
-async function ensureDataFile() {
-  const folder = path.dirname(TRANSFERS_FILE);
-  await fs.mkdir(folder, { recursive: true });
-  try {
-    await fs.access(TRANSFERS_FILE);
-  } catch {
-    await fs.writeFile(TRANSFERS_FILE, "[]", "utf-8");
-  }
-}
-
-async function readTransfers() {
-  await ensureDataFile();
-  const content = await fs.readFile(TRANSFERS_FILE, "utf-8");
-  return JSON.parse(content);
-}
-
-async function writeTransfers(transfers) {
-  await fs.writeFile(TRANSFERS_FILE, JSON.stringify(transfers, null, 2), "utf-8");
-}
 
 function buildTransferEmail(transfer) {
   const lines = [
@@ -144,7 +118,7 @@ function requireAdmin(req, res, next) {
 }
 
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok" });
+  res.json({ status: "ok", storage: getStorageMode() });
 });
 
 app.post("/api/admin/login", (req, res) => {
@@ -167,15 +141,13 @@ app.post("/api/transfers", async (req, res) => {
     return res.status(400).json({ message: `Missing required field: ${missingField}` });
   }
 
-  const transfers = await readTransfers();
   const newTransfer = {
     id: randomUUID(),
     createdAt: new Date().toISOString(),
     ...transfer,
   };
 
-  transfers.unshift(newTransfer);
-  await writeTransfers(transfers);
+  await saveTransfer(newTransfer);
 
   queueTransferNotification(newTransfer);
 
@@ -183,13 +155,24 @@ app.post("/api/transfers", async (req, res) => {
 });
 
 app.get("/api/admin/transfers", requireAdmin, async (_req, res) => {
-  const transfers = await readTransfers();
+  const transfers = await getTransfers();
   res.json({ transfers });
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT}`);
-  if (!mailTransporter) {
-    console.log("SMTP is not configured yet. Set SMTP_* env vars to enable email notifications.");
+async function startServer() {
+  try {
+    await initStorage();
+    app.listen(PORT, () => {
+      console.log(`Backend running on http://localhost:${PORT}`);
+      console.log(`Storage mode: ${getStorageMode()}`);
+      if (!mailTransporter) {
+        console.log("SMTP is not configured yet. Set SMTP_* env vars to enable email notifications.");
+      }
+    });
+  } catch (error) {
+    console.error("Failed to initialize server storage:", error);
+    process.exit(1);
   }
-});
+}
+
+startServer();
