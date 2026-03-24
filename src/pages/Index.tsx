@@ -1,8 +1,38 @@
 import logo from "@/assets/logo.jpeg";
 import BookingForm from "@/components/BookingForm";
 import { Phone, Mail, Star, MapPin } from "lucide-react";
+import { useSeo } from "@/hooks/useSeo";
 
 const Index = () => {
+  useSeo({
+    title: "Crete Transfers & Airport Taxi",
+    description:
+      "Book private Crete transfers for Heraklion and Chania airports, ports, hotels, and resorts with professional local drivers.",
+    canonicalPath: "/",
+    structuredData: [
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        name: "Habibi Come to Crete Transfers",
+        url: "https://habibitransferscrete.com/",
+        telephone: "+30 697 626 3677",
+        email: "habibitransferscrete@gmail.com",
+        areaServed: "Crete, Greece",
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        name: "Crete Airport Transfer Service",
+        provider: {
+          "@type": "LocalBusiness",
+          name: "Habibi Come to Crete Transfers",
+        },
+        areaServed: "Crete, Greece",
+        serviceType: "Private airport and hotel transfers",
+      },
+    ],
+  });
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero with logo watermark */}
