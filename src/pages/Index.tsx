@@ -1,6 +1,6 @@
 import logo from "@/assets/logo.jpeg";
 import BookingForm from "@/components/BookingForm";
-import { Phone, Mail, Star, MapPin, Facebook } from "lucide-react";
+import { Phone, Mail, Star, MapPin, Facebook, MessageCircle } from "lucide-react";
 import { useSeo } from "@/hooks/useSeo";
 
 const Index = () => {
@@ -85,6 +85,14 @@ const Index = () => {
             <p className="text-primary-foreground/70 text-sm mt-1">Professional transfers in Crete, Greece</p>
           </div>
           <div className="flex flex-col items-center md:items-end gap-2 text-sm">
+            <a
+              href="https://wa.me/306976263677?text=Hi%2C%20I%20want%20to%20book%20a%20transfer%20in%20Crete"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors font-medium"
+            >
+              <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
+            </a>
             <a
               href="https://www.facebook.com/profile.php?id=61575578152214"
               target="_blank"
