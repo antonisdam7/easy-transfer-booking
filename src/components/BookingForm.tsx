@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -154,6 +154,21 @@ const BookingForm = () => {
     return null;
   }, [formData.pickup, formData.dropoff]);
 
+  const pickupOptions = useMemo(
+    () => popularLocations.filter((loc) => loc !== formData.dropoff),
+    [formData.dropoff],
+  );
+  const dropoffOptions = useMemo(
+    () => popularLocations.filter((loc) => loc !== formData.pickup),
+    [formData.pickup],
+  );
+
+  useEffect(() => {
+    if (formData.pickup && formData.dropoff && formData.pickup === formData.dropoff) {
+      setFormData((prev) => ({ ...prev, dropoff: "" }));
+    }
+  }, [formData.pickup, formData.dropoff]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.pickup || !formData.dropoff || !formData.date || !formData.time || !formData.passengers) {
@@ -216,7 +231,7 @@ const BookingForm = () => {
           <Select value={formData.pickup} onValueChange={(v) => setFormData({ ...formData, pickup: v })}>
             <SelectTrigger><SelectValue placeholder="Select pick-up" /></SelectTrigger>
             <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
-              {popularLocations.map((loc) => (
+              {pickupOptions.map((loc) => (
                 <SelectItem key={loc} value={loc}>{loc}</SelectItem>
               ))}
             </SelectContent>
@@ -227,7 +242,7 @@ const BookingForm = () => {
           <Select value={formData.dropoff} onValueChange={(v) => setFormData({ ...formData, dropoff: v })}>
             <SelectTrigger><SelectValue placeholder="Select drop-off" /></SelectTrigger>
             <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
-              {popularLocations.map((loc) => (
+              {dropoffOptions.map((loc) => (
                 <SelectItem key={loc} value={loc}>{loc}</SelectItem>
               ))}
             </SelectContent>
