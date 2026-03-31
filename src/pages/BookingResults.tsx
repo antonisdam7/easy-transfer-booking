@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
+import { CalendarDays, Clock3, Luggage, MapPin, Route, Users } from "lucide-react";
 import { apiRequest } from "@/lib/api";
 import { airportValues, getPrice, getRouteStats, popularLocations } from "@/lib/booking";
 
@@ -208,29 +209,39 @@ export default function BookingResults() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Pickup Date</Label>
-              <Input type="date" value={formData.date} onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))} />
+              <Input
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
+              />
             </div>
             <div className="space-y-2">
               <Label>Pickup Time</Label>
-              <Input type="time" value={formData.time} onChange={(e) => setFormData((prev) => ({ ...prev, time: e.target.value }))} />
+              <Input
+                type="time"
+                value={formData.time}
+                onChange={(e) => setFormData((prev) => ({ ...prev, time: e.target.value }))}
+              />
             </div>
-            <div className="space-y-2">
-              <Label>People</Label>
-              <Select value={formData.people} onValueChange={(v) => setFormData((prev) => ({ ...prev, people: v }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                    <SelectItem key={n} value={String(n)}>
-                      {n}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>People</Label>
+            <Select value={formData.people} onValueChange={(v) => setFormData((prev) => ({ ...prev, people: v }))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    {n}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           {formData.roundtrip && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -259,16 +270,30 @@ export default function BookingResults() {
       {step === 2 && (
         <div className="space-y-4">
           <h2 className="text-2xl font-display font-bold text-primary">Select Car</h2>
-          <div className="rounded-lg border bg-secondary/40 p-4 text-sm space-y-2">
-            <p className="font-medium">
-              {`📅 ${formatDateWithWeekday(formData.date, formData.time)}   👥 x${formData.people}   📍 ${routeStats.km} km   ⏱️ ${routeStats.minutes} mins`}
-            </p>
-            <p className="text-muted-foreground">
-              {`✈️ ${formData.pickup}  ➜  ${formData.dropoff}`}
+          <div className="rounded-lg border bg-secondary/40 p-4 text-sm space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <p className="inline-flex items-center gap-2 font-medium text-primary">
+                <CalendarDays className="h-4 w-4 text-emerald-600" />
+                {formatDateWithWeekday(formData.date, formData.time)}
+              </p>
+              <p className="inline-flex items-center gap-2 font-medium text-primary">
+                <Users className="h-4 w-4 text-emerald-600" /> {`x${formData.people} persons`}
+              </p>
+              <p className="inline-flex items-center gap-2 text-muted-foreground">
+                <Route className="h-4 w-4 text-primary" /> {`${routeStats.km} km distance`}
+              </p>
+              <p className="inline-flex items-center gap-2 text-muted-foreground">
+                <Clock3 className="h-4 w-4 text-primary" /> {`${routeStats.minutes} mins duration`}
+              </p>
+            </div>
+            <p className="inline-flex items-center gap-2 text-muted-foreground">
+              <MapPin className="h-4 w-4 text-primary" />
+              {`${formData.pickup}  ->  ${formData.dropoff}`}
             </p>
             {formData.roundtrip && (
-              <p className="text-muted-foreground">
-                {`🔁 ${formatDateWithWeekday(formData.returnDate, formData.returnTime)}  | Return route included`}
+              <p className="inline-flex items-center gap-2 text-muted-foreground">
+                <CalendarDays className="h-4 w-4 text-emerald-600" />
+                {`${formatDateWithWeekday(formData.returnDate, formData.returnTime)}  | Return route included`}
               </p>
             )}
           </div>
@@ -277,13 +302,21 @@ export default function BookingResults() {
               <img src={CAR_IMAGE} alt="Sedan car" className="h-52 w-full object-cover" />
               <div className="p-4 space-y-2">
                 <h3 className="font-display font-semibold text-lg">Mercedes E Class Sedan</h3>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
                   {carPrice ? `€${carPrice}` : "Price on request"}
                 </p>
-                <p className="text-sm text-muted-foreground">× 4 suitcases</p>
-                <p className="text-sm text-muted-foreground">× 4 persons</p>
-                <p className="text-sm text-muted-foreground">{routeStats.km} km</p>
-                <p className="text-sm text-muted-foreground">{routeStats.minutes} mins (duration)</p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Luggage className="h-4 w-4 text-primary" /> 4 suitcases
+                </p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Users className="h-4 w-4 text-primary" /> 4 persons
+                </p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
+                </p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
+                </p>
                 <Button onClick={() => setVehicleAndContinue("sedan")}>Select Car</Button>
               </div>
             </article>
@@ -291,13 +324,21 @@ export default function BookingResults() {
               <img src={ESTATE_IMAGE} alt="Mercedes E Class Estate" className="h-52 w-full object-cover" />
               <div className="p-4 space-y-2">
                 <h3 className="font-display font-semibold text-lg">Mercedes-Benz E-Class Estate</h3>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
                   {carPrice ? `€${carPrice}` : "Price on request"}
                 </p>
-                <p className="text-sm text-muted-foreground">× 7 suitcases</p>
-                <p className="text-sm text-muted-foreground">× 4 persons</p>
-                <p className="text-sm text-muted-foreground">{routeStats.km} km</p>
-                <p className="text-sm text-muted-foreground">{routeStats.minutes} mins (duration)</p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Luggage className="h-4 w-4 text-primary" /> 7 suitcases
+                </p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Users className="h-4 w-4 text-primary" /> 4 persons
+                </p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
+                </p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
+                </p>
                 <Button onClick={() => setVehicleAndContinue("sedan")}>Select Estate</Button>
               </div>
             </article>
@@ -305,13 +346,21 @@ export default function BookingResults() {
               <img src={VAN_IMAGE} alt="Passenger van" className="h-52 w-full object-cover" />
               <div className="p-4 space-y-2">
                 <h3 className="font-display font-semibold text-lg">Minivan Mercedes V Class</h3>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
                   {vanPrice ? `€${vanPrice}` : "Price on request"}
                 </p>
-                <p className="text-sm text-muted-foreground">× 8 suitcases</p>
-                <p className="text-sm text-muted-foreground">× 8 persons</p>
-                <p className="text-sm text-muted-foreground">{routeStats.km} km</p>
-                <p className="text-sm text-muted-foreground">{routeStats.minutes} mins (duration)</p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Luggage className="h-4 w-4 text-primary" /> 8 suitcases
+                </p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Users className="h-4 w-4 text-primary" /> 8 persons
+                </p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
+                </p>
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
+                </p>
                 <Button onClick={() => setVehicleAndContinue("van")}>Select Van</Button>
               </div>
             </article>
