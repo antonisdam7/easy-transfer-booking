@@ -305,18 +305,20 @@ export default function BookingResults() {
                 <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
                   {carPrice ? `€${carPrice}` : "Price on request"}
                 </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Luggage className="h-4 w-4 text-primary" /> 4 suitcases
-                </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Users className="h-4 w-4 text-primary" /> 4 persons
-                </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
-                </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
-                </p>
+                <div className="space-y-1">
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Luggage className="h-4 w-4 text-primary" /> 4 suitcases
+                  </p>
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Users className="h-4 w-4 text-primary" /> 4 persons
+                  </p>
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
+                  </p>
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
+                  </p>
+                </div>
                 <Button onClick={() => setVehicleAndContinue("sedan")}>Select Car</Button>
               </div>
             </article>
@@ -327,18 +329,20 @@ export default function BookingResults() {
                 <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
                   {carPrice ? `€${carPrice}` : "Price on request"}
                 </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Luggage className="h-4 w-4 text-primary" /> 7 suitcases
-                </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Users className="h-4 w-4 text-primary" /> 4 persons
-                </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
-                </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
-                </p>
+                <div className="space-y-1">
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Luggage className="h-4 w-4 text-primary" /> 7 suitcases
+                  </p>
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Users className="h-4 w-4 text-primary" /> 4 persons
+                  </p>
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
+                  </p>
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
+                  </p>
+                </div>
                 <Button onClick={() => setVehicleAndContinue("sedan")}>Select Estate</Button>
               </div>
             </article>
@@ -349,18 +353,20 @@ export default function BookingResults() {
                 <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
                   {vanPrice ? `€${vanPrice}` : "Price on request"}
                 </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Luggage className="h-4 w-4 text-primary" /> 8 suitcases
-                </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Users className="h-4 w-4 text-primary" /> 8 persons
-                </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
-                </p>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
-                </p>
+                <div className="space-y-1">
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Luggage className="h-4 w-4 text-primary" /> 8 suitcases
+                  </p>
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Users className="h-4 w-4 text-primary" /> 8 persons
+                  </p>
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
+                  </p>
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
+                  </p>
+                </div>
                 <Button onClick={() => setVehicleAndContinue("van")}>Select Van</Button>
               </div>
             </article>
