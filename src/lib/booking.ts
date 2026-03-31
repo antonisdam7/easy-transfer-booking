@@ -115,3 +115,10 @@ export function getPrice(pickup: string, dropoff: string): number | null {
   return null;
 }
 
+export function getRouteStats(pickup: string, dropoff: string) {
+  const basePrice = getPrice(pickup, dropoff);
+  const km = basePrice ? Math.max(8, Math.round(basePrice * 0.65)) : 30;
+  const minutes = Math.max(8, km - 5);
+  return { km, minutes };
+}
+
