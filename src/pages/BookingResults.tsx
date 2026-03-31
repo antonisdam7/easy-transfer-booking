@@ -46,6 +46,7 @@ export default function BookingResults() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(() => getInitialState(location.search));
+  const progressPercent = ((step - 1) / (steps.length - 1)) * 100;
 
   const pickupOptions = useMemo(
     () => popularLocations.filter((loc) => loc !== formData.dropoff),
@@ -118,23 +119,24 @@ export default function BookingResults() {
 
   return (
     <section className="container max-w-6xl py-10 space-y-8">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {steps.map((label, index) => {
-          const stepNumber = index + 1;
-          const active = step === stepNumber;
-          const completed = step > stepNumber;
-          return (
-            <div
-              key={label}
-              className={`rounded-lg border p-3 text-center text-sm ${active ? "border-primary bg-secondary/60" : ""} ${
-                completed ? "border-green-600 bg-green-50 text-green-700" : ""
-              }`}
-            >
-              <p className="font-display font-semibold">{stepNumber}</p>
-              <p>{label}</p>
-            </div>
-          );
-        })}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-xs md:text-sm text-muted-foreground">
+          {steps.map((label, index) => {
+            const stepNumber = index + 1;
+            const activeOrDone = step >= stepNumber;
+            return (
+              <span key={label} className={activeOrDone ? "text-primary font-medium" : ""}>
+                {stepNumber}. {label}
+              </span>
+            );
+          })}
+        </div>
+        <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full bg-green-600 transition-all duration-300 ease-out"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
       </div>
 
       {step === 1 && (
