@@ -9,12 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { apiRequest } from "@/lib/api";
-import { airportValues, getPrice, popularLocations } from "@/lib/booking";
+import { airportValues, getPrice, getRouteStats, popularLocations } from "@/lib/booking";
 
-const CAR_IMAGE =
-  "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=900&q=80";
-const VAN_IMAGE =
-  "https://images.unsplash.com/photo-1615906655593-ad0386982a0f?auto=format&fit=crop&w=900&q=80";
+const CAR_IMAGE = "/vehicle-sedan.png";
+const ESTATE_IMAGE = "/vehicle-estate.png";
+const VAN_IMAGE = "/vehicle-van.png";
 
 function getInitialState(search: string) {
   const query = new URLSearchParams(search);
@@ -43,7 +42,7 @@ const steps = ["Select Dates", "Select Car", "Select Equipment", "Personal Info"
 export default function BookingResults() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(2);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(() => getInitialState(location.search));
   const progressPercent = ((step - 1) / (steps.length - 1)) * 100;
@@ -67,6 +66,24 @@ export default function BookingResults() {
     if (!carPrice) return null;
     return Math.round(carPrice * 1.3);
   }, [carPrice]);
+  const routeStats = useMemo(
+    () => getRouteStats(formData.pickup, formData.dropoff),
+    [formData.pickup, formData.dropoff],
+  );
+
+  const formatDateWithWeekday = (date: string, time: string) => {
+    if (!date) return `No date selected @ ${time}`;
+    const dt = new Date(`${date}T${time || "00:00"}`);
+    return dt.toLocaleString("en-GB", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
 
   const setVehicleAndContinue = (vehicleType: "sedan" | "van") => {
     setFormData((prev) => ({ ...prev, vehicleType }));
@@ -242,24 +259,59 @@ export default function BookingResults() {
       {step === 2 && (
         <div className="space-y-4">
           <h2 className="text-2xl font-display font-bold text-primary">Select Car</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="rounded-lg border bg-secondary/40 p-4 text-sm space-y-2">
+            <p className="font-medium">
+              {`📅 ${formatDateWithWeekday(formData.date, formData.time)}   👥 x${formData.people}   📍 ${routeStats.km} km   ⏱️ ${routeStats.minutes} mins`}
+            </p>
+            <p className="text-muted-foreground">
+              {`✈️ ${formData.pickup}  ➜  ${formData.dropoff}`}
+            </p>
+            {formData.roundtrip && (
+              <p className="text-muted-foreground">
+                {`🔁 ${formatDateWithWeekday(formData.returnDate, formData.returnTime)}  | Return route included`}
+              </p>
+            )}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <article className="rounded-lg border bg-card overflow-hidden">
               <img src={CAR_IMAGE} alt="Sedan car" className="h-52 w-full object-cover" />
               <div className="p-4 space-y-2">
-                <h3 className="font-display font-semibold text-xl">Car (1-4)</h3>
+                <h3 className="font-display font-semibold text-lg">Mercedes E Class Sedan</h3>
                 <p className="text-muted-foreground text-sm">
                   {carPrice ? `€${carPrice}` : "Price on request"}
                 </p>
+                <p className="text-sm text-muted-foreground">× 4 suitcases</p>
+                <p className="text-sm text-muted-foreground">× 4 persons</p>
+                <p className="text-sm text-muted-foreground">{routeStats.km} km</p>
+                <p className="text-sm text-muted-foreground">{routeStats.minutes} mins (duration)</p>
                 <Button onClick={() => setVehicleAndContinue("sedan")}>Select Car</Button>
+              </div>
+            </article>
+            <article className="rounded-lg border bg-card overflow-hidden">
+              <img src={ESTATE_IMAGE} alt="Mercedes E Class Estate" className="h-52 w-full object-cover" />
+              <div className="p-4 space-y-2">
+                <h3 className="font-display font-semibold text-lg">Mercedes-Benz E-Class Estate</h3>
+                <p className="text-muted-foreground text-sm">
+                  {carPrice ? `€${carPrice}` : "Price on request"}
+                </p>
+                <p className="text-sm text-muted-foreground">× 7 suitcases</p>
+                <p className="text-sm text-muted-foreground">× 4 persons</p>
+                <p className="text-sm text-muted-foreground">{routeStats.km} km</p>
+                <p className="text-sm text-muted-foreground">{routeStats.minutes} mins (duration)</p>
+                <Button onClick={() => setVehicleAndContinue("sedan")}>Select Estate</Button>
               </div>
             </article>
             <article className="rounded-lg border bg-card overflow-hidden">
               <img src={VAN_IMAGE} alt="Passenger van" className="h-52 w-full object-cover" />
               <div className="p-4 space-y-2">
-                <h3 className="font-display font-semibold text-xl">Van (1-8)</h3>
+                <h3 className="font-display font-semibold text-lg">Minivan Mercedes V Class</h3>
                 <p className="text-muted-foreground text-sm">
                   {vanPrice ? `€${vanPrice}` : "Price on request"}
                 </p>
+                <p className="text-sm text-muted-foreground">× 8 suitcases</p>
+                <p className="text-sm text-muted-foreground">× 8 persons</p>
+                <p className="text-sm text-muted-foreground">{routeStats.km} km</p>
+                <p className="text-sm text-muted-foreground">{routeStats.minutes} mins (duration)</p>
                 <Button onClick={() => setVehicleAndContinue("van")}>Select Van</Button>
               </div>
             </article>
