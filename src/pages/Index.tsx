@@ -136,7 +136,7 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Pickup Date</Label>
                 <Input
@@ -155,21 +155,21 @@ const Index = () => {
                   required
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label>People</Label>
-              <Select value={searchData.people} onValueChange={(v) => setSearchData((prev) => ({ ...prev, people: v }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select people" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                    <SelectItem key={n} value={String(n)}>
-                      {n}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label>People</Label>
+                <Select value={searchData.people} onValueChange={(v) => setSearchData((prev) => ({ ...prev, people: v }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select people" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                      <SelectItem key={n} value={String(n)}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             {searchData.roundtrip && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -194,7 +194,7 @@ const Index = () => {
               </div>
             )}
 
-            <p className="text-xs text-muted-foreground">Free cancellation</p>
+            <p className="text-xs text-muted-foreground">Free cancellation up to 24 hours before pickup.</p>
             <Button type="submit" className="w-full md:w-auto font-display">
               Search
             </Button>
