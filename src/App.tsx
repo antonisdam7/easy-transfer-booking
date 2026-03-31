@@ -17,6 +17,7 @@ import CreteTransfers from "./pages/CreteTransfers";
 import HeraklionAirportTransfer from "./pages/HeraklionAirportTransfer";
 import ChaniaAirportTransfer from "./pages/ChaniaAirportTransfer";
 import PrivateTaxiCrete from "./pages/PrivateTaxiCrete";
+import BookingResults from "./pages/BookingResults";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/heraklion-airport-transfer" element={<HeraklionAirportTransfer />} />
             <Route path="/chania-airport-transfer" element={<ChaniaAirportTransfer />} />
             <Route path="/private-taxi-crete" element={<PrivateTaxiCrete />} />
+            <Route path="/booking-results" element={<BookingResults />} />
           </Route>
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route

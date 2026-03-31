@@ -1,9 +1,25 @@
+import { FormEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.jpeg";
-import BookingForm from "@/components/BookingForm";
 import { Phone, Mail, Star, MapPin, Facebook, MessageCircle } from "lucide-react";
 import { useSeo } from "@/hooks/useSeo";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { popularLocations } from "@/lib/booking";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [searchData, setSearchData] = useState({
+    roundtrip: false,
+    pickup: "Heraklion Airport (HER)",
+    dropoff: "Hersonissos / Koutouloufari",
+    date: "",
+    time: "12:00",
+    people: "2",
+  });
+
   useSeo({
     title: "Crete Transfers & Airport Taxi",
     description:
@@ -34,6 +50,19 @@ const Index = () => {
     ],
   });
 
+  const onSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const params = new URLSearchParams({
+      roundtrip: String(searchData.roundtrip),
+      pickup: searchData.pickup,
+      dropoff: searchData.dropoff,
+      date: searchData.date,
+      time: searchData.time,
+      people: searchData.people,
+    });
+    navigate(`/booking-results?${params.toString()}`);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero with logo watermark */}
@@ -48,11 +77,102 @@ const Index = () => {
           />
         </div>
 
-        {/* Booking form card - semi-transparent */}
+        {/* Quick search card */}
         <div className="relative z-10 w-full max-w-4xl bg-card/80 backdrop-blur-md rounded-lg shadow-card p-6 md:p-10 border border-border/50 animate-fade-in-up">
-          <h2 className="text-xl font-display font-bold text-primary mb-1">Book Your Transfer</h2>
-          <p className="text-muted-foreground text-sm mb-6">Fill in the details and we'll confirm your ride.</p>
-          <BookingForm />
+          <h1 className="text-2xl font-display font-bold text-primary mb-1">Book Your Transfer</h1>
+          <p className="text-muted-foreground text-sm mb-6">Search available options in seconds.</p>
+          <form onSubmit={onSearch} className="space-y-4">
+            <div className="flex items-center gap-2">
+              <input
+                id="roundtrip"
+                type="checkbox"
+                className="h-4 w-4"
+                checked={searchData.roundtrip}
+                onChange={(e) => setSearchData((prev) => ({ ...prev, roundtrip: e.target.checked }))}
+              />
+              <Label htmlFor="roundtrip" className="text-sm font-medium">
+                Roundtrip?
+              </Label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Pickup Location</Label>
+                <Select value={searchData.pickup} onValueChange={(v) => setSearchData((prev) => ({ ...prev, pickup: v }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select pickup" />
+                  </SelectTrigger>
+                  <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
+                    {popularLocations
+                      .filter((loc) => loc !== searchData.dropoff)
+                      .map((loc) => (
+                        <SelectItem key={loc} value={loc}>
+                          {loc}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Drop off Location</Label>
+                <Select value={searchData.dropoff} onValueChange={(v) => setSearchData((prev) => ({ ...prev, dropoff: v }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select drop-off" />
+                  </SelectTrigger>
+                  <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
+                    {popularLocations
+                      .filter((loc) => loc !== searchData.pickup)
+                      .map((loc) => (
+                        <SelectItem key={loc} value={loc}>
+                          {loc}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Pickup Date</Label>
+                <Input
+                  type="date"
+                  value={searchData.date}
+                  onChange={(e) => setSearchData((prev) => ({ ...prev, date: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Pickup Time</Label>
+                <Input
+                  type="time"
+                  value={searchData.time}
+                  onChange={(e) => setSearchData((prev) => ({ ...prev, time: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>People</Label>
+                <Select value={searchData.people} onValueChange={(v) => setSearchData((prev) => ({ ...prev, people: v }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select people" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                      <SelectItem key={n} value={String(n)}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground">Free cancellation up to 24 hours before pickup.</p>
+            <Button type="submit" className="w-full md:w-auto font-display">
+              Search
+            </Button>
+          </form>
         </div>
       </section>
 
