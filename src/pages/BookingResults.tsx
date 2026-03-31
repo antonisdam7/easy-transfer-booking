@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { apiRequest } from "@/lib/api";
 import { airportValues, getPrice, popularLocations } from "@/lib/booking";
 
@@ -23,6 +24,8 @@ function getInitialState(search: string) {
     dropoff: query.get("dropoff") || "Hersonissos / Koutouloufari",
     date: query.get("date") || "",
     time: query.get("time") || "12:00",
+    returnDate: query.get("returnDate") || "",
+    returnTime: query.get("returnTime") || "12:00",
     people: query.get("people") || "2",
     vehicleType: "",
     flightNumber: "",
@@ -75,6 +78,10 @@ export default function BookingResults() {
       toast.error("Please complete all required fields.");
       return;
     }
+    if (formData.roundtrip && (!formData.returnDate || !formData.returnTime)) {
+      toast.error("Please add return date and return time for roundtrip booking.");
+      return;
+    }
     setIsSubmitting(true);
     try {
       await apiRequest<{ id: string }>("/api/transfers", {
@@ -92,7 +99,11 @@ export default function BookingResults() {
           flightNumber: formData.flightNumber,
           luggage: formData.luggage,
           childSeat: formData.childSeat,
-          notes: `${formData.notes}${formData.roundtrip ? "\nRoundtrip requested: Yes" : ""}`.trim(),
+          notes: `${formData.notes}${
+            formData.roundtrip
+              ? `\nRoundtrip requested: Yes\nReturn Date: ${formData.returnDate}\nReturn Time: ${formData.returnTime}`
+              : ""
+          }`.trim(),
         },
       });
       toast.success("Booking request sent successfully.");
@@ -129,6 +140,24 @@ export default function BookingResults() {
       {step === 1 && (
         <div className="rounded-lg border bg-card p-6 space-y-4">
           <h1 className="text-2xl font-display font-bold text-primary">Select Dates</h1>
+          <div className="flex items-center justify-end gap-3">
+            <Label htmlFor="roundtrip-step" className="text-sm font-medium">
+              Roundtrip
+            </Label>
+            <Switch
+              id="roundtrip-step"
+              checked={formData.roundtrip}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  roundtrip: checked === true,
+                  returnDate: checked ? prev.returnDate : "",
+                  returnTime: checked ? prev.returnTime : "12:00",
+                }))
+              }
+              className="data-[state=checked]:bg-green-600"
+            />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Pickup Location</Label>
@@ -184,6 +213,26 @@ export default function BookingResults() {
               </Select>
             </div>
           </div>
+          {formData.roundtrip && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Return Date</Label>
+                <Input
+                  type="date"
+                  value={formData.returnDate}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, returnDate: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Return Time</Label>
+                <Input
+                  type="time"
+                  value={formData.returnTime}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, returnTime: e.target.value }))}
+                />
+              </div>
+            </div>
+          )}
           <Button onClick={() => setStep(2)}>Continue to Select Car</Button>
         </div>
       )}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { popularLocations } from "@/lib/booking";
 
 const Index = () => {
@@ -17,6 +18,8 @@ const Index = () => {
     dropoff: "Hersonissos / Koutouloufari",
     date: "",
     time: "12:00",
+    returnDate: "",
+    returnTime: "12:00",
     people: "2",
   });
 
@@ -58,6 +61,8 @@ const Index = () => {
       dropoff: searchData.dropoff,
       date: searchData.date,
       time: searchData.time,
+      returnDate: searchData.returnDate,
+      returnTime: searchData.returnTime,
       people: searchData.people,
     });
     navigate(`/booking-results?${params.toString()}`);
@@ -82,17 +87,16 @@ const Index = () => {
           <h1 className="text-2xl font-display font-bold text-primary mb-1">Book Your Transfer</h1>
           <p className="text-muted-foreground text-sm mb-6">Search available options in seconds.</p>
           <form onSubmit={onSearch} className="space-y-4">
-            <div className="flex items-center gap-2">
-              <input
-                id="roundtrip"
-                type="checkbox"
-                className="h-4 w-4"
-                checked={searchData.roundtrip}
-                onChange={(e) => setSearchData((prev) => ({ ...prev, roundtrip: e.target.checked }))}
-              />
+            <div className="flex items-center justify-end gap-3">
               <Label htmlFor="roundtrip" className="text-sm font-medium">
-                Roundtrip?
+                Roundtrip
               </Label>
+              <Switch
+                id="roundtrip"
+                checked={searchData.roundtrip}
+                onCheckedChange={(checked) => setSearchData((prev) => ({ ...prev, roundtrip: checked === true }))}
+                className="data-[state=checked]:bg-green-600"
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -167,6 +171,28 @@ const Index = () => {
                 </Select>
               </div>
             </div>
+            {searchData.roundtrip && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Return Date</Label>
+                  <Input
+                    type="date"
+                    value={searchData.returnDate}
+                    onChange={(e) => setSearchData((prev) => ({ ...prev, returnDate: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Return Time</Label>
+                  <Input
+                    type="time"
+                    value={searchData.returnTime}
+                    onChange={(e) => setSearchData((prev) => ({ ...prev, returnTime: e.target.value }))}
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
             <p className="text-xs text-muted-foreground">Free cancellation up to 24 hours before pickup.</p>
             <Button type="submit" className="w-full md:w-auto font-display">
