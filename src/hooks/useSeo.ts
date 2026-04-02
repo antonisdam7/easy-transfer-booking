@@ -9,7 +9,7 @@ type SeoOptions = {
 };
 
 const SITE_URL = "https://habibitransferscrete.com";
-const DEFAULT_OG_IMAGE = "/src/assets/logo.jpeg";
+const DEFAULT_OG_IMAGE = `${SITE_URL}/logo.jpeg`;
 
 export function useSeo({
   title,
