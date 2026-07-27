@@ -23,24 +23,28 @@ Change credentials using environment variables:
 
 ## Email notifications for new bookings
 
-1. Copy `.env.example` to `.env`
-2. Fill SMTP values in `.env`
-3. Restart backend (`npm run dev:backend`) or all services (`npm run dev:all`)
+Set variables on **Render** (backend), not Netlify.
 
-Required email variables:
+### Recommended: Resend (Render free tier)
 
-- `SMTP_HOST`
-- `SMTP_PORT`
-- `SMTP_SECURE` (`true` for SSL/465, `false` for TLS/587)
-- `SMTP_USER`
-- `SMTP_PASS`
-- `MAIL_FROM`
-- `MAIL_TO`
+Render **blocks SMTP** on ports 587/465. Use Resend instead (HTTPS, not blocked).
 
-For Gmail:
+1. Create a free account at [resend.com](https://resend.com)
+2. Add and verify your domain (e.g. `habibitransferscrete.com`), or use `onboarding@resend.dev` only for quick tests to your Resend account email
+3. Create an API key
+4. On Render → Environment, set:
+   - `RESEND_API_KEY=re_...`
+   - `MAIL_FROM=bookings@yourdomain.com` (must match a verified sender in Resend)
+   - `MAIL_TO=habibitransferscrete@gmail.com`
+5. Redeploy and check `https://<your-render-service>/api/health` → `email.provider` should be `"resend"`
 
-- Use `SMTP_HOST=smtp.gmail.com`
-- Use an App Password (not your normal Gmail password)
+### Optional: SMTP (local dev or paid Render)
+
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`
+- `MAIL_FROM`, `MAIL_TO`
+- Gmail: use an App Password, not your normal password
+
+`EMAIL_PROVIDER` can be `auto` (default: Resend if API key set, else SMTP), `resend`, or `smtp`.
 
 ## Persistent storage (recommended for production)
 
