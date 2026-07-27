@@ -36,6 +36,9 @@ type Destination = {
   name: string;
   lat: number;
   lng: number;
+  // Ports and airports. Bookable when a customer picks one by name, but never the
+  // answer to "which zone is this hotel in" -- see matchZone.
+  hub?: true;
   her?: Fare;
   chq?: Fare;
 };
@@ -43,18 +46,18 @@ type Destination = {
 // Grouped roughly west to east so the dropdown reads like the island looks.
 export const destinations: Destination[] = [
   // Airports and ports.
-  { name: "Heraklion Airport (HER)", lat: 35.33955, lng: 25.17606, chq: { oneWay: 153, minutes: 137, km: 150 } },
+  { name: "Heraklion Airport (HER)", lat: 35.33955, lng: 25.17606, hub: true, chq: { oneWay: 153, minutes: 137, km: 150 } },
   // No fares of its own: an airport-to-airport trip is priced once, on the Heraklion
   // entry above, and getFare finds it from either direction. This is here so the
   // airport still appears in the dropdown.
-  { name: "Chania Airport (CHQ)", lat: 35.53981, lng: 24.1404 },
-  { name: "Heraklion Port", lat: 35.34344, lng: 25.15095, her: { oneWay: 15, minutes: 11, km: 3 }, chq: { oneWay: 162, minutes: 140, km: 150 } },
-  { name: "Chania Port (Souda)", lat: 35.489, lng: 24.07559, her: { oneWay: 157, minutes: 119, km: 134 }, chq: { oneWay: 31, minutes: 24, km: 16 } },
-  { name: "Rethymno Port", lat: 35.37129, lng: 24.47637, chq: { oneWay: 76, minutes: 74, km: 68 } },
-  { name: "Agios Nikolaos Port", lat: 35.19282, lng: 25.72061, chq: { oneWay: 210, minutes: 193, km: 209 } },
-  { name: "Ierapetra Port", lat: 35.00396, lng: 25.73589, chq: { oneWay: 244, minutes: 223, km: 242 } },
-  { name: "Sitia Port", lat: 35.2077, lng: 26.10961, chq: { oneWay: 270, minutes: 257, km: 273 } },
-  { name: "Sitia Airport (JSH)", lat: 35.21697, lng: 26.09727, chq: { oneWay: 270, minutes: 253, km: 273 } },
+  { name: "Chania Airport (CHQ)", lat: 35.53981, lng: 24.1404, hub: true },
+  { name: "Heraklion Port", lat: 35.34344, lng: 25.15095, hub: true, her: { oneWay: 15, minutes: 11, km: 3 }, chq: { oneWay: 162, minutes: 140, km: 150 } },
+  { name: "Chania Port (Souda)", lat: 35.489, lng: 24.07559, hub: true, her: { oneWay: 157, minutes: 119, km: 134 }, chq: { oneWay: 31, minutes: 24, km: 16 } },
+  { name: "Rethymno Port", lat: 35.37129, lng: 24.47637, hub: true, chq: { oneWay: 76, minutes: 74, km: 68 } },
+  { name: "Agios Nikolaos Port", lat: 35.19282, lng: 25.72061, hub: true, chq: { oneWay: 210, minutes: 193, km: 209 } },
+  { name: "Ierapetra Port", lat: 35.00396, lng: 25.73589, hub: true, chq: { oneWay: 244, minutes: 223, km: 242 } },
+  { name: "Sitia Port", lat: 35.2077, lng: 26.10961, hub: true, chq: { oneWay: 270, minutes: 257, km: 273 } },
+  { name: "Sitia Airport (JSH)", lat: 35.21697, lng: 26.09727, hub: true, chq: { oneWay: 270, minutes: 253, km: 273 } },
 
   // Chania region.
   { name: "Chania City / Hotel", lat: 35.51378, lng: 24.02031, her: { oneWay: 157, minutes: 126, km: 142 }, chq: { oneWay: 33, minutes: 24, km: 15 } },
@@ -154,6 +157,57 @@ function getFare(pickup: string, dropoff: string): Fare | null {
   if (fromPickup) return fromPickup;
 
   return airportValues.includes(dropoff) ? fareFrom(dropoff, pickup) : null;
+}
+
+// Straight-line kilometres. Only ever used to rank candidates against each other,
+// never shown as a travel distance.
+function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(bLat - aLat);
+  const dLng = toRad(bLng - aLng);
+
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLng / 2) ** 2;
+
+  return 6371 * 2 * Math.asin(Math.sqrt(h));
+}
+
+export type ZoneMatch = {
+  zone: string;
+  // How far the hotel sits from the zone it was priced as. Small numbers mean the
+  // match is safe; a large one is the operator's cue to check before dispatching.
+  offsetKm: number;
+};
+
+// Picks the priced zone nearest to a set of coordinates.
+//
+// Only zones priced from this particular airport are eligible. Matching purely on
+// distance would happily land a Heraklion pickup on Elafonisi, which has a Chania
+// fare and no Heraklion one, and the booking would come through with no price.
+//
+// Hubs are skipped as well. A hotel by Rethymno harbour is nearer the port entry
+// than the town one and would be quoted the port fare, which is a different journey
+// that happens to start in the same place.
+//
+// Nothing is rejected for being far away. A remote villa still deserves a quote, and
+// the offset travels with the booking so the operator can see when one is unusual.
+export function matchZone(lat: number, lng: number, airport: string): ZoneMatch | null {
+  let best: ZoneMatch | null = null;
+
+  for (const destination of destinations) {
+    if (destination.hub) continue;
+
+    const fare = airport === HERAKLION_AIRPORT ? destination.her : destination.chq;
+    if (!fare) continue;
+
+    const offsetKm = haversineKm(lat, lng, destination.lat, destination.lng);
+    if (!best || offsetKm < best.offsetKm) {
+      best = { zone: destination.name, offsetKm: Math.round(offsetKm * 10) / 10 };
+    }
+  }
+
+  return best;
 }
 
 export type VehicleType = "sedan" | "estate" | "van";
