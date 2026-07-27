@@ -80,6 +80,7 @@ export default function AdminTransfers() {
                   <TableHead>Date & Time</TableHead>
                   <TableHead>Passengers</TableHead>
                   <TableHead>Vehicle</TableHead>
+                  <TableHead>Price</TableHead>
                   <TableHead>Extras</TableHead>
                   <TableHead>Notes</TableHead>
                 </TableRow>
@@ -87,13 +88,13 @@ export default function AdminTransfers() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="text-center text-muted-foreground">
                       Loading transfer requests...
                     </TableCell>
                   </TableRow>
                 ) : transfers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="text-center text-muted-foreground">
                       No transfers yet.
                     </TableCell>
                   </TableRow>
@@ -112,6 +113,9 @@ export default function AdminTransfers() {
                       <TableCell>{formatDateTime(transfer.date, transfer.time)}</TableCell>
                       <TableCell>{transfer.passengers}</TableCell>
                       <TableCell>{transfer.vehicleType || "-"}</TableCell>
+                      <TableCell className="whitespace-nowrap font-medium">
+                        {transfer.price == null ? "-" : `€${transfer.price}`}
+                      </TableCell>
                       <TableCell>
                         {transfer.flightNumber ? `Flight: ${transfer.flightNumber}` : ""}
                         {transfer.flightNumber && transfer.luggage ? " | " : ""}

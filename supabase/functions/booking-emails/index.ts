@@ -19,11 +19,20 @@ type Transfer = {
   transfer_time: string;
   passengers: string;
   vehicle_type: string | null;
+  // numeric arrives as a string in the webhook payload.
+  price: string | number | null;
   flight_number: string | null;
   luggage: string | null;
   child_seat: boolean | null;
   notes: string | null;
 };
+
+// Routes with no price in the table reach here as null; both emails then say so
+// rather than printing an empty amount.
+function formatPrice(price: string | number | null): string {
+  if (price === null || price === "") return "To be confirmed";
+  return `EUR ${Number(price).toFixed(2)}`;
+}
 
 type WebhookPayload = {
   type: "INSERT" | "UPDATE" | "DELETE";
@@ -46,6 +55,7 @@ function operatorEmail(t: Transfer): Email {
     `Time: ${t.transfer_time}`,
     `Passengers: ${t.passengers}`,
     `Vehicle: ${t.vehicle_type || "-"}`,
+    `Price quoted: ${formatPrice(t.price)}`,
     `Flight Number: ${t.flight_number || "-"}`,
     `Luggage: ${t.luggage || "-"}`,
     `Child Seat: ${t.child_seat ? "Yes" : "No"}`,
@@ -80,6 +90,9 @@ function customerEmail(t: Transfer): Email {
     t.flight_number ? `Flight Number: ${t.flight_number}` : null,
     t.luggage ? `Luggage: ${t.luggage}` : null,
     t.child_seat ? "Child Seat: Yes" : null,
+    "",
+    `Price: ${formatPrice(t.price)}`,
+    "Payable to the driver, in cash or by card. Nothing is charged online.",
     "",
     `Reference: ${t.id}`,
     "",

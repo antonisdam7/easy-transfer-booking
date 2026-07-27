@@ -115,6 +115,37 @@ export function getPrice(pickup: string, dropoff: string): number | null {
   return null;
 }
 
+export type VehicleType = "sedan" | "estate" | "van";
+
+export const vehicleLabels: Record<VehicleType, string> = {
+  sedan: "Mercedes E-Class Sedan",
+  estate: "Mercedes E-Class Estate",
+  van: "Minivan Mercedes V-Class",
+};
+
+// The estate carries the same passengers as the sedan and only adds boot space,
+// so it costs the same. The van is a bigger car with a bigger driver's fee.
+const vehicleMultipliers: Record<VehicleType, number> = {
+  sedan: 1,
+  estate: 1,
+  van: 1.3,
+};
+
+// Rounds each leg before doubling, so the roundtrip figure is always exactly twice
+// the one-way figure the customer saw a moment earlier.
+export function getVehiclePrice(
+  pickup: string,
+  dropoff: string,
+  vehicle: VehicleType,
+  roundtrip: boolean,
+): number | null {
+  const base = getPrice(pickup, dropoff);
+  if (base === null) return null;
+
+  const oneWay = Math.round(base * vehicleMultipliers[vehicle]);
+  return roundtrip ? oneWay * 2 : oneWay;
+}
+
 export function getRouteStats(pickup: string, dropoff: string) {
   const basePrice = getPrice(pickup, dropoff);
   const km = basePrice ? Math.max(8, Math.round(basePrice * 0.65)) : 30;

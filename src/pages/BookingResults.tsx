@@ -10,7 +10,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { CalendarDays, Clock3, Luggage, MapPin, Route, Users } from "lucide-react";
 import { submitTransfer } from "@/lib/transfers";
-import { airportValues, getPrice, getRouteStats, popularLocations } from "@/lib/booking";
+import {
+  airportValues,
+  getRouteStats,
+  getVehiclePrice,
+  popularLocations,
+  VehicleType,
+} from "@/lib/booking";
 
 const CAR_IMAGE = "/vehicle-sedan.png";
 const ESTATE_IMAGE = "/vehicle-estate.png";
@@ -27,7 +33,10 @@ function getInitialState(search: string) {
     returnDate: query.get("returnDate") || "",
     returnTime: query.get("returnTime") || "12:00",
     people: query.get("people") || "2",
-    vehicleType: "",
+    vehicleType: "" as VehicleType | "",
+    // The fare shown next to the car the customer picked, kept so it can be stored
+    // and repeated back in both confirmation emails.
+    price: null as number | null,
     flightNumber: "",
     luggage: "",
     childSeat: false,
@@ -58,15 +67,14 @@ export default function BookingResults() {
   );
   const isAirportTransfer = airportValues.includes(formData.pickup) || airportValues.includes(formData.dropoff);
 
-  const basePrice = useMemo(() => getPrice(formData.pickup, formData.dropoff), [formData.pickup, formData.dropoff]);
-  const carPrice = useMemo(() => {
-    if (!basePrice) return null;
-    return formData.roundtrip ? basePrice * 2 : basePrice;
-  }, [basePrice, formData.roundtrip]);
-  const vanPrice = useMemo(() => {
-    if (!carPrice) return null;
-    return Math.round(carPrice * 1.3);
-  }, [carPrice]);
+  const prices = useMemo(() => {
+    const { pickup, dropoff, roundtrip } = formData;
+    return {
+      sedan: getVehiclePrice(pickup, dropoff, "sedan", roundtrip),
+      estate: getVehiclePrice(pickup, dropoff, "estate", roundtrip),
+      van: getVehiclePrice(pickup, dropoff, "van", roundtrip),
+    };
+  }, [formData.pickup, formData.dropoff, formData.roundtrip]);
   const routeStats = useMemo(
     () => getRouteStats(formData.pickup, formData.dropoff),
     [formData.pickup, formData.dropoff],
@@ -86,8 +94,8 @@ export default function BookingResults() {
     });
   };
 
-  const setVehicleAndContinue = (vehicleType: "sedan" | "van") => {
-    setFormData((prev) => ({ ...prev, vehicleType }));
+  const setVehicleAndContinue = (vehicleType: VehicleType) => {
+    setFormData((prev) => ({ ...prev, vehicleType, price: prices[vehicleType] }));
     setStep(3);
   };
 
@@ -113,6 +121,7 @@ export default function BookingResults() {
         time: formData.time,
         passengers: formData.people,
         vehicleType: formData.vehicleType,
+        price: formData.price,
         flightNumber: formData.flightNumber,
         luggage: formData.luggage,
         childSeat: formData.childSeat,
@@ -300,7 +309,7 @@ export default function BookingResults() {
               <div className="p-4 space-y-2">
                 <h3 className="font-display font-semibold text-lg">Mercedes E Class Sedan</h3>
                 <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
-                  {carPrice ? `€${carPrice}` : "Price on request"}
+                  {prices.sedan ? `€${prices.sedan}` : "Price on request"}
                 </p>
                 <div className="space-y-1">
                   <p className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -324,7 +333,7 @@ export default function BookingResults() {
               <div className="p-4 space-y-2">
                 <h3 className="font-display font-semibold text-lg">Mercedes-Benz E-Class Estate</h3>
                 <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
-                  {carPrice ? `€${carPrice}` : "Price on request"}
+                  {prices.estate ? `€${prices.estate}` : "Price on request"}
                 </p>
                 <div className="space-y-1">
                   <p className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -340,7 +349,7 @@ export default function BookingResults() {
                     <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
                   </p>
                 </div>
-                <Button onClick={() => setVehicleAndContinue("sedan")}>Select Estate</Button>
+                <Button onClick={() => setVehicleAndContinue("estate")}>Select Estate</Button>
               </div>
             </article>
             <article className="rounded-lg border bg-card overflow-hidden">
@@ -348,7 +357,7 @@ export default function BookingResults() {
               <div className="p-4 space-y-2">
                 <h3 className="font-display font-semibold text-lg">Minivan Mercedes V Class</h3>
                 <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
-                  {vanPrice ? `€${vanPrice}` : "Price on request"}
+                  {prices.van ? `€${prices.van}` : "Price on request"}
                 </p>
                 <div className="space-y-1">
                   <p className="flex items-center gap-2 text-sm text-muted-foreground">

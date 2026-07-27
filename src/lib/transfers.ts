@@ -13,6 +13,9 @@ type TransferRow = {
   transfer_time: string;
   passengers: string;
   vehicle_type: string | null;
+  // numeric comes back from PostgREST as a string, so that it never loses precision
+  // in JSON. Rows from before this column existed are null.
+  price: string | number | null;
   flight_number: string | null;
   luggage: string | null;
   // Rows created by the old backend can have this null.
@@ -35,6 +38,7 @@ function toTransferRequest(row: TransferRow): TransferRequest {
     time: row.transfer_time,
     passengers: row.passengers,
     vehicleType: row.vehicle_type ?? "",
+    price: row.price === null ? null : Number(row.price),
     flightNumber: row.flight_number ?? "",
     luggage: row.luggage ?? "",
     childSeat: Boolean(row.child_seat),
@@ -55,6 +59,7 @@ export async function submitTransfer(transfer: NewTransfer) {
     transfer_time: transfer.time,
     passengers: transfer.passengers,
     vehicle_type: transfer.vehicleType || null,
+    price: transfer.price ?? null,
     flight_number: transfer.flightNumber || null,
     luggage: transfer.luggage || null,
     child_seat: Boolean(transfer.childSeat),
