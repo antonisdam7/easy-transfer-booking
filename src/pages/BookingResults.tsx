@@ -27,7 +27,7 @@ function getInitialState(search: string) {
   return {
     roundtrip: query.get("roundtrip") === "true",
     pickup: query.get("pickup") || "Heraklion Airport (HER)",
-    dropoff: query.get("dropoff") || "Hersonissos / Koutouloufari",
+    dropoff: query.get("dropoff") || "Chersonissos",
     date: query.get("date") || "",
     time: query.get("time") || "12:00",
     returnDate: query.get("returnDate") || "",

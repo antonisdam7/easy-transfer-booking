@@ -15,7 +15,7 @@ const Index = () => {
   const [searchData, setSearchData] = useState({
     roundtrip: false,
     pickup: "Heraklion Airport (HER)",
-    dropoff: "Hersonissos / Koutouloufari",
+    dropoff: "Chersonissos",
     date: "",
     time: "12:00",
     returnDate: "",
