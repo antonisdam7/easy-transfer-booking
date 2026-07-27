@@ -51,7 +51,7 @@ export const destinations: Destination[] = [
   // entry above, and getFare finds it from either direction. This is here so the
   // airport still appears in the dropdown.
   { name: "Chania Airport (CHQ)", lat: 35.53981, lng: 24.1404, hub: true },
-  { name: "Heraklion Port", lat: 35.34344, lng: 25.15095, hub: true, her: { oneWay: 15, minutes: 11, km: 3 }, chq: { oneWay: 162, minutes: 140, km: 150 } },
+  { name: "Heraklion Port", lat: 35.34344, lng: 25.15095, hub: true, her: { oneWay: 22, minutes: 11, km: 3 }, chq: { oneWay: 162, minutes: 140, km: 150 } },
   { name: "Chania Port (Souda)", lat: 35.489, lng: 24.07559, hub: true, her: { oneWay: 157, minutes: 119, km: 134 }, chq: { oneWay: 31, minutes: 24, km: 16 } },
   { name: "Rethymno Port", lat: 35.37129, lng: 24.47637, hub: true, her: { oneWay: 87, minutes: 78, km: 82 }, chq: { oneWay: 76, minutes: 74, km: 68 } },
   { name: "Agios Nikolaos Port", lat: 35.19282, lng: 25.72061, hub: true, her: { oneWay: 73, minutes: 62, km: 61 }, chq: { oneWay: 210, minutes: 193, km: 209 } },
@@ -95,7 +95,7 @@ export const destinations: Destination[] = [
   { name: "Fodele", lat: 35.40204, lng: 24.95244, her: { oneWay: 38, minutes: 28, km: 30 }, chq: { oneWay: 132, minutes: 114, km: 120 } },
   { name: "Ammoudara (Heraklion)", lat: 35.33746, lng: 25.08756, her: { oneWay: 24, minutes: 15, km: 10 }, chq: { oneWay: 159, minutes: 134, km: 140 } },
   { name: "Arolithos - Cretan Village", lat: 35.31541, lng: 25.03557, her: { oneWay: 28, minutes: 17, km: 15 }, chq: { oneWay: 155, minutes: 131, km: 141 } },
-  { name: "Heraklion City / Hotel", lat: 35.33867, lng: 25.14213, her: { oneWay: 15, minutes: 13, km: 4 }, chq: { oneWay: 162, minutes: 139, km: 147 } },
+  { name: "Heraklion City / Hotel", lat: 35.33867, lng: 25.14213, her: { oneWay: 22, minutes: 13, km: 4 }, chq: { oneWay: 162, minutes: 139, km: 147 } },
   { name: "P.A.G.N.I", lat: 35.30401, lng: 25.08436, her: { oneWay: 23, minutes: 16, km: 12 } },
   { name: "Archanes", lat: 35.23532, lng: 25.15931, her: { oneWay: 28, minutes: 21, km: 15 } },
   { name: "Amnissos / Karteros", lat: 35.33238, lng: 25.20654, her: { oneWay: 17, minutes: 8, km: 6 }, chq: { oneWay: 155, minutes: 139, km: 153 } },
