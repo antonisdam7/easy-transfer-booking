@@ -258,6 +258,17 @@ export type LocationValue = {
   zone?: string;
 };
 
+// The only places offered by name in the search field. Every other zone is still
+// priced and still reachable -- a customer types their hotel and we match it -- but
+// a list of every port and village was a menu, and the point of the search box was
+// to stop making people read one.
+export const quickPicks = [
+  HERAKLION_AIRPORT,
+  "Heraklion Port",
+  CHANIA_AIRPORT,
+  "Chania Port (Souda)",
+].map((name) => destinationsByName.get(name));
+
 // Turns one of our own destination names into a location, for the airport the form
 // starts on and for links that carry a name but no coordinates.
 export function locationFromName(name: string): LocationValue | null {

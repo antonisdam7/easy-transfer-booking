@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import logo from "@/assets/logo.jpeg";
+import balos from "@/assets/balos-beach.webp";
 import { Phone, Mail, Star, MapPin, Facebook, MessageCircle } from "lucide-react";
 import { useSeo } from "@/hooks/useSeo";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import LocationInput from "@/components/LocationInput";
+import { DateInput, TimeInput } from "@/components/DateTimeInput";
 import { HERAKLION_AIRPORT, locationFromName, locationToParams, LocationValue } from "@/lib/booking";
 
 const Index = () => {
@@ -80,22 +81,25 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero with logo watermark */}
+      {/* Hero over Balos */}
       <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden py-12 px-4">
-        {/* Giant logo watermark */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <img
-            src={logo}
-            alt=""
-            aria-hidden="true"
-            className="w-[90vmin] h-[90vmin] max-w-[700px] max-h-[700px] object-cover rounded-full opacity-[0.08]"
-          />
-        </div>
+        <img
+          src={balos}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* Just enough veil to keep the labels legible over the dark headland,
+            without washing the sea out. */}
+        <div className="absolute inset-0 bg-white/10" aria-hidden="true" />
 
-        {/* Quick search card */}
-        <div className="relative z-10 w-full max-w-4xl bg-card/80 backdrop-blur-md rounded-lg shadow-card p-6 md:p-10 border border-border/50 animate-fade-in-up">
-          <h1 className="text-2xl font-display font-bold text-primary mb-1">Book Your Transfer</h1>
-          <p className="text-muted-foreground text-sm mb-6">Search available options in seconds.</p>
+        {/* Quick search card. The tint and blur are as light as the labels will
+            tolerate: the beach is meant to read through the form, not behind it. */}
+        <div className="relative z-10 w-full max-w-4xl bg-white/25 backdrop-blur-[3px] rounded-lg shadow-xl p-6 md:p-10 border border-white/50 animate-fade-in-up">
+          <h1 className="text-2xl font-display font-bold text-primary mb-1 drop-shadow-sm">
+            Book Your Transfer
+          </h1>
+          <p className="text-primary/80 text-sm mb-6">Search available options in seconds.</p>
           <form onSubmit={onSearch} className="space-y-4">
             <div className="flex items-center justify-end gap-3">
               <Label htmlFor="roundtrip" className="text-sm font-medium">
@@ -124,24 +128,16 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Pickup Date</Label>
-                <Input
-                  type="date"
-                  value={searchData.date}
-                  onChange={(e) => setSearchData((prev) => ({ ...prev, date: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Pickup Time</Label>
-                <Input
-                  type="time"
-                  value={searchData.time}
-                  onChange={(e) => setSearchData((prev) => ({ ...prev, time: e.target.value }))}
-                  required
-                />
-              </div>
+              <DateInput
+                label="Pickup Date"
+                value={searchData.date}
+                onChange={(date) => setSearchData((prev) => ({ ...prev, date }))}
+              />
+              <TimeInput
+                label="Pickup Time"
+                value={searchData.time}
+                onChange={(time) => setSearchData((prev) => ({ ...prev, time }))}
+              />
               <div className="space-y-2">
                 <Label>People</Label>
                 <Select value={searchData.people} onValueChange={(v) => setSearchData((prev) => ({ ...prev, people: v }))}>
@@ -160,28 +156,21 @@ const Index = () => {
             </div>
             {searchData.roundtrip && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Return Date</Label>
-                  <Input
-                    type="date"
-                    value={searchData.returnDate}
-                    onChange={(e) => setSearchData((prev) => ({ ...prev, returnDate: e.target.value }))}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Return Time</Label>
-                  <Input
-                    type="time"
-                    value={searchData.returnTime}
-                    onChange={(e) => setSearchData((prev) => ({ ...prev, returnTime: e.target.value }))}
-                    required
-                  />
-                </div>
+                <DateInput
+                  label="Return Date"
+                  value={searchData.returnDate}
+                  onChange={(returnDate) => setSearchData((prev) => ({ ...prev, returnDate }))}
+                  min={searchData.date}
+                />
+                <TimeInput
+                  label="Return Time"
+                  value={searchData.returnTime}
+                  onChange={(returnTime) => setSearchData((prev) => ({ ...prev, returnTime }))}
+                />
               </div>
             )}
 
-            <p className="text-xs text-muted-foreground">Free cancellation up to 24 hours before pickup.</p>
+            <p className="text-xs text-primary/70">Free cancellation up to 24 hours before pickup.</p>
             <Button type="submit" className="w-full md:w-auto font-display">
               Search
             </Button>

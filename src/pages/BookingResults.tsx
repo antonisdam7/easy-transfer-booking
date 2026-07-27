@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { CalendarDays, Clock3, Luggage, MapPin, Route, Users } from "lucide-react";
 import { submitTransfer } from "@/lib/transfers";
 import LocationInput from "@/components/LocationInput";
+import { DateInput, TimeInput } from "@/components/DateTimeInput";
 import {
   airportValues,
   locationFromParams,
@@ -210,22 +211,16 @@ export default function BookingResults() {
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Pickup Date</Label>
-              <Input
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Pickup Time</Label>
-              <Input
-                type="time"
-                value={formData.time}
-                onChange={(e) => setFormData((prev) => ({ ...prev, time: e.target.value }))}
-              />
-            </div>
+            <DateInput
+              label="Pickup Date"
+              value={formData.date}
+              onChange={(date) => setFormData((prev) => ({ ...prev, date }))}
+            />
+            <TimeInput
+              label="Pickup Time"
+              value={formData.time}
+              onChange={(time) => setFormData((prev) => ({ ...prev, time }))}
+            />
           </div>
           <div className="space-y-2">
             <Label>People</Label>
@@ -244,22 +239,17 @@ export default function BookingResults() {
           </div>
           {formData.roundtrip && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Return Date</Label>
-                <Input
-                  type="date"
-                  value={formData.returnDate}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, returnDate: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Return Time</Label>
-                <Input
-                  type="time"
-                  value={formData.returnTime}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, returnTime: e.target.value }))}
-                />
-              </div>
+              <DateInput
+                label="Return Date"
+                value={formData.returnDate}
+                onChange={(returnDate) => setFormData((prev) => ({ ...prev, returnDate }))}
+                min={formData.date}
+              />
+              <TimeInput
+                label="Return Time"
+                value={formData.returnTime}
+                onChange={(returnTime) => setFormData((prev) => ({ ...prev, returnTime }))}
+              />
             </div>
           )}
           <Button onClick={() => setStep(2)}>Continue to Select Car</Button>

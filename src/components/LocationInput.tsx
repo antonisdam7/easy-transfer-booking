@@ -11,13 +11,13 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { destinations, LocationValue } from "@/lib/booking";
+import { LocationValue, quickPicks } from "@/lib/booking";
 import { isPlacesConfigured, PlaceSuggestion, resolvePlace, suggestPlaces } from "@/lib/places";
 
-// Airports and ports, offered up front. Almost every transfer has one at one end,
-// and making people type "Heraklion Airport" to find it would be a poor trade for
-// the hotel search everywhere else.
-const hubs = destinations.filter((destination) => destination.hub);
+// The two airports and the two big ports, offered up front. Almost every transfer has
+// one of them at one end, and making people type "Heraklion Airport" to find it would
+// be a poor trade for the hotel search everywhere else.
+const hubs = quickPicks;
 
 type Props = {
   label: string;
@@ -103,7 +103,15 @@ export default function LocationInput({ label, value, onChange, placeholder }: P
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+        {/* Pinned below the field. Left to itself the list flips upward near the
+            bottom of the screen, which on a phone puts the suggestions behind the
+            keyboard just as someone starts typing. */}
+        <PopoverContent
+          className="w-[--radix-popover-trigger-width] p-0"
+          align="start"
+          side="bottom"
+          avoidCollisions={false}
+        >
           {/* Filtering is ours: the hub list is filtered above, and Google has already
               decided which places match. */}
           <Command shouldFilter={false}>
