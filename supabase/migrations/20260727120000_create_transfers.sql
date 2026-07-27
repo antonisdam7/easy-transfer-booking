@@ -60,11 +60,16 @@ alter table public.transfers enable row level security;
 -- Visitors submit bookings and can never read anything back, not even their own row.
 -- status is pinned so a visitor cannot submit a booking already marked cancelled
 -- or completed, which would hide it from the admin's working list.
+--
+-- Granted to authenticated as well as anon: a signed-in admin browsing their own
+-- site is `authenticated`, and with an anon-only policy their bookings were
+-- rejected with "new row violates row-level security policy".
 drop policy if exists "anon can submit a booking" on public.transfers;
-create policy "anon can submit a booking"
+drop policy if exists "anyone can submit a booking" on public.transfers;
+create policy "anyone can submit a booking"
   on public.transfers
   for insert
-  to anon
+  to anon, authenticated
   with check (status = 'confirmed');
 
 -- Only signed-in users see bookings. There is one user (the admin), so `to authenticated`
