@@ -8,6 +8,10 @@
 //
 // The coordinates are also what places a customer's hotel into a zone, so an entry
 // being a few hundred metres off is a mispriced booking, not a cosmetic problem.
+//
+// Durations east of Agios Nikolaos run roughly half an hour longer than the drive
+// normally takes. That is roadworks, not bad data, and the operator expects them to
+// last into 2028. Re-measure once the road reopens.
 
 export const HERAKLION_AIRPORT = "Heraklion Airport (HER)";
 export const CHANIA_AIRPORT = "Chania Airport (CHQ)";
@@ -49,7 +53,7 @@ export const destinations: Destination[] = [
   { name: "Rethymno Port", lat: 35.37129, lng: 24.47637, chq: { oneWay: 76, minutes: 74, km: 68 } },
   { name: "Agios Nikolaos Port", lat: 35.19282, lng: 25.72061, chq: { oneWay: 210, minutes: 193, km: 209 } },
   { name: "Ierapetra Port", lat: 35.00396, lng: 25.73589, chq: { oneWay: 244, minutes: 223, km: 242 } },
-  { name: "Sitia Port", lat: 35.2077, lng: 26.10961, chq: { oneWay: 421, minutes: 257, km: 273 } },
+  { name: "Sitia Port", lat: 35.2077, lng: 26.10961, chq: { oneWay: 270, minutes: 257, km: 273 } },
   { name: "Sitia Airport (JSH)", lat: 35.21697, lng: 26.09727, chq: { oneWay: 270, minutes: 253, km: 273 } },
 
   // Chania region.
