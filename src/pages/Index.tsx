@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import logo from "@/assets/logo.jpeg";
 import { Phone, Mail, Star, MapPin, Facebook, MessageCircle } from "lucide-react";
 import { useSeo } from "@/hooks/useSeo";
@@ -8,14 +9,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { popularLocations } from "@/lib/booking";
+import LocationInput from "@/components/LocationInput";
+import { HERAKLION_AIRPORT, locationFromName, locationToParams, LocationValue } from "@/lib/booking";
 
 const Index = () => {
   const navigate = useNavigate();
   const [searchData, setSearchData] = useState({
     roundtrip: false,
-    pickup: "Heraklion Airport (HER)",
-    dropoff: "Chersonissos",
+    // Most transfers start at Heraklion, so the harder half of the trip is filled in
+    // already. The drop-off is left empty on purpose: it is the hotel, and nobody's
+    // hotel is a sensible default.
+    pickup: locationFromName(HERAKLION_AIRPORT) as LocationValue | null,
+    dropoff: null as LocationValue | null,
     date: "",
     time: "12:00",
     returnDate: "",
@@ -55,10 +60,15 @@ const Index = () => {
 
   const onSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!searchData.pickup || !searchData.dropoff) {
+      toast.error("Please choose where we are picking you up and where you are going.");
+      return;
+    }
+
     const params = new URLSearchParams({
       roundtrip: String(searchData.roundtrip),
-      pickup: searchData.pickup,
-      dropoff: searchData.dropoff,
+      ...locationToParams("pickup", searchData.pickup),
+      ...locationToParams("dropoff", searchData.dropoff),
       date: searchData.date,
       time: searchData.time,
       returnDate: searchData.returnDate,
@@ -100,40 +110,17 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Pickup Location</Label>
-                <Select value={searchData.pickup} onValueChange={(v) => setSearchData((prev) => ({ ...prev, pickup: v }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select pickup" />
-                  </SelectTrigger>
-                  <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
-                    {popularLocations
-                      .filter((loc) => loc !== searchData.dropoff)
-                      .map((loc) => (
-                        <SelectItem key={loc} value={loc}>
-                          {loc}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Drop off Location</Label>
-                <Select value={searchData.dropoff} onValueChange={(v) => setSearchData((prev) => ({ ...prev, dropoff: v }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select drop-off" />
-                  </SelectTrigger>
-                  <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
-                    {popularLocations
-                      .filter((loc) => loc !== searchData.pickup)
-                      .map((loc) => (
-                        <SelectItem key={loc} value={loc}>
-                          {loc}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <LocationInput
+                label="Pickup Location"
+                value={searchData.pickup}
+                onChange={(value) => setSearchData((prev) => ({ ...prev, pickup: value }))}
+              />
+              <LocationInput
+                label="Drop off Location"
+                value={searchData.dropoff}
+                onChange={(value) => setSearchData((prev) => ({ ...prev, dropoff: value }))}
+                placeholder="Search for your hotel"
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -137,10 +137,6 @@ export const destinations: Destination[] = [
   { name: "Kato Zakros", lat: 35.09718, lng: 26.26333, her: { oneWay: 218, minutes: 182, km: 168 }, chq: { oneWay: 484, minutes: 313, km: 316 } },
 ];
 
-const OTHER_LOCATION = "Other (specify in notes)";
-
-export const popularLocations = [...destinations.map((d) => d.name), OTHER_LOCATION];
-
 const destinationsByName = new Map(destinations.map((d) => [d.name, d]));
 
 function fareFrom(airport: string, other: string): Fare | null {
@@ -226,7 +222,7 @@ const vehicleMultipliers: Record<VehicleType, number> = {
   van: 1.3,
 };
 
-export function getVehiclePrice(
+function getVehiclePrice(
   pickup: string,
   dropoff: string,
   vehicle: VehicleType,
@@ -243,9 +239,153 @@ export function getVehiclePrice(
 // Null rather than a placeholder: a route we have no fare for is a route we never
 // measured, and inventing a distance for it is how the old estimate ended up showing
 // customers arithmetic on a price and calling it kilometres.
-export function getRouteStats(pickup: string, dropoff: string) {
+function getRouteStats(pickup: string, dropoff: string) {
   const fare = getFare(pickup, dropoff);
   if (!fare) return null;
 
   return { km: fare.km, minutes: fare.minutes };
+}
+
+// One end of a journey as the customer chose it: the hotel they searched for, or an
+// airport or port they picked by name.
+export type LocationValue = {
+  // What the customer picked, and what the booking and both emails will say.
+  name: string;
+  lat: number;
+  lng: number;
+  // Set when the name is one of ours, so the zone is already known exactly and no
+  // matching is needed.
+  zone?: string;
+};
+
+// Turns one of our own destination names into a location, for the airport the form
+// starts on and for links that carry a name but no coordinates.
+export function locationFromName(name: string): LocationValue | null {
+  const destination = destinationsByName.get(name);
+  if (!destination) return null;
+
+  return {
+    name: destination.name,
+    lat: destination.lat,
+    lng: destination.lng,
+    zone: destination.name,
+  };
+}
+
+// A customer who searches for "Heraklion airport" and picks Google's entry instead of
+// ours arrives with coordinates and no zone. Without this the trip would price as if
+// neither end were an airport, which means no price at all.
+//
+// Airports only. Ports are deliberately left out: a city hotel can sit a kilometre
+// from the ferry terminal, and quoting it the port fare would undercharge a much
+// longer drive.
+const AIRPORT_SNAP_KM = 1.5;
+
+function snapToAirport(value: LocationValue): LocationValue {
+  if (value.zone) return value;
+
+  for (const name of airportValues) {
+    const airport = destinationsByName.get(name);
+    if (haversineKm(value.lat, value.lng, airport.lat, airport.lng) <= AIRPORT_SNAP_KM) {
+      return { ...value, zone: name };
+    }
+  }
+
+  return value;
+}
+
+export type TripQuote = {
+  // The zone each end was priced as, and how far the customer's actual address sits
+  // from it. Both are for the operator only -- the customer sees the place they
+  // typed and a fare, and never learns which zone produced it.
+  pickupZone: string | null;
+  dropoffZone: string | null;
+  // Null when the zone was picked by name and no matching was involved.
+  pickupOffsetKm: number | null;
+  dropoffOffsetKm: number | null;
+  prices: Record<VehicleType, number | null>;
+  stats: { km: number; minutes: number } | null;
+};
+
+const NO_QUOTE: TripQuote = {
+  pickupZone: null,
+  dropoffZone: null,
+  pickupOffsetKm: null,
+  dropoffOffsetKm: null,
+  prices: { sedan: null, estate: null, van: null },
+  stats: null,
+};
+
+function zoneOf(value: LocationValue, airport: string | null) {
+  if (value.zone) return { zone: value.zone, offsetKm: null as number | null };
+  if (!airport) return null;
+
+  return matchZone(value.lat, value.lng, airport);
+}
+
+// Prices a journey between two places the customer chose, by finding the zone each
+// end falls into and looking the pair up in the fare table.
+export function quoteTrip(
+  pickup: LocationValue | null,
+  dropoff: LocationValue | null,
+  roundtrip: boolean,
+): TripQuote {
+  if (!pickup || !dropoff) return NO_QUOTE;
+
+  const from = snapToAirport(pickup);
+  const to = snapToAirport(dropoff);
+
+  // Every fare is measured from an airport, so the airport end decides which column
+  // of the price list the other end is looked up in.
+  const airport = airportValues.find((name) => from.zone === name || to.zone === name) ?? null;
+
+  const fromZone = zoneOf(from, airport);
+  const toZone = zoneOf(to, airport);
+  if (!fromZone || !toZone) return NO_QUOTE;
+
+  const priced = (vehicle: VehicleType) =>
+    getVehiclePrice(fromZone.zone, toZone.zone, vehicle, roundtrip);
+
+  return {
+    pickupZone: fromZone.zone,
+    dropoffZone: toZone.zone,
+    pickupOffsetKm: fromZone.offsetKm,
+    dropoffOffsetKm: toZone.offsetKm,
+    prices: {
+      sedan: priced("sedan"),
+      estate: priced("estate"),
+      van: priced("van"),
+    },
+    stats: getRouteStats(fromZone.zone, toZone.zone),
+  };
+}
+
+// A location survives the hop from the search form to the results page in the query
+// string, so a customer can bookmark or share the link and land on the same quote.
+export function locationToParams(prefix: string, value: LocationValue | null) {
+  if (!value) return {};
+
+  return {
+    [prefix]: value.name,
+    [`${prefix}Lat`]: String(value.lat),
+    [`${prefix}Lng`]: String(value.lng),
+    ...(value.zone ? { [`${prefix}Zone`]: value.zone } : {}),
+  };
+}
+
+export function locationFromParams(prefix: string, params: URLSearchParams): LocationValue | null {
+  const name = params.get(prefix);
+  if (!name) return null;
+
+  const lat = Number(params.get(`${prefix}Lat`));
+  const lng = Number(params.get(`${prefix}Lng`));
+
+  // A link from before the search field existed, or one that lost its coordinates.
+  // Recoverable only if the name is one of ours.
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) {
+    return locationFromName(name);
+  }
+
+  const zone = params.get(`${prefix}Zone`);
+  return { name, lat, lng, ...(zone ? { zone } : {}) };
 }

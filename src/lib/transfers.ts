@@ -9,6 +9,11 @@ type TransferRow = {
   phone: string | null;
   pickup: string;
   dropoff: string;
+  pickup_zone: string | null;
+  dropoff_zone: string | null;
+  // numeric again, so strings, and null on rows booked before hotel search existed.
+  pickup_offset_km: string | number | null;
+  dropoff_offset_km: string | number | null;
   transfer_date: string;
   transfer_time: string;
   passengers: string;
@@ -34,6 +39,10 @@ function toTransferRequest(row: TransferRow): TransferRequest {
     phone: row.phone ?? "",
     pickup: row.pickup,
     dropoff: row.dropoff,
+    pickupZone: row.pickup_zone,
+    dropoffZone: row.dropoff_zone,
+    pickupOffsetKm: row.pickup_offset_km === null ? null : Number(row.pickup_offset_km),
+    dropoffOffsetKm: row.dropoff_offset_km === null ? null : Number(row.dropoff_offset_km),
     date: row.transfer_date,
     time: row.transfer_time,
     passengers: row.passengers,
@@ -55,6 +64,10 @@ export async function submitTransfer(transfer: NewTransfer) {
     phone: transfer.phone || null,
     pickup: transfer.pickup,
     dropoff: transfer.dropoff,
+    pickup_zone: transfer.pickupZone ?? null,
+    dropoff_zone: transfer.dropoffZone ?? null,
+    pickup_offset_km: transfer.pickupOffsetKm ?? null,
+    dropoff_offset_km: transfer.dropoffOffsetKm ?? null,
     transfer_date: transfer.date,
     transfer_time: transfer.time,
     passengers: transfer.passengers,

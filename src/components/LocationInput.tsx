@@ -11,18 +11,8 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { destinations } from "@/lib/booking";
+import { destinations, LocationValue } from "@/lib/booking";
 import { isPlacesConfigured, PlaceSuggestion, resolvePlace, suggestPlaces } from "@/lib/places";
-
-export type LocationValue = {
-  // What the customer picked, and what the booking and both emails will say.
-  name: string;
-  lat: number;
-  lng: number;
-  // Set when they chose an airport or port by name rather than searching. Skips the
-  // zone matching, because the zone is already known exactly.
-  zone?: string;
-};
 
 // Airports and ports, offered up front. Almost every transfer has one at one end,
 // and making people type "Heraklion Airport" to find it would be a poor trade for

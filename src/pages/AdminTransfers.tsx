@@ -25,6 +25,25 @@ function formatDateTime(date: string, time: string) {
   return `${date} ${time}`;
 }
 
+// Which priced zone a hotel was charged as, and how far it sat from it. Shown only
+// when it differs from what the customer typed, so a booking made straight from an
+// airport or a village name stays a single line.
+function zoneNote(place: string, zone: string | null, offsetKm: number | null) {
+  if (!zone || zone === place) return null;
+  return offsetKm === null ? zone : `${zone}, ${offsetKm} km`;
+}
+
+function RouteZones({ transfer }: { transfer: TransferRequest }) {
+  const notes = [
+    zoneNote(transfer.pickup, transfer.pickupZone, transfer.pickupOffsetKm),
+    zoneNote(transfer.dropoff, transfer.dropoffZone, transfer.dropoffOffsetKm),
+  ].filter(Boolean);
+
+  if (notes.length === 0) return null;
+
+  return <div className="text-xs text-muted-foreground">{`priced as ${notes.join(" / ")}`}</div>;
+}
+
 export default function AdminTransfers() {
   const navigate = useNavigate();
   const [transfers, setTransfers] = useState<TransferRequest[]>([]);
@@ -109,7 +128,12 @@ export default function AdminTransfers() {
                           <div className="text-muted-foreground">{transfer.phone || "-"}</div>
                         </div>
                       </TableCell>
-                      <TableCell>{`${transfer.pickup} -> ${transfer.dropoff}`}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div>{`${transfer.pickup} -> ${transfer.dropoff}`}</div>
+                          <RouteZones transfer={transfer} />
+                        </div>
+                      </TableCell>
                       <TableCell>{formatDateTime(transfer.date, transfer.time)}</TableCell>
                       <TableCell>{transfer.passengers}</TableCell>
                       <TableCell>{transfer.vehicleType || "-"}</TableCell>

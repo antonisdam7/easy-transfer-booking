@@ -15,6 +15,12 @@ type Transfer = {
   phone: string | null;
   pickup: string;
   dropoff: string;
+  // The priced zone each end was charged as. Operator's email only: the customer
+  // asked for their hotel and should be told about their hotel.
+  pickup_zone: string | null;
+  dropoff_zone: string | null;
+  pickup_offset_km: string | number | null;
+  dropoff_offset_km: string | number | null;
   transfer_date: string;
   transfer_time: string;
   passengers: string;
@@ -34,6 +40,24 @@ function formatPrice(price: string | number | null): string {
   return `EUR ${Number(price).toFixed(2)}`;
 }
 
+// The place as the customer wrote it, followed by the zone it was priced from when
+// the two are not the same thing. The kilometres are how far the hotel sits from that
+// zone: a small number means the match is safe, a large one is worth checking before
+// a driver is sent.
+function locationLine(
+  label: string,
+  place: string,
+  zone: string | null,
+  offsetKm: string | number | null,
+): string {
+  if (!zone || zone === place) return `${label}: ${place}`;
+
+  const offset =
+    offsetKm === null || offsetKm === "" ? "" : `, ${Number(offsetKm).toFixed(1)} km away`;
+
+  return `${label}: ${place} (priced as ${zone}${offset})`;
+}
+
 type WebhookPayload = {
   type: "INSERT" | "UPDATE" | "DELETE";
   table: string;
@@ -49,8 +73,8 @@ function operatorEmail(t: Transfer): Email {
     `Name: ${t.name}`,
     `Email: ${t.email}`,
     `Phone: ${t.phone || "-"}`,
-    `Pickup: ${t.pickup}`,
-    `Dropoff: ${t.dropoff}`,
+    locationLine("Pickup", t.pickup, t.pickup_zone, t.pickup_offset_km),
+    locationLine("Dropoff", t.dropoff, t.dropoff_zone, t.dropoff_offset_km),
     `Date: ${t.transfer_date}`,
     `Time: ${t.transfer_time}`,
     `Passengers: ${t.passengers}`,

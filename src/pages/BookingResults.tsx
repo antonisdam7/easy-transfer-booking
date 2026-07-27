@@ -10,11 +10,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { CalendarDays, Clock3, Luggage, MapPin, Route, Users } from "lucide-react";
 import { submitTransfer } from "@/lib/transfers";
+import LocationInput from "@/components/LocationInput";
 import {
   airportValues,
-  getRouteStats,
-  getVehiclePrice,
-  popularLocations,
+  locationFromParams,
+  LocationValue,
+  quoteTrip,
   VehicleType,
 } from "@/lib/booking";
 
@@ -26,8 +27,8 @@ function getInitialState(search: string) {
   const query = new URLSearchParams(search);
   return {
     roundtrip: query.get("roundtrip") === "true",
-    pickup: query.get("pickup") || "Heraklion Airport (HER)",
-    dropoff: query.get("dropoff") || "Chersonissos",
+    pickup: locationFromParams("pickup", query),
+    dropoff: locationFromParams("dropoff", query),
     date: query.get("date") || "",
     time: query.get("time") || "12:00",
     returnDate: query.get("returnDate") || "",
@@ -74,28 +75,16 @@ export default function BookingResults() {
   const [formData, setFormData] = useState(() => getInitialState(location.search));
   const progressPercent = ((step - 1) / (steps.length - 1)) * 100;
 
-  const pickupOptions = useMemo(
-    () => popularLocations.filter((loc) => loc !== formData.dropoff),
-    [formData.dropoff],
+  // The zones inside this are never rendered. They exist so the fare can be found and
+  // so the operator's email can say which zone the hotel was charged as.
+  const quote = useMemo(
+    () => quoteTrip(formData.pickup, formData.dropoff, formData.roundtrip),
+    [formData.pickup, formData.dropoff, formData.roundtrip],
   );
-  const dropoffOptions = useMemo(
-    () => popularLocations.filter((loc) => loc !== formData.pickup),
-    [formData.pickup],
-  );
-  const isAirportTransfer = airportValues.includes(formData.pickup) || airportValues.includes(formData.dropoff);
+  const { prices, stats: routeStats } = quote;
 
-  const prices = useMemo(() => {
-    const { pickup, dropoff, roundtrip } = formData;
-    return {
-      sedan: getVehiclePrice(pickup, dropoff, "sedan", roundtrip),
-      estate: getVehiclePrice(pickup, dropoff, "estate", roundtrip),
-      van: getVehiclePrice(pickup, dropoff, "van", roundtrip),
-    };
-  }, [formData.pickup, formData.dropoff, formData.roundtrip]);
-  const routeStats = useMemo(
-    () => getRouteStats(formData.pickup, formData.dropoff),
-    [formData.pickup, formData.dropoff],
-  );
+  const isAirportTransfer =
+    airportValues.includes(quote.pickupZone) || airportValues.includes(quote.dropoffZone);
 
   const formatDateWithWeekday = (date: string, time: string) => {
     if (!date) return `No date selected @ ${time}`;
@@ -132,8 +121,14 @@ export default function BookingResults() {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        pickup: formData.pickup,
-        dropoff: formData.dropoff,
+        // The customer's own words for both ends. The zones alongside are what the
+        // fare was actually taken from, and only the operator ever sees them.
+        pickup: formData.pickup.name,
+        dropoff: formData.dropoff.name,
+        pickupZone: quote.pickupZone,
+        dropoffZone: quote.dropoffZone,
+        pickupOffsetKm: quote.pickupOffsetKm,
+        dropoffOffsetKm: quote.dropoffOffsetKm,
         date: formData.date,
         time: formData.time,
         passengers: formData.people,
@@ -202,36 +197,17 @@ export default function BookingResults() {
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Pickup Location</Label>
-              <Select value={formData.pickup} onValueChange={(v) => setFormData((prev) => ({ ...prev, pickup: v, dropoff: prev.dropoff === v ? "" : prev.dropoff }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
-                  {pickupOptions.map((loc) => (
-                    <SelectItem key={loc} value={loc}>
-                      {loc}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Drop off Location</Label>
-              <Select value={formData.dropoff} onValueChange={(v) => setFormData((prev) => ({ ...prev, dropoff: v, pickup: prev.pickup === v ? "" : prev.pickup }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select drop-off" />
-                </SelectTrigger>
-                <SelectContent side="bottom" align="start" sideOffset={4} avoidCollisions={false}>
-                  {dropoffOptions.map((loc) => (
-                    <SelectItem key={loc} value={loc}>
-                      {loc}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <LocationInput
+              label="Pickup Location"
+              value={formData.pickup}
+              onChange={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
+            />
+            <LocationInput
+              label="Drop off Location"
+              value={formData.dropoff}
+              onChange={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
+              placeholder="Search for your hotel"
+            />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -315,7 +291,7 @@ export default function BookingResults() {
             </div>
             <p className="inline-flex items-center gap-2 text-muted-foreground">
               <MapPin className="h-4 w-4 text-primary" />
-              {`${formData.pickup}  ->  ${formData.dropoff}`}
+              {`${formData.pickup?.name ?? "Not set"}  ->  ${formData.dropoff?.name ?? "Not set"}`}
             </p>
             {formData.roundtrip && (
               <p className="inline-flex items-center gap-2 text-muted-foreground">

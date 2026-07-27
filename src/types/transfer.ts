@@ -4,8 +4,15 @@ export type TransferRequest = {
   name: string;
   email: string;
   phone?: string;
+  // What the customer chose, in their words: usually a hotel name.
   pickup: string;
   dropoff: string;
+  // The priced zone each end was charged as, and how far it sat from that zone.
+  // Operator-facing only, and null on bookings made before the hotel search existed.
+  pickupZone?: string | null;
+  dropoffZone?: string | null;
+  pickupOffsetKm?: number | null;
+  dropoffOffsetKm?: number | null;
   date: string;
   time: string;
   passengers: string;
