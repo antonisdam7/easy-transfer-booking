@@ -15,7 +15,8 @@ type TransferRow = {
   vehicle_type: string | null;
   flight_number: string | null;
   luggage: string | null;
-  child_seat: boolean;
+  // Rows created by the old backend can have this null.
+  child_seat: boolean | null;
   notes: string | null;
 };
 

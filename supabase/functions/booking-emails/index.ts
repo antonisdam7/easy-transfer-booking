@@ -21,7 +21,7 @@ type Transfer = {
   vehicle_type: string | null;
   flight_number: string | null;
   luggage: string | null;
-  child_seat: boolean;
+  child_seat: boolean | null;
   notes: string | null;
 };
 

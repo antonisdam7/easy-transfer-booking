@@ -1,9 +1,17 @@
 -- Transfers table + row level security.
--- Column names match server/storage.js so the frontend TransferRequest type is unchanged.
+--
+-- The table already exists in production: the old Express backend created it via
+-- server/storage.js and it holds live bookings. So this migration is written to
+-- run safely against that table as well as against an empty project. It never
+-- drops or rewrites data.
+--
+-- Column names match what the old backend used, so the frontend TransferRequest
+-- type is unchanged.
 
+-- Fresh project only. On production this is a no-op and the ALTERs below do the work.
 create table if not exists public.transfers (
-  id             uuid primary key default gen_random_uuid(),
-  created_at     timestamptz not null default now(),
+  id             text primary key,
+  created_at     timestamptz not null,
   name           text not null,
   email          text not null,
   phone          text,
@@ -15,18 +23,38 @@ create table if not exists public.transfers (
   vehicle_type   text,
   flight_number  text,
   luggage        text,
-  child_seat     boolean not null default false,
-  notes          text,
-  -- Bookings are confirmed on submission; no approval step. The admin can later
-  -- move a booking to cancelled or completed.
-  status         text not null default 'confirmed'
-                 check (status in ('confirmed', 'cancelled', 'completed'))
+  child_seat     boolean default false,
+  notes          text
 );
+
+-- The old backend generated id and created_at in JavaScript. The browser cannot be
+-- trusted to do that, so the database generates them from now on.
+alter table public.transfers alter column id         set default gen_random_uuid()::text;
+alter table public.transfers alter column created_at set default now();
+
+-- Bookings are confirmed on submission; there is no approval step. The admin can
+-- later move a booking to cancelled or completed.
+alter table public.transfers
+  add column if not exists status text not null default 'confirmed';
+
+do $$
+begin
+  alter table public.transfers
+    add constraint transfers_status_check
+    check (status in ('confirmed', 'cancelled', 'completed'));
+exception
+  when duplicate_object then null;
+end
+$$;
 
 -- The admin list is always ordered newest first.
 create index if not exists transfers_created_at_idx
   on public.transfers (created_at desc);
 
+-- Until now this table was reachable only from the server through DATABASE_URL, so
+-- it never needed policies. The new frontend talks to it with the public anon key,
+-- which means RLS is the only thing standing between a visitor and every customer
+-- name, email and phone number in here.
 alter table public.transfers enable row level security;
 
 -- Visitors submit bookings and can never read anything back, not even their own row.
