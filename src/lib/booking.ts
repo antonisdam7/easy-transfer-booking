@@ -70,7 +70,7 @@ export const destinations: Destination[] = [
   { name: "Kolymbari", lat: 35.53747, lng: 23.78139, her: { oneWay: 169, minutes: 137, km: 162 }, chq: { oneWay: 70, minutes: 43, km: 43 } },
   { name: "Kastelli (Kissamos)", lat: 35.49627, lng: 23.65402, her: { oneWay: 181, minutes: 151, km: 176 }, chq: { oneWay: 88, minutes: 57, km: 56 } },
   { name: "Falasarna", lat: 35.50196, lng: 23.5799, chq: { oneWay: 105, minutes: 76, km: 70 } },
-  { name: "Elafonisi", lat: 35.27118, lng: 23.5413, chq: { oneWay: 125, minutes: 111, km: 91 } },
+  { name: "Elafonisi", lat: 35.27118, lng: 23.5413, her: { oneWay: 218, minutes: 205, km: 211 }, chq: { oneWay: 125, minutes: 111, km: 91 } },
   { name: "Paleochora", lat: 35.23054, lng: 23.68222, her: { oneWay: 234, minutes: 194, km: 209 }, chq: { oneWay: 128, minutes: 100, km: 89 } },
   { name: "Samonas", lat: 35.41899, lng: 24.10947, chq: { oneWay: 62, minutes: 49, km: 33 } },
   { name: "Kalyves / Almirida", lat: 35.45112, lng: 24.16972, her: { oneWay: 122, minutes: 107, km: 123 }, chq: { oneWay: 58, minutes: 36, km: 29 } },
@@ -87,7 +87,7 @@ export const destinations: Destination[] = [
   { name: "Bali", lat: 35.41494, lng: 24.78313, her: { oneWay: 65, minutes: 50, km: 53 }, chq: { oneWay: 131, minutes: 100, km: 101 } },
   { name: "Plakias", lat: 35.18912, lng: 24.39757, her: { oneWay: 122, minutes: 106, km: 114 }, chq: { oneWay: 143, minutes: 103, km: 97 } },
   { name: "Agia Galini", lat: 35.09627, lng: 24.68837, her: { oneWay: 87, minutes: 76, km: 75 }, chq: { oneWay: 165, minutes: 118, km: 115 } },
-  { name: "Agios Pavlos", lat: 35.10289, lng: 24.56355, chq: { oneWay: 134, minutes: 129, km: 117 } },
+  { name: "Agios Pavlos", lat: 35.10289, lng: 24.56355, her: { oneWay: 115, minutes: 105, km: 96 }, chq: { oneWay: 134, minutes: 129, km: 117 } },
 
   // Heraklion region.
   { name: "Agia Pelagia", lat: 35.4073, lng: 25.0181, her: { oneWay: 38, minutes: 30, km: 26 }, chq: { oneWay: 142, minutes: 127, km: 131 } },
@@ -116,8 +116,8 @@ export const destinations: Destination[] = [
   { name: "Kamilari", lat: 35.03373, lng: 24.79005, chq: { oneWay: 142, minutes: 142, km: 133 } },
   { name: "Matala", lat: 34.99311, lng: 24.74964, her: { oneWay: 73, minutes: 66, km: 66 }, chq: { oneWay: 199, minutes: 152, km: 140 } },
   { name: "Kokinos Pyrgos", lat: 35.08146, lng: 24.74137, chq: { oneWay: 138, minutes: 130, km: 124 } },
-  { name: "Lentas", lat: 34.93089, lng: 24.92432, chq: { oneWay: 173, minutes: 182, km: 162 } },
-  { name: "Tsoutsouros", lat: 34.98427, lng: 25.28253, chq: { oneWay: 198, minutes: 193, km: 206 } },
+  { name: "Lentas", lat: 34.93089, lng: 24.92432, her: { oneWay: 89, minutes: 80, km: 71 }, chq: { oneWay: 173, minutes: 182, km: 162 } },
+  { name: "Tsoutsouros", lat: 34.98427, lng: 25.28253, her: { oneWay: 78, minutes: 65, km: 61 }, chq: { oneWay: 198, minutes: 193, km: 206 } },
 
   // Lasithi.
   { name: "Sissi", lat: 35.30855, lng: 25.52072, her: { oneWay: 50, minutes: 38, km: 41 }, chq: { oneWay: 194, minutes: 168, km: 188 } },
@@ -133,8 +133,8 @@ export const destinations: Destination[] = [
   { name: "Makri Gialos", lat: 35.03651, lng: 25.97058, her: { oneWay: 125, minutes: 115, km: 118 }, chq: { oneWay: 252, minutes: 246, km: 266 } },
   { name: "Sitia City / Hotel", lat: 35.20865, lng: 26.10523, her: { oneWay: 167, minutes: 125, km: 125 }, chq: { oneWay: 270, minutes: 256, km: 273 } },
   { name: "Palekastro", lat: 35.20054, lng: 26.25003, her: { oneWay: 174, minutes: 144, km: 142 }, chq: { oneWay: 445, minutes: 275, km: 290 } },
-  { name: "Vai", lat: 35.25441, lng: 26.26493, chq: { oneWay: 460, minutes: 284, km: 296 } },
-  { name: "Kato Zakros", lat: 35.09718, lng: 26.26333, chq: { oneWay: 484, minutes: 313, km: 316 } },
+  { name: "Vai", lat: 35.25441, lng: 26.26493, her: { oneWay: 198, minutes: 153, km: 148 }, chq: { oneWay: 460, minutes: 284, km: 296 } },
+  { name: "Kato Zakros", lat: 35.09718, lng: 26.26333, her: { oneWay: 218, minutes: 182, km: 168 }, chq: { oneWay: 484, minutes: 313, km: 316 } },
 ];
 
 const OTHER_LOCATION = "Other (specify in notes)";
