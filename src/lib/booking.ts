@@ -98,7 +98,7 @@ export const destinations: Destination[] = [
   { name: "Heraklion City / Hotel", lat: 35.33867, lng: 25.14213, her: { oneWay: 22, minutes: 13, km: 4 }, chq: { oneWay: 162, minutes: 139, km: 147 } },
   { name: "P.A.G.N.I", lat: 35.30401, lng: 25.08436, her: { oneWay: 23, minutes: 16, km: 12 } },
   { name: "Archanes", lat: 35.23532, lng: 25.15931, her: { oneWay: 28, minutes: 21, km: 15 } },
-  { name: "Amnissos / Karteros", lat: 35.33238, lng: 25.20654, her: { oneWay: 17, minutes: 8, km: 6 }, chq: { oneWay: 155, minutes: 139, km: 153 } },
+  { name: "Amnissos / Karteros", lat: 35.33238, lng: 25.20654, her: { oneWay: 22, minutes: 8, km: 6 }, chq: { oneWay: 155, minutes: 139, km: 153 } },
   { name: "Kokkini Hani", lat: 35.33068, lng: 25.25634, her: { oneWay: 24, minutes: 12, km: 10 }, chq: { oneWay: 165, minutes: 142, km: 158 } },
   { name: "Creta Aquarium - Gournes", lat: 35.33236, lng: 25.28246, her: { oneWay: 24, minutes: 17, km: 16 }, chq: { oneWay: 167, minutes: 148, km: 163 } },
   { name: "Anopolis - Water City", lat: 35.31099, lng: 25.2514, her: { oneWay: 24, minutes: 15, km: 12 }, chq: { oneWay: 172, minutes: 145, km: 160 } },
