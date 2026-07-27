@@ -6,35 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { apiRequest } from "@/lib/api";
-import { getAdminToken, setAdminToken } from "@/lib/auth";
-
-type LoginResponse = {
-  token: string;
-};
+import { signIn } from "@/lib/auth";
+import { useSession } from "@/hooks/useSession";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const { session } = useSession();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (getAdminToken()) {
+    if (session) {
       navigate("/admin");
     }
-  }, [navigate]);
+  }, [session, navigate]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const data = await apiRequest<LoginResponse>("/api/admin/login", {
-        method: "POST",
-        body: { username, password },
-      });
-      setAdminToken(data.token);
+      await signIn(email, password);
       toast.success("Welcome back.");
       navigate("/admin");
     } catch (error) {
@@ -58,11 +51,13 @@ export default function AdminLogin() {
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="admin-username">Username</Label>
+              <Label htmlFor="admin-email">Email</Label>
               <Input
-                id="admin-username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="admin-email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -71,6 +66,7 @@ export default function AdminLogin() {
               <Input
                 id="admin-password"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

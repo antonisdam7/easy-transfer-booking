@@ -1,0 +1,7 @@
+project_id = "easy-transfer-booking"
+
+# The function authenticates the database webhook with its own shared secret
+# (x-webhook-secret), so Supabase JWT verification is turned off. Leaving it on
+# would not help anyway: the anon key is a valid JWT and is public.
+[functions.booking-emails]
+verify_jwt = false

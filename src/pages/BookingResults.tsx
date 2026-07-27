@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { CalendarDays, Clock3, Luggage, MapPin, Route, Users } from "lucide-react";
-import { apiRequest } from "@/lib/api";
+import { submitTransfer } from "@/lib/transfers";
 import { airportValues, getPrice, getRouteStats, popularLocations } from "@/lib/booking";
 
 const CAR_IMAGE = "/vehicle-sedan.png";
@@ -103,29 +103,26 @@ export default function BookingResults() {
     }
     setIsSubmitting(true);
     try {
-      await apiRequest<{ id: string }>("/api/transfers", {
-        method: "POST",
-        body: {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          pickup: formData.pickup,
-          dropoff: formData.dropoff,
-          date: formData.date,
-          time: formData.time,
-          passengers: formData.people,
-          vehicleType: formData.vehicleType,
-          flightNumber: formData.flightNumber,
-          luggage: formData.luggage,
-          childSeat: formData.childSeat,
-          notes: `${formData.notes}${
-            formData.roundtrip
-              ? `\nRoundtrip requested: Yes\nReturn Date: ${formData.returnDate}\nReturn Time: ${formData.returnTime}`
-              : ""
-          }`.trim(),
-        },
+      await submitTransfer({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        pickup: formData.pickup,
+        dropoff: formData.dropoff,
+        date: formData.date,
+        time: formData.time,
+        passengers: formData.people,
+        vehicleType: formData.vehicleType,
+        flightNumber: formData.flightNumber,
+        luggage: formData.luggage,
+        childSeat: formData.childSeat,
+        notes: `${formData.notes}${
+          formData.roundtrip
+            ? `\nRoundtrip requested: Yes\nReturn Date: ${formData.returnDate}\nReturn Time: ${formData.returnTime}`
+            : ""
+        }`.trim(),
       });
-      toast.success("Booking request sent successfully.");
+      toast.success("Booking confirmed. Check your email for the details.");
       navigate("/");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not submit booking.";

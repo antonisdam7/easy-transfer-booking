@@ -1,13 +1,17 @@
-const ADMIN_TOKEN_KEY = "adminToken";
+import { supabase } from "@/lib/supabase";
 
-export function getAdminToken() {
-  return localStorage.getItem(ADMIN_TOKEN_KEY);
+export async function signIn(email: string, password: string) {
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    throw new Error(error.message || "Login failed.");
+  }
 }
 
-export function setAdminToken(token: string) {
-  localStorage.setItem(ADMIN_TOKEN_KEY, token);
+export async function signOut() {
+  await supabase.auth.signOut();
 }
 
-export function clearAdminToken() {
-  localStorage.removeItem(ADMIN_TOKEN_KEY);
+export async function getSession() {
+  const { data } = await supabase.auth.getSession();
+  return data.session;
 }

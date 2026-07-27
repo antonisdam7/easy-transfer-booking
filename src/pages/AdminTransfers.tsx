@@ -17,13 +17,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { apiRequest } from "@/lib/api";
-import { clearAdminToken } from "@/lib/auth";
+import { signOut } from "@/lib/auth";
+import { fetchTransfers } from "@/lib/transfers";
 import { TransferRequest } from "@/types/transfer";
-
-type TransfersResponse = {
-  transfers: TransferRequest[];
-};
 
 function formatDateTime(date: string, time: string) {
   return `${date} ${time}`;
@@ -37,26 +33,21 @@ export default function AdminTransfers() {
   const loadTransfers = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await apiRequest<TransfersResponse>("/api/admin/transfers", { withAuth: true });
-      setTransfers(data.transfers);
+      setTransfers(await fetchTransfers());
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not load transfers.";
       toast.error(message);
-      if (message.toLowerCase().includes("token")) {
-        clearAdminToken();
-        navigate("/admin/login");
-      }
     } finally {
       setIsLoading(false);
     }
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     loadTransfers();
   }, [loadTransfers]);
 
-  const handleLogout = () => {
-    clearAdminToken();
+  const handleLogout = async () => {
+    await signOut();
     navigate("/admin/login");
   };
 

@@ -1,12 +1,22 @@
 import { Navigate } from "react-router-dom";
-import { getAdminToken } from "@/lib/auth";
+import { useSession } from "@/hooks/useSession";
 
 type ProtectedRouteProps = {
   children: JSX.Element;
 };
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  if (!getAdminToken()) {
+  const { session, isLoading } = useSession();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!session) {
     return <Navigate to="/admin/login" replace />;
   }
 

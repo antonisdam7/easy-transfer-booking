@@ -1,73 +1,74 @@
 # Easy Transfer Booking
 
+Booking site for Habibi Come to Crete Transfers. Vite + React frontend on Vercel,
+Supabase for the database, authentication and the transactional emails. There is
+no backend server to run or host.
+
 ## Run the app
 
 ```bash
 npm install
-npm run dev:all
+cp .env.example .env   # fill in the two VITE_ values from Supabase
+npm run dev
 ```
 
-- Frontend: `http://localhost:8080`
-- Backend API: `http://localhost:4000`
+Frontend: `http://localhost:8080`
 
-## Admin login
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` come from Supabase →
+Project Settings → API. Both are public by design; the anon key ships in the
+JavaScript bundle and access is controlled by row level security, not secrecy.
 
-- URL: `http://localhost:8080/admin/login`
-- Default username: `admin`
-- Default password: `admin123`
+## Supabase setup
 
-Change credentials using environment variables:
+### 1. Database
 
-- `ADMIN_USERNAME`
-- `ADMIN_PASSWORD`
+Run `supabase/migrations/20260727120000_create_transfers.sql` in the SQL editor.
+It creates the `transfers` table and its policies:
 
-## Email notifications for new bookings
+- `anon` may insert a booking and can never read one back
+- `authenticated` may read and update every booking
 
-Set variables on **Render** (backend), not Netlify.
+Because visitors have no select policy, an insert must not chain `.select()` —
+asking for the inserted row back fails the whole write. See `src/lib/transfers.ts`.
 
-### Recommended: Resend (Render free tier)
+### 2. Admin user
 
-Render **blocks SMTP** on ports 587/465. Use Resend instead (HTTPS, not blocked).
+Auth → Users → Add user. That email and password are the admin login at
+`/admin/login`. There are no `ADMIN_USERNAME` / `ADMIN_PASSWORD` variables any more.
 
-1. Create a free account at [resend.com](https://resend.com)
-2. Add and verify your domain (e.g. `habibitransferscrete.com`), or use `onboarding@resend.dev` only for quick tests to your Resend account email
-3. Create an API key
-4. On Render → Environment, set:
-   - `RESEND_API_KEY=re_...`
-   - `MAIL_FROM=bookings@yourdomain.com` (must match a verified sender in Resend)
-   - `MAIL_TO=habibitransferscrete@gmail.com`
-5. Redeploy and check `https://<your-render-service>/api/health` → `email.provider` should be `"resend"`
+### 3. Booking emails
 
-### Optional: SMTP (local dev or paid Render)
+`supabase/functions/booking-emails` sends two emails through Resend on every new
+booking: the full details to the operator, and a confirmation to the customer.
+Bookings are confirmed on submission; there is no approval step.
 
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`
-- `MAIL_FROM`, `MAIL_TO`
-- Gmail: use an App Password, not your normal password
+Deploy it, then set under Edge Functions → Secrets:
 
-`EMAIL_PROVIDER` can be `auto` (default: Resend if API key set, else SMTP), `resend`, or `smtp`.
+| Secret | Value |
+| --- | --- |
+| `RESEND_API_KEY` | from resend.com |
+| `MAIL_FROM` | e.g. `bookings@habibitransferscrete.com`, on a domain verified in Resend |
+| `MAIL_TO` | where new booking notifications are sent |
+| `WEBHOOK_SECRET` | random string |
 
-## Persistent storage (recommended for production)
+Then Database → Webhooks → Create:
 
-By default, local development can use JSON file storage. In production, use PostgreSQL so transfers do not disappear after restarts.
+- Table `transfers`, event **Insert** only
+- Type: Supabase Edge Functions → `booking-emails`
+- HTTP header `x-webhook-secret` set to the same value as the secret
 
-Environment variables:
+The function checks that header itself and `supabase/config.toml` turns off the
+built-in JWT check. That check would not help here: the anon key is a valid JWT
+and is public, so anyone could otherwise invoke the function and send mail from
+the verified domain.
 
-- `DATABASE_URL` (PostgreSQL connection string)
-- `DATABASE_SSL` (`true` on cloud providers like Supabase/Render, `false` for local DB)
+Sending to customers requires a verified domain in Resend. The free
+`onboarding@resend.dev` sender only delivers to your own Resend account address.
 
-When `DATABASE_URL` is set, the backend automatically:
+## Deployment
 
-- connects to PostgreSQL
-- creates the `transfers` table if needed
-- stores and reads transfers from DB
+Vercel, connected to this repository. Build command `npm run build`, output `dist`.
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the project settings.
 
-If `DATABASE_URL` is not set, backend falls back to `server/data/transfers.json`.
-
-### Supabase quick setup
-
-1. Create a Supabase project
-2. Open `Project Settings -> Database` and copy the connection string
-3. Set on Render:
-   - `DATABASE_URL=<your-supabase-connection-string>`
-   - `DATABASE_SSL=true`
-4. Redeploy backend service
+`vercel.json` rewrites every path to `/index.html`. Without it each route other
+than `/` returns 404, which breaks the SEO landing pages.
