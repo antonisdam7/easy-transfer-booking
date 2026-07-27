@@ -1,10 +1,13 @@
 // Fares and route information for every destination we serve, keyed by the airport
 // the transfer starts from or returns to.
 //
-// The two airports were priced separately and the operator's Chania list is the
-// richer of the two: it carries real driving time and distance, where the Heraklion
-// list is prices only. Both shapes live in the same table and the gaps are filled at
-// lookup time, so a destination only ever appears once here.
+// Fares are the operator's own. Coordinates, distances and durations were measured
+// once against Google Maps and written in here, rather than being fetched while a
+// customer waits: the fares are per zone, so the route only has to be measured per
+// zone too. See the git history for the script that produced them.
+//
+// The coordinates are also what places a customer's hotel into a zone, so an entry
+// being a few hundred metres off is a mispriced booking, not a cosmetic problem.
 
 export const HERAKLION_AIRPORT = "Heraklion Airport (HER)";
 export const CHANIA_AIRPORT = "Chania Airport (CHQ)";
@@ -13,8 +16,8 @@ export const airportValues = [HERAKLION_AIRPORT, CHANIA_AIRPORT];
 
 type Fare = {
   oneWay: number;
-  minutes?: number;
-  km?: number;
+  minutes: number;
+  km: number;
 };
 
 // A return trip is charged as one full leg plus a second leg at 20% off.
@@ -27,102 +30,104 @@ const ROUNDTRIP_MULTIPLIER = 1.8;
 
 type Destination = {
   name: string;
+  lat: number;
+  lng: number;
   her?: Fare;
   chq?: Fare;
 };
 
 // Grouped roughly west to east so the dropdown reads like the island looks.
-const destinations: Destination[] = [
+export const destinations: Destination[] = [
   // Airports and ports.
-  { name: HERAKLION_AIRPORT, chq: { oneWay: 153, minutes: 120, km: 148 } },
+  { name: "Heraklion Airport (HER)", lat: 35.33955, lng: 25.17606, chq: { oneWay: 153, minutes: 137, km: 150 } },
   // No fares of its own: an airport-to-airport trip is priced once, on the Heraklion
   // entry above, and getFare finds it from either direction. This is here so the
   // airport still appears in the dropdown.
-  { name: CHANIA_AIRPORT },
-  { name: "Heraklion Port", her: { oneWay: 15 }, chq: { oneWay: 162, minutes: 120, km: 148 } },
-  { name: "Chania Port (Souda)", her: { oneWay: 157 }, chq: { oneWay: 31, minutes: 15, km: 15 } },
-  { name: "Rethymno Port", chq: { oneWay: 76, minutes: 61, km: 67 } },
-  { name: "Agios Nikolaos Port", chq: { oneWay: 210, minutes: 165, km: 208 } },
-  { name: "Ierapetra Port", chq: { oneWay: 244, minutes: 191, km: 240 } },
-  { name: "Sitia Port", chq: { oneWay: 421, minutes: 229, km: 274 } },
-  { name: "Sitia Airport (JSH)", chq: { oneWay: 270, minutes: 232, km: 275 } },
+  { name: "Chania Airport (CHQ)", lat: 35.53981, lng: 24.1404 },
+  { name: "Heraklion Port", lat: 35.34344, lng: 25.15095, her: { oneWay: 15, minutes: 11, km: 3 }, chq: { oneWay: 162, minutes: 140, km: 150 } },
+  { name: "Chania Port (Souda)", lat: 35.489, lng: 24.07559, her: { oneWay: 157, minutes: 119, km: 134 }, chq: { oneWay: 31, minutes: 24, km: 16 } },
+  { name: "Rethymno Port", lat: 35.37129, lng: 24.47637, chq: { oneWay: 76, minutes: 74, km: 68 } },
+  { name: "Agios Nikolaos Port", lat: 35.19282, lng: 25.72061, chq: { oneWay: 210, minutes: 193, km: 209 } },
+  { name: "Ierapetra Port", lat: 35.00396, lng: 25.73589, chq: { oneWay: 244, minutes: 223, km: 242 } },
+  { name: "Sitia Port", lat: 35.2077, lng: 26.10961, chq: { oneWay: 421, minutes: 257, km: 273 } },
+  { name: "Sitia Airport (JSH)", lat: 35.21697, lng: 26.09727, chq: { oneWay: 270, minutes: 253, km: 273 } },
 
   // Chania region.
-  { name: "Chania City / Hotel", her: { oneWay: 157 }, chq: { oneWay: 33, minutes: 15, km: 16 } },
-  { name: "Daratso / Agioi Apostoloi", chq: { oneWay: 48, minutes: 20, km: 18 } },
-  { name: "Stalos", chq: { oneWay: 48, minutes: 23, km: 21 } },
-  { name: "Agia Marina (Chania)", her: { oneWay: 162 }, chq: { oneWay: 53, minutes: 26, km: 24 } },
-  { name: "Platanias (Chania)", her: { oneWay: 162 }, chq: { oneWay: 58, minutes: 27, km: 26 } },
-  { name: "Gerani (Chania)", chq: { oneWay: 58, minutes: 28, km: 28 } },
-  { name: "Maleme", her: { oneWay: 164 }, chq: { oneWay: 63, minutes: 31, km: 32 } },
-  { name: "Kolymbari", her: { oneWay: 169 }, chq: { oneWay: 70, minutes: 38, km: 43 } },
-  { name: "Kastelli (Kissamos)", her: { oneWay: 181 }, chq: { oneWay: 88, minutes: 46, km: 52 } },
-  { name: "Falasarna", chq: { oneWay: 105, minutes: 63, km: 67 } },
-  { name: "Elafonisi", chq: { oneWay: 125, minutes: 98, km: 89 } },
-  { name: "Paleochora", her: { oneWay: 234 }, chq: { oneWay: 128, minutes: 91, km: 86 } },
-  { name: "Samonas", chq: { oneWay: 62, minutes: 40, km: 39 } },
-  { name: "Kalyves / Almirida", her: { oneWay: 122 }, chq: { oneWay: 58, minutes: 33, km: 31 } },
-  { name: "Georgioupolis", her: { oneWay: 110 }, chq: { oneWay: 70, minutes: 42, km: 46 } },
-  { name: "Chora Sfakion / Sfakia", her: { oneWay: 148 }, chq: { oneWay: 143, minutes: 87, km: 76 } },
-  { name: "Frangokastello", her: { oneWay: 134 }, chq: { oneWay: 144, minutes: 99, km: 87 } },
+  { name: "Chania City / Hotel", lat: 35.51378, lng: 24.02031, her: { oneWay: 157, minutes: 126, km: 142 }, chq: { oneWay: 33, minutes: 24, km: 15 } },
+  { name: "Daratso / Agioi Apostoloi", lat: 35.5011, lng: 23.97438, chq: { oneWay: 48, minutes: 34, km: 25 } },
+  { name: "Stalos", lat: 35.50379, lng: 23.93542, chq: { oneWay: 48, minutes: 37, km: 29 } },
+  { name: "Agia Marina (Chania)", lat: 35.5172, lng: 23.92548, her: { oneWay: 162, minutes: 132, km: 149 }, chq: { oneWay: 53, minutes: 38, km: 29 } },
+  { name: "Platanias (Chania)", lat: 35.5167, lng: 23.90892, her: { oneWay: 162, minutes: 133, km: 154 }, chq: { oneWay: 58, minutes: 39, km: 34 } },
+  { name: "Gerani (Chania)", lat: 35.51665, lng: 23.87779, chq: { oneWay: 58, minutes: 38, km: 34 } },
+  { name: "Maleme", lat: 35.52211, lng: 23.84743, her: { oneWay: 164, minutes: 138, km: 156 }, chq: { oneWay: 63, minutes: 44, km: 37 } },
+  { name: "Kolymbari", lat: 35.53747, lng: 23.78139, her: { oneWay: 169, minutes: 137, km: 162 }, chq: { oneWay: 70, minutes: 43, km: 43 } },
+  { name: "Kastelli (Kissamos)", lat: 35.49627, lng: 23.65402, her: { oneWay: 181, minutes: 151, km: 176 }, chq: { oneWay: 88, minutes: 57, km: 56 } },
+  { name: "Falasarna", lat: 35.50196, lng: 23.5799, chq: { oneWay: 105, minutes: 76, km: 70 } },
+  { name: "Elafonisi", lat: 35.27118, lng: 23.5413, chq: { oneWay: 125, minutes: 111, km: 91 } },
+  { name: "Paleochora", lat: 35.23054, lng: 23.68222, her: { oneWay: 234, minutes: 194, km: 209 }, chq: { oneWay: 128, minutes: 100, km: 89 } },
+  { name: "Samonas", lat: 35.41899, lng: 24.10947, chq: { oneWay: 62, minutes: 49, km: 33 } },
+  { name: "Kalyves / Almirida", lat: 35.45112, lng: 24.16972, her: { oneWay: 122, minutes: 107, km: 123 }, chq: { oneWay: 58, minutes: 36, km: 29 } },
+  { name: "Georgioupolis", lat: 35.36082, lng: 24.26217, her: { oneWay: 110, minutes: 90, km: 103 }, chq: { oneWay: 70, minutes: 52, km: 48 } },
+  { name: "Chora Sfakion / Sfakia", lat: 35.20152, lng: 24.13803, her: { oneWay: 148, minutes: 143, km: 146 }, chq: { oneWay: 143, minutes: 96, km: 78 } },
+  { name: "Frangokastello", lat: 35.18211, lng: 24.23419, her: { oneWay: 134, minutes: 134, km: 134 }, chq: { oneWay: 144, minutes: 107, km: 85 } },
 
   // Rethymno region.
-  { name: "Rethymno City / Hotel", her: { oneWay: 87 }, chq: { oneWay: 92, minutes: 59, km: 68 } },
-  { name: "Platanias (Rethymno)", chq: { oneWay: 99, minutes: 67, km: 76 } },
-  { name: "Adelianos Kampos / Adele", her: { oneWay: 84 }, chq: { oneWay: 97, minutes: 64, km: 73 } },
-  { name: "Scaleta", her: { oneWay: 75 }, chq: { oneWay: 95, minutes: 69, km: 80 } },
-  { name: "Panormo", her: { oneWay: 69 }, chq: { oneWay: 116, minutes: 76, km: 88 } },
-  { name: "Bali", her: { oneWay: 65 }, chq: { oneWay: 131, minutes: 86, km: 98 } },
-  { name: "Plakias", her: { oneWay: 122 }, chq: { oneWay: 143, minutes: 89, km: 98 } },
-  { name: "Agia Galini", her: { oneWay: 87 }, chq: { oneWay: 165, minutes: 101, km: 115 } },
-  { name: "Agios Pavlos", chq: { oneWay: 134, minutes: 109, km: 113 } },
+  { name: "Rethymno City / Hotel", lat: 35.36555, lng: 24.49198, her: { oneWay: 87, minutes: 72, km: 81 }, chq: { oneWay: 92, minutes: 78, km: 74 } },
+  { name: "Platanias (Rethymno)", lat: 35.36799, lng: 24.5296, chq: { oneWay: 99, minutes: 74, km: 73 } },
+  { name: "Adelianos Kampos / Adele", lat: 35.3721, lng: 24.5414, her: { oneWay: 84, minutes: 66, km: 76 }, chq: { oneWay: 97, minutes: 76, km: 74 } },
+  { name: "Scaleta", lat: 35.39145, lng: 24.61312, her: { oneWay: 75, minutes: 60, km: 69 }, chq: { oneWay: 95, minutes: 80, km: 81 } },
+  { name: "Panormo", lat: 35.41818, lng: 24.6908, her: { oneWay: 69, minutes: 54, km: 61 }, chq: { oneWay: 116, minutes: 89, km: 90 } },
+  { name: "Bali", lat: 35.41494, lng: 24.78313, her: { oneWay: 65, minutes: 50, km: 53 }, chq: { oneWay: 131, minutes: 100, km: 101 } },
+  { name: "Plakias", lat: 35.18912, lng: 24.39757, her: { oneWay: 122, minutes: 106, km: 114 }, chq: { oneWay: 143, minutes: 103, km: 97 } },
+  { name: "Agia Galini", lat: 35.09627, lng: 24.68837, her: { oneWay: 87, minutes: 76, km: 75 }, chq: { oneWay: 165, minutes: 118, km: 115 } },
+  { name: "Agios Pavlos", lat: 35.10289, lng: 24.56355, chq: { oneWay: 134, minutes: 129, km: 117 } },
 
   // Heraklion region.
-  { name: "Agia Pelagia", her: { oneWay: 38 }, chq: { oneWay: 142, minutes: 107, km: 127 } },
-  { name: "Ligaria", her: { oneWay: 30 }, chq: { oneWay: 142, minutes: 109, km: 128 } },
-  { name: "Fodele", her: { oneWay: 38 }, chq: { oneWay: 132, minutes: 103, km: 122 } },
-  { name: "Ammoudara (Heraklion)", her: { oneWay: 24 }, chq: { oneWay: 159, minutes: 116, km: 138 } },
-  { name: "Arolithos - Cretan Village", her: { oneWay: 28 }, chq: { oneWay: 155, minutes: 118, km: 140 } },
-  { name: "Heraklion City / Hotel", her: { oneWay: 15 }, chq: { oneWay: 162, minutes: 120, km: 148 } },
-  { name: "P.A.G.N.I", her: { oneWay: 23 } },
-  { name: "Archanes", her: { oneWay: 28 } },
-  { name: "Amnissos / Karteros", her: { oneWay: 17 }, chq: { oneWay: 155, minutes: 124, km: 152 } },
-  { name: "Kokkini Hani", her: { oneWay: 24 }, chq: { oneWay: 165, minutes: 127, km: 157 } },
-  { name: "Creta Aquarium - Gournes", her: { oneWay: 24 }, chq: { oneWay: 167, minutes: 131, km: 160 } },
-  { name: "Anopolis - Water City", chq: { oneWay: 172, minutes: 132, km: 159 } },
-  { name: "Gouves", her: { oneWay: 28 }, chq: { oneWay: 167, minutes: 133, km: 164 } },
-  { name: "Analipsi", her: { oneWay: 33 }, chq: { oneWay: 175, minutes: 134, km: 166 } },
-  { name: "Anissaras", her: { oneWay: 33 }, chq: { oneWay: 176, minutes: 138, km: 169 } },
-  { name: "Chersonissos", her: { oneWay: 37 }, chq: { oneWay: 176, minutes: 137, km: 170 } },
-  { name: "Koutouloufari", her: { oneWay: 37 }, chq: { oneWay: 176, minutes: 137, km: 171 } },
-  { name: "Piskopiano", her: { oneWay: 37 }, chq: { oneWay: 176, minutes: 137, km: 170 } },
-  { name: "Stalis / Stalida", her: { oneWay: 39 }, chq: { oneWay: 201, minutes: 172, km: 190 } },
-  { name: "Malia", her: { oneWay: 42 }, chq: { oneWay: 184, minutes: 142, km: 179 } },
+  { name: "Agia Pelagia", lat: 35.4073, lng: 25.0181, her: { oneWay: 38, minutes: 30, km: 26 }, chq: { oneWay: 142, minutes: 127, km: 131 } },
+  { name: "Ligaria", lat: 35.3986, lng: 25.02687, her: { oneWay: 30, minutes: 25, km: 23 }, chq: { oneWay: 142, minutes: 123, km: 129 } },
+  { name: "Fodele", lat: 35.40204, lng: 24.95244, her: { oneWay: 38, minutes: 28, km: 30 }, chq: { oneWay: 132, minutes: 114, km: 120 } },
+  { name: "Ammoudara (Heraklion)", lat: 35.33746, lng: 25.08756, her: { oneWay: 24, minutes: 15, km: 10 }, chq: { oneWay: 159, minutes: 134, km: 140 } },
+  { name: "Arolithos - Cretan Village", lat: 35.31541, lng: 25.03557, her: { oneWay: 28, minutes: 17, km: 15 }, chq: { oneWay: 155, minutes: 131, km: 141 } },
+  { name: "Heraklion City / Hotel", lat: 35.33867, lng: 25.14213, her: { oneWay: 15, minutes: 13, km: 4 }, chq: { oneWay: 162, minutes: 139, km: 147 } },
+  { name: "P.A.G.N.I", lat: 35.30401, lng: 25.08436, her: { oneWay: 23, minutes: 16, km: 12 } },
+  { name: "Archanes", lat: 35.23532, lng: 25.15931, her: { oneWay: 28, minutes: 21, km: 15 } },
+  { name: "Amnissos / Karteros", lat: 35.33238, lng: 25.20654, her: { oneWay: 17, minutes: 8, km: 6 }, chq: { oneWay: 155, minutes: 139, km: 153 } },
+  { name: "Kokkini Hani", lat: 35.33068, lng: 25.25634, her: { oneWay: 24, minutes: 12, km: 10 }, chq: { oneWay: 165, minutes: 142, km: 158 } },
+  { name: "Creta Aquarium - Gournes", lat: 35.33236, lng: 25.28246, her: { oneWay: 24, minutes: 17, km: 16 }, chq: { oneWay: 167, minutes: 148, km: 163 } },
+  { name: "Anopolis - Water City", lat: 35.31099, lng: 25.2514, chq: { oneWay: 172, minutes: 145, km: 160 } },
+  { name: "Gouves", lat: 35.31135, lng: 25.31302, her: { oneWay: 28, minutes: 18, km: 17 }, chq: { oneWay: 167, minutes: 149, km: 165 } },
+  { name: "Analipsi", lat: 35.33173, lng: 25.34527, her: { oneWay: 33, minutes: 21, km: 19 }, chq: { oneWay: 175, minutes: 151, km: 167 } },
+  { name: "Anissaras", lat: 35.33542, lng: 25.37481, her: { oneWay: 33, minutes: 25, km: 23 }, chq: { oneWay: 176, minutes: 156, km: 170 } },
+  { name: "Chersonissos", lat: 35.30732, lng: 25.37016, her: { oneWay: 37, minutes: 20, km: 22 }, chq: { oneWay: 176, minutes: 151, km: 170 } },
+  { name: "Koutouloufari", lat: 35.30588, lng: 25.39264, her: { oneWay: 37, minutes: 26, km: 24 }, chq: { oneWay: 176, minutes: 157, km: 172 } },
+  { name: "Piskopiano", lat: 35.30834, lng: 25.38528, her: { oneWay: 37, minutes: 23, km: 23 }, chq: { oneWay: 176, minutes: 153, km: 171 } },
+  { name: "Stalis / Stalida", lat: 35.29265, lng: 25.43304, her: { oneWay: 39, minutes: 27, km: 29 }, chq: { oneWay: 201, minutes: 158, km: 177 } },
+  { name: "Malia", lat: 35.28324, lng: 25.46088, her: { oneWay: 42, minutes: 29, km: 31 }, chq: { oneWay: 184, minutes: 160, km: 179 } },
 
   // Heraklion south coast.
-  { name: "Kalamaki", chq: { oneWay: 146, minutes: 126, km: 135 } },
-  { name: "Kamilari", chq: { oneWay: 142, minutes: 122, km: 133 } },
-  { name: "Matala", her: { oneWay: 73 }, chq: { oneWay: 199, minutes: 133, km: 145 } },
-  { name: "Kokinos Pyrgos", chq: { oneWay: 138, minutes: 111, km: 124 } },
-  { name: "Lentas", chq: { oneWay: 173, minutes: 163, km: 170 } },
-  { name: "Tsoutsouros", chq: { oneWay: 198, minutes: 257, km: 297 } },
+  { name: "Kalamaki", lat: 35.02909, lng: 24.75997, chq: { oneWay: 146, minutes: 144, km: 135 } },
+  { name: "Kamilari", lat: 35.03373, lng: 24.79005, chq: { oneWay: 142, minutes: 142, km: 133 } },
+  { name: "Matala", lat: 34.99311, lng: 24.74964, her: { oneWay: 73, minutes: 66, km: 66 }, chq: { oneWay: 199, minutes: 152, km: 140 } },
+  { name: "Kokinos Pyrgos", lat: 35.08146, lng: 24.74137, chq: { oneWay: 138, minutes: 130, km: 124 } },
+  { name: "Lentas", lat: 34.93089, lng: 24.92432, chq: { oneWay: 173, minutes: 182, km: 162 } },
+  { name: "Tsoutsouros", lat: 34.98427, lng: 25.28253, chq: { oneWay: 198, minutes: 193, km: 206 } },
 
   // Lasithi.
-  { name: "Sissi", her: { oneWay: 50 }, chq: { oneWay: 194, minutes: 228, km: 274 } },
-  { name: "Milatos", her: { oneWay: 60 }, chq: { oneWay: 201, minutes: 155, km: 192 } },
-  { name: "Agios Nikolaos City / Hotel", her: { oneWay: 73 }, chq: { oneWay: 210, minutes: 165, km: 208 } },
-  { name: "Ammoudara (Agios Nikolaos)", her: { oneWay: 73 }, chq: { oneWay: 218, minutes: 168, km: 211 } },
-  { name: "Elounda", her: { oneWay: 78 }, chq: { oneWay: 223, minutes: 172, km: 214 } },
-  { name: "Plaka Eloundas", her: { oneWay: 84 }, chq: { oneWay: 229, minutes: 180, km: 218 } },
-  { name: "Istron / Kalo Horio", her: { oneWay: 84 }, chq: { oneWay: 227, minutes: 170, km: 218 } },
-  { name: "Mochlos", chq: { oneWay: 244, minutes: 205, km: 242 } },
-  { name: "Ierapetra City / Hotel", her: { oneWay: 106 }, chq: { oneWay: 244, minutes: 191, km: 240 } },
-  { name: "Koutsounari / Ferma", her: { oneWay: 113 }, chq: { oneWay: 248, minutes: 200, km: 245 } },
-  { name: "Makri Gialos", her: { oneWay: 125 }, chq: { oneWay: 252, minutes: 199, km: 251 } },
-  { name: "Sitia City / Hotel", her: { oneWay: 167 }, chq: { oneWay: 270, minutes: 229, km: 274 } },
-  { name: "Palekastro", her: { oneWay: 174 }, chq: { oneWay: 445, minutes: 248, km: 290 } },
-  { name: "Vai", chq: { oneWay: 460, minutes: 265, km: 300 } },
-  { name: "Kato Zakros", chq: { oneWay: 484, minutes: 282, km: 316 } },
+  { name: "Sissi", lat: 35.30855, lng: 25.52072, her: { oneWay: 50, minutes: 38, km: 41 }, chq: { oneWay: 194, minutes: 168, km: 188 } },
+  { name: "Milatos", lat: 35.3082, lng: 25.56644, her: { oneWay: 60, minutes: 45, km: 45 }, chq: { oneWay: 201, minutes: 176, km: 192 } },
+  { name: "Agios Nikolaos City / Hotel", lat: 35.18913, lng: 25.71711, her: { oneWay: 73, minutes: 58, km: 60 }, chq: { oneWay: 210, minutes: 189, km: 208 } },
+  { name: "Ammoudara (Agios Nikolaos)", lat: 35.16679, lng: 25.71046, her: { oneWay: 73, minutes: 59, km: 63 }, chq: { oneWay: 218, minutes: 190, km: 210 } },
+  { name: "Elounda", lat: 35.26135, lng: 25.72342, her: { oneWay: 78, minutes: 67, km: 68 }, chq: { oneWay: 223, minutes: 198, km: 215 } },
+  { name: "Plaka Eloundas", lat: 35.30222, lng: 25.72679, her: { oneWay: 84, minutes: 69, km: 63 }, chq: { oneWay: 229, minutes: 199, km: 211 } },
+  { name: "Istron / Kalo Horio", lat: 35.1252, lng: 25.75324, her: { oneWay: 84, minutes: 77, km: 80 }, chq: { oneWay: 227, minutes: 208, km: 228 } },
+  { name: "Mochlos", lat: 35.18405, lng: 25.90499, chq: { oneWay: 244, minutes: 224, km: 243 } },
+  { name: "Ierapetra City / Hotel", lat: 35.01033, lng: 25.74041, her: { oneWay: 106, minutes: 89, km: 93 }, chq: { oneWay: 244, minutes: 220, km: 241 } },
+  { name: "Koutsounari / Ferma", lat: 35.01601, lng: 25.82942, her: { oneWay: 113, minutes: 97, km: 102 }, chq: { oneWay: 248, minutes: 228, km: 250 } },
+  { name: "Makri Gialos", lat: 35.03651, lng: 25.97058, her: { oneWay: 125, minutes: 115, km: 118 }, chq: { oneWay: 252, minutes: 246, km: 266 } },
+  { name: "Sitia City / Hotel", lat: 35.20865, lng: 26.10523, her: { oneWay: 167, minutes: 125, km: 125 }, chq: { oneWay: 270, minutes: 256, km: 273 } },
+  { name: "Palekastro", lat: 35.20054, lng: 26.25003, her: { oneWay: 174, minutes: 144, km: 142 }, chq: { oneWay: 445, minutes: 275, km: 290 } },
+  { name: "Vai", lat: 35.25441, lng: 26.26493, chq: { oneWay: 460, minutes: 284, km: 296 } },
+  { name: "Kato Zakros", lat: 35.09718, lng: 26.26333, chq: { oneWay: 484, minutes: 313, km: 316 } },
 ];
 
 const OTHER_LOCATION = "Other (specify in notes)";
@@ -177,15 +182,12 @@ export function getVehiclePrice(
   return Math.round(base * vehicleMultipliers[vehicle]);
 }
 
-// Falls back to an estimate for the Heraklion routes, which were never measured.
-// The multipliers come from the Chania list, where roughly 1.2 km and 1 minute of
-// driving map onto each euro of fare.
+// Null rather than a placeholder: a route we have no fare for is a route we never
+// measured, and inventing a distance for it is how the old estimate ended up showing
+// customers arithmetic on a price and calling it kilometres.
 export function getRouteStats(pickup: string, dropoff: string) {
   const fare = getFare(pickup, dropoff);
-  if (!fare) return { km: 30, minutes: 25 };
+  if (!fare) return null;
 
-  return {
-    km: fare.km ?? Math.max(8, Math.round(fare.oneWay * 1.2)),
-    minutes: fare.minutes ?? Math.max(8, Math.round(fare.oneWay)),
-  };
+  return { km: fare.km, minutes: fare.minutes };
 }

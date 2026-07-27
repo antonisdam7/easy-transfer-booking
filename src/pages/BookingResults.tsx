@@ -49,6 +49,23 @@ function getInitialState(search: string) {
 
 const steps = ["Select Dates", "Select Car", "Select Equipment", "Personal Info"] as const;
 
+// Renders nothing on a route we have no measurements for, which is the same set of
+// routes that show "Price on request" rather than a fare.
+function RouteFacts({ stats }: { stats: { km: number; minutes: number } | null }) {
+  if (!stats) return null;
+
+  return (
+    <>
+      <p className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Route className="h-4 w-4 text-primary" /> {stats.km} km distance
+      </p>
+      <p className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Clock3 className="h-4 w-4 text-primary" /> {stats.minutes} mins duration
+      </p>
+    </>
+  );
+}
+
 export default function BookingResults() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -285,12 +302,16 @@ export default function BookingResults() {
               <p className="inline-flex items-center gap-2 font-medium text-primary">
                 <Users className="h-4 w-4 text-emerald-600" /> {`x${formData.people} persons`}
               </p>
-              <p className="inline-flex items-center gap-2 text-muted-foreground">
-                <Route className="h-4 w-4 text-primary" /> {`${routeStats.km} km distance`}
-              </p>
-              <p className="inline-flex items-center gap-2 text-muted-foreground">
-                <Clock3 className="h-4 w-4 text-primary" /> {`${routeStats.minutes} mins duration`}
-              </p>
+              {routeStats && (
+                <>
+                  <p className="inline-flex items-center gap-2 text-muted-foreground">
+                    <Route className="h-4 w-4 text-primary" /> {`${routeStats.km} km distance`}
+                  </p>
+                  <p className="inline-flex items-center gap-2 text-muted-foreground">
+                    <Clock3 className="h-4 w-4 text-primary" /> {`${routeStats.minutes} mins duration`}
+                  </p>
+                </>
+              )}
             </div>
             <p className="inline-flex items-center gap-2 text-muted-foreground">
               <MapPin className="h-4 w-4 text-primary" />
@@ -318,12 +339,7 @@ export default function BookingResults() {
                   <p className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Users className="h-4 w-4 text-primary" /> 4 persons
                   </p>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
-                  </p>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
-                  </p>
+                  <RouteFacts stats={routeStats} />
                 </div>
                 <Button onClick={() => setVehicleAndContinue("sedan")}>Select Car</Button>
               </div>
@@ -342,12 +358,7 @@ export default function BookingResults() {
                   <p className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Users className="h-4 w-4 text-primary" /> 4 persons
                   </p>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
-                  </p>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
-                  </p>
+                  <RouteFacts stats={routeStats} />
                 </div>
                 <Button onClick={() => setVehicleAndContinue("estate")}>Select Estate</Button>
               </div>
@@ -366,12 +377,7 @@ export default function BookingResults() {
                   <p className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Users className="h-4 w-4 text-primary" /> 8 persons
                   </p>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Route className="h-4 w-4 text-primary" /> {routeStats.km} km distance
-                  </p>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock3 className="h-4 w-4 text-primary" /> {routeStats.minutes} mins duration
-                  </p>
+                  <RouteFacts stats={routeStats} />
                 </div>
                 <Button onClick={() => setVehicleAndContinue("van")}>Select Van</Button>
               </div>
