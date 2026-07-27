@@ -1,4 +1,4 @@
-import { Loader } from "@googlemaps/js-api-loader";
+import { importLibrary, setOptions } from "@googlemaps/js-api-loader";
 
 // Google Places, used only to turn what a customer types into coordinates. The fare
 // still comes from the zone table in booking.ts; nothing here decides a price.
@@ -40,8 +40,10 @@ async function loadPlaces(): Promise<google.maps.PlacesLibrary> {
     throw new Error("VITE_GOOGLE_MAPS_API_KEY is not set");
   }
 
-  const loader = new Loader({ apiKey: API_KEY, version: "weekly" });
-  placesLibrary = (await loader.importLibrary("places")) as google.maps.PlacesLibrary;
+  // setOptions has to run before the first importLibrary, and importLibrary is what
+  // actually fetches the API. Nothing is downloaded until a customer starts typing.
+  setOptions({ key: API_KEY, v: "weekly" });
+  placesLibrary = await importLibrary("places");
   return placesLibrary;
 }
 
