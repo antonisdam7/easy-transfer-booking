@@ -1,6 +1,7 @@
+import { ReactNode } from "react";
 import { addMinutes, format, parse } from "date-fns";
 import { enGB } from "date-fns/locale";
-import { Check, Clock3, Luggage, Pencil, Route, Users } from "lucide-react";
+import { Check, Clock3, Luggage, Pencil, Repeat, Route, Users } from "lucide-react";
 import { LocationValue, TripQuote, VehicleType } from "@/lib/booking";
 import { Vehicle } from "@/components/VehicleRow";
 
@@ -24,18 +25,20 @@ type Props = {
   // Shown once a car has actually been chosen, so the later steps still say what was
   // picked without making anyone go back to look.
   chosen?: Vehicle;
-  // Takes the customer back to the search form. This replaces the numbered step bar
+  // Opens the trip in a dialog over the results. This replaces the numbered step bar
   // that used to sit above the page: one way back, next to what it would change.
   onEdit?: () => void;
+  // Same dialog, opened with the return leg already switched on.
+  onAddReturn?: () => void;
 };
 
 // Claims we already make elsewhere on the site. Nothing here is new to a customer
 // who read the About page, and nothing here is invented.
 const included = [
-  "Free cancellation up to 24 hours before pickup",
+  "Free cancellation up to 24h",
   "Door-to-door service",
-  "Flight monitoring for airport pickups",
-  "Professional, licensed drivers",
+  "Flight tracking",
+  "Licensed drivers",
 ];
 
 function formatDay(date: string) {
@@ -62,6 +65,7 @@ function Leg({
   minutes,
   km,
   label,
+  action,
 }: {
   from: string;
   to: string;
@@ -70,13 +74,17 @@ function Leg({
   minutes?: number;
   km?: number;
   label: string;
+  action?: ReactNode;
 }) {
   return (
     <div className="space-y-3">
-      <p className="text-sm">
-        <span className="font-semibold text-primary">{label}</span>
-        <span className="text-muted-foreground"> · {formatDay(date)}</span>
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm">
+          <span className="font-semibold text-primary">{label}</span>
+          <span className="text-muted-foreground"> · {formatDay(date)}</span>
+        </p>
+        {action}
+      </div>
 
       <div className="grid grid-cols-[auto_1fr_auto] items-start gap-x-3">
         <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-sm bg-primary" />
@@ -120,6 +128,7 @@ export default function BookingSummary({
   vehicle,
   chosen,
   onEdit,
+  onAddReturn,
 }: Props) {
   const from = pickup?.name ?? "Not set";
   const to = dropoff?.name ?? "Not set";
@@ -134,20 +143,9 @@ export default function BookingSummary({
       <div className="space-y-6 rounded-lg border bg-card p-5 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <span className="font-semibold text-primary">{roundtrip ? "Round trip" : "One way"}</span>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-muted-foreground">
-              <Users className="h-3.5 w-3.5" /> {people} {people === "1" ? "passenger" : "passengers"}
-            </span>
-            {onEdit && (
-              <button
-                type="button"
-                onClick={onEdit}
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
-              >
-                <Pencil className="h-3 w-3" /> Edit
-              </button>
-            )}
-          </div>
+          <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-muted-foreground">
+            <Users className="h-3.5 w-3.5" /> {people} {people === "1" ? "passenger" : "passengers"}
+          </span>
         </div>
 
         <Leg
@@ -158,9 +156,20 @@ export default function BookingSummary({
           time={time}
           minutes={quote.stats?.minutes}
           km={quote.stats?.km}
+          action={
+            onEdit && (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
+              >
+                <Pencil className="h-3 w-3" /> Edit
+              </button>
+            )
+          }
         />
 
-        {roundtrip && (
+        {roundtrip ? (
           <>
             <hr />
             <Leg
@@ -173,6 +182,16 @@ export default function BookingSummary({
               km={quote.stats?.km}
             />
           </>
+        ) : (
+          onAddReturn && (
+            <button
+              type="button"
+              onClick={onAddReturn}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            >
+              <Repeat className="h-4 w-4" /> Add return
+            </button>
+          )
         )}
 
         {chosen && (
@@ -231,10 +250,13 @@ export default function BookingSummary({
 
         <hr />
 
-        <ul className="space-y-2">
+        <ul className="flex flex-wrap gap-2">
           {included.map((item) => (
-            <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+            <li
+              key={item}
+              className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-muted-foreground"
+            >
+              <Check className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
               {item}
             </li>
           ))}

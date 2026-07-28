@@ -6,13 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Car, Plane, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { submitTransfer } from "@/lib/transfers";
-import LocationInput from "@/components/LocationInput";
-import { DateInput, TimeInput } from "@/components/DateTimeInput";
 import RouteMap from "@/components/RouteMap";
+import TripEditDialog, { TripDraft } from "@/components/TripEditDialog";
 import ChildSeats from "@/components/ChildSeats";
 import BookingSummary from "@/components/BookingSummary";
 import VehicleRow, { Vehicle } from "@/components/VehicleRow";
@@ -106,6 +104,20 @@ function ActionBar({ children }: { children: ReactNode }) {
   );
 }
 
+// The summary beside the page. It used to be a scroll box of its own, which put a
+// second scrollbar down the middle of the page; now it simply follows the page.
+//
+// It only sticks where there is room for the whole panel to stand still -- pinning it
+// on a short window would leave the price details below the fold with no way to reach
+// them.
+function SummaryColumn({ children }: { children: ReactNode }) {
+  return (
+    <div className="lg:self-start [@media(min-height:56rem)]:lg:sticky [@media(min-height:56rem)]:lg:top-6">
+      {children}
+    </div>
+  );
+}
+
 // A disclosure the customer opens themselves. The cross tells them the section is
 // already showing and clicking again puts it away.
 function Pill({
@@ -138,11 +150,41 @@ function Pill({
 export default function BookingResults() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [step, setStep] = useState(2);
+  // Two steps: choose the car, then say who is travelling. Changing the trip itself is
+  // a dialog over whichever of them is open, not a page of its own.
+  const [step, setStep] = useState<"vehicle" | "details">("vehicle");
+  // Null when closed. "return" is the same dialog reached from Add return.
+  const [editing, setEditing] = useState<null | "trip" | "return">(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [showSeats, setShowSeats] = useState(false);
   const [formData, setFormData] = useState(() => getInitialState(location.search));
+
+  // Only the trip fields go into the dialog. Everything else on the booking is
+  // untouched by it. Held steady between renders because the dialog reloads its draft
+  // whenever this changes, and a fresh object each render would undo every keystroke.
+  const trip = useMemo<TripDraft>(
+    () => ({
+      roundtrip: formData.roundtrip,
+      pickup: formData.pickup,
+      dropoff: formData.dropoff,
+      date: formData.date,
+      time: formData.time,
+      returnDate: formData.returnDate,
+      returnTime: formData.returnTime,
+      people: formData.people,
+    }),
+    [
+      formData.roundtrip,
+      formData.pickup,
+      formData.dropoff,
+      formData.date,
+      formData.time,
+      formData.returnDate,
+      formData.returnTime,
+      formData.people,
+    ],
+  );
 
   // The zones inside this are never rendered. They exist so the fare can be found and
   // so the operator's email can say which zone the hotel was charged as.
@@ -161,7 +203,7 @@ export default function BookingResults() {
   // what gets stored is exactly what was on screen when the customer moved on.
   const continueToEquipment = () => {
     setFormData((prev) => ({ ...prev, price: prices[prev.vehicleType] }));
-    setStep(3);
+    setStep("details");
   };
 
   const submitBooking = async (event: FormEvent<HTMLFormElement>) => {
@@ -224,87 +266,15 @@ export default function BookingResults() {
 
   return (
     <section className="container max-w-6xl space-y-8 py-10">
-      {step === 1 && (
-        <div className="rounded-lg border bg-card p-6 space-y-4">
-          <h1 className="font-display text-2xl font-bold text-primary">Edit your trip</h1>
-          <div className="flex items-center justify-end gap-3">
-            <Label htmlFor="roundtrip-step" className="text-sm font-medium">
-              Roundtrip
-            </Label>
-            <Switch
-              id="roundtrip-step"
-              checked={formData.roundtrip}
-              onCheckedChange={(checked) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  roundtrip: checked === true,
-                  returnDate: checked ? prev.returnDate : "",
-                  returnTime: checked ? prev.returnTime : "12:00",
-                }))
-              }
-              className="data-[state=checked]:bg-green-600"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <LocationInput
-              label="Pickup Location"
-              value={formData.pickup}
-              onChange={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
-            />
-            <LocationInput
-              label="Drop off Location"
-              value={formData.dropoff}
-              onChange={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
-              placeholder="Search for your hotel"
-            />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <DateInput
-              label="Pickup Date"
-              value={formData.date}
-              onChange={(date) => setFormData((prev) => ({ ...prev, date }))}
-            />
-            <TimeInput
-              label="Pickup Time"
-              value={formData.time}
-              onChange={(time) => setFormData((prev) => ({ ...prev, time }))}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>People</Label>
-            <Select value={formData.people} onValueChange={(v) => setFormData((prev) => ({ ...prev, people: v }))}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                  <SelectItem key={n} value={String(n)}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {formData.roundtrip && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DateInput
-                label="Return Date"
-                value={formData.returnDate}
-                onChange={(returnDate) => setFormData((prev) => ({ ...prev, returnDate }))}
-                min={formData.date}
-              />
-              <TimeInput
-                label="Return Time"
-                value={formData.returnTime}
-                onChange={(returnTime) => setFormData((prev) => ({ ...prev, returnTime }))}
-              />
-            </div>
-          )}
-          <Button onClick={() => setStep(2)}>Continue</Button>
-        </div>
-      )}
+      <TripEditDialog
+        open={editing !== null}
+        onOpenChange={(open) => !open && setEditing(null)}
+        value={trip}
+        seedReturn={editing === "return"}
+        onSave={(next) => setFormData((prev) => ({ ...prev, ...next }))}
+      />
 
-      {step === 2 && (
+      {step === "vehicle" && (
         // The cars on the left, the journey on the right. On a phone the summary drops
         // below the cars: the price beside each one is the question being answered, and
         // a screenful of itinerary before reaching them helps nobody.
@@ -334,7 +304,7 @@ export default function BookingResults() {
             </div>
           </div>
 
-          <div className="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+          <SummaryColumn>
             <BookingSummary
               pickup={formData.pickup}
               dropoff={formData.dropoff}
@@ -346,9 +316,10 @@ export default function BookingResults() {
               people={formData.people}
               quote={quote}
               vehicle={formData.vehicleType}
-              onEdit={() => setStep(1)}
+              onEdit={() => setEditing("trip")}
+              onAddReturn={() => setEditing("return")}
             />
-          </div>
+          </SummaryColumn>
 
           <ActionBar>
             <p className="min-w-0 truncate text-sm">
@@ -363,7 +334,7 @@ export default function BookingResults() {
         </div>
       )}
 
-      {step === 3 && (
+      {step === "details" && (
         <form onSubmit={submitBooking} className="grid grid-cols-1 gap-6 pb-24 lg:grid-cols-[minmax(0,1fr)_22rem]">
           <div className="space-y-6">
             <section className="space-y-5 rounded-lg border bg-card p-6">
@@ -525,12 +496,12 @@ export default function BookingResults() {
               </div>
             </section>
 
-            <Button type="button" variant="outline" onClick={() => setStep(2)}>
+            <Button type="button" variant="outline" onClick={() => setStep("vehicle")}>
               Back
             </Button>
           </div>
 
-          <div className="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+          <SummaryColumn>
             <BookingSummary
               pickup={formData.pickup}
               dropoff={formData.dropoff}
@@ -543,9 +514,10 @@ export default function BookingResults() {
               quote={quote}
               vehicle={formData.vehicleType}
               chosen={chosen}
-              onEdit={() => setStep(1)}
+              onEdit={() => setEditing("trip")}
+              onAddReturn={() => setEditing("return")}
             />
-          </div>
+          </SummaryColumn>
 
           <ActionBar>
             <p className="min-w-0 truncate text-sm">
