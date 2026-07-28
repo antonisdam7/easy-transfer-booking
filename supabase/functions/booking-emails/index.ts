@@ -158,7 +158,7 @@ function customerEmail(t: Transfer): Email {
 
   return {
     to: t.email,
-    subject: `Your transfer request - ${t.transfer_date} ${t.transfer_time}`,
+    subject: `Your transfer request ${t.transfer_date} ${t.transfer_time}`,
     text: lines.join("\n"),
   };
 }
