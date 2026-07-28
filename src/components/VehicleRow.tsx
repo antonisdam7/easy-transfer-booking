@@ -25,17 +25,33 @@ type Props = {
   roundtrip: boolean;
   selected: boolean;
   onSelect: () => void;
+  // Set when the car cannot take the party. It stays on the page, dimmed and with its
+  // price still readable: knowing the sedan is cheaper but too small is worth more than
+  // wondering where the sedan went.
+  unavailable?: string;
 };
 
-export default function VehicleRow({ vehicle, price, roundtrip, selected, onSelect }: Props) {
+export default function VehicleRow({
+  vehicle,
+  price,
+  roundtrip,
+  selected,
+  onSelect,
+  unavailable,
+}: Props) {
   return (
     <button
       type="button"
       onClick={onSelect}
+      disabled={Boolean(unavailable)}
       aria-pressed={selected}
       className={cn(
         "flex w-full items-center gap-4 rounded-lg border bg-card p-4 text-left transition-colors sm:gap-6",
-        selected ? "border-primary ring-1 ring-primary" : "hover:border-primary/40",
+        unavailable
+          ? "cursor-not-allowed opacity-45 grayscale"
+          : selected
+            ? "border-primary ring-1 ring-primary"
+            : "hover:border-primary/40",
       )}
     >
       <img
@@ -63,7 +79,9 @@ export default function VehicleRow({ vehicle, price, roundtrip, selected, onSele
           </span>
         </p>
 
-        <p className="truncate text-xs text-muted-foreground">{vehicle.examples}</p>
+        <p className="truncate text-xs text-muted-foreground">
+          {unavailable ?? vehicle.examples}
+        </p>
       </div>
 
       <div className="shrink-0 text-right">

@@ -91,7 +91,14 @@ function Leg({
         <span className="font-medium text-primary">{from}</span>
         <span className="tabular-nums text-muted-foreground">{time}</span>
 
-        <span className="my-1 ml-[0.3125rem] w-px justify-self-start bg-border" style={{ height: "100%" }} />
+        {/* The track is always there so the two ends stay joined; the bar inside it
+            travels the leg. Left still for anyone who has asked for less motion. */}
+        <span
+          className="relative my-1 ml-1 w-0.5 justify-self-start overflow-hidden rounded-full bg-border"
+          style={{ height: "100%" }}
+        >
+          <span className="absolute inset-0 origin-top rounded-full bg-primary motion-safe:animate-route-fill" />
+        </span>
         <span className="col-span-2 flex flex-wrap gap-2 py-2">
           {minutes !== undefined && (
             <span className="inline-flex items-center gap-1 rounded-full border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">

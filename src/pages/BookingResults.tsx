@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -199,6 +199,22 @@ export default function BookingResults() {
 
   const chosen = fleet.find((vehicle) => vehicle.type === formData.vehicleType) ?? fleet[0];
 
+  // A party of five in a sedan is not a booking, it is a driver turning people away at
+  // the kerb. Cars that cannot seat everyone are dimmed rather than removed, so the
+  // cheaper fare stays visible and it is clear why it is not on offer.
+  const people = Number(formData.people) || 1;
+
+  // If the party grows past what the chosen car holds -- which can happen from the edit
+  // dialog, after the choice was made -- move to one that fits, so the fare in the
+  // panel is a fare we could actually honour.
+  useEffect(() => {
+    const current = fleet.find((vehicle) => vehicle.type === formData.vehicleType);
+    if (!current || current.passengers >= people) return;
+
+    const roomy = fleet.find((vehicle) => vehicle.passengers >= people);
+    if (roomy) setFormData((prev) => ({ ...prev, vehicleType: roomy.type }));
+  }, [people, formData.vehicleType]);
+
   // Both steps are a full page long, so whichever one is being left was almost
   // certainly scrolled down. Landing halfway into the next one hides the heading that
   // says where you now are.
@@ -304,6 +320,11 @@ export default function BookingResults() {
                   price={prices[vehicle.type]}
                   roundtrip={formData.roundtrip}
                   selected={formData.vehicleType === vehicle.type}
+                  unavailable={
+                    vehicle.passengers < people
+                      ? `Seats ${vehicle.passengers}, and you are ${people}`
+                      : undefined
+                  }
                   onSelect={() =>
                     setFormData((prev) => ({ ...prev, vehicleType: vehicle.type }))
                   }

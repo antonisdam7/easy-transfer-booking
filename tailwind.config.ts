@@ -84,11 +84,20 @@ export default {
           from: { opacity: "0", transform: "translateY(20px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        // The connector between the two ends of a leg, drawing itself downwards and
+        // retracting. It runs both ways rather than snapping back to empty, which
+        // would read as a stutter at the top of every loop.
+        "route-fill": {
+          "0%": { transform: "scaleY(0)" },
+          "50%": { transform: "scaleY(1)" },
+          "100%": { transform: "scaleY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in-up": "fade-in-up 0.6s ease-out forwards",
+        "route-fill": "route-fill 4s ease-in-out infinite",
       },
     },
   },
