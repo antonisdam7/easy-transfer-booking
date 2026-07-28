@@ -25,6 +25,8 @@ type TransferRow = {
   luggage: string | null;
   // Rows created by the old backend can have this null.
   child_seat: boolean | null;
+  child_seats: number | null;
+  booster_seats: number | null;
   notes: string | null;
 };
 
@@ -51,6 +53,8 @@ function toTransferRequest(row: TransferRow): TransferRequest {
     flightNumber: row.flight_number ?? "",
     luggage: row.luggage ?? "",
     childSeat: Boolean(row.child_seat),
+    childSeats: row.child_seats ?? 0,
+    boosterSeats: row.booster_seats ?? 0,
     notes: row.notes ?? "",
   };
 }
@@ -76,6 +80,8 @@ export async function submitTransfer(transfer: NewTransfer) {
     flight_number: transfer.flightNumber || null,
     luggage: transfer.luggage || null,
     child_seat: Boolean(transfer.childSeat),
+    child_seats: transfer.childSeats ?? 0,
+    booster_seats: transfer.boosterSeats ?? 0,
     notes: transfer.notes || null,
   });
 

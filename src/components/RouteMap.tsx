@@ -92,6 +92,11 @@ export default function RouteMap({ pickup, dropoff }: Props) {
             suppressMarkers: true,
             polylineOptions: { strokeColor: ROUTE_COLOUR, strokeWeight: 5, strokeOpacity: 0.9 },
           });
+
+          // A step back from the renderer's own framing, which sits tight against the
+          // road. One level out puts the towns either side of it on screen, and a
+          // customer recognising Hersonissos is the point of showing a map at all.
+          core.event.addListenerOnce(map, "idle", () => map.setZoom(map.getZoom() - 1));
         } catch {
           if (cancelled) return;
 

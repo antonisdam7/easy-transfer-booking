@@ -33,6 +33,17 @@ function zoneNote(place: string, zone: string | null, offsetKm: number | null) {
   return offsetKm === null ? zone : `${zone}, ${offsetKm} km`;
 }
 
+// Which seats to load. Bookings taken before the two kinds were counted have the
+// boolean only, and say so rather than claiming a count of zero.
+function seatSummary(transfer: TransferRequest) {
+  const parts = [
+    transfer.childSeats ? `${transfer.childSeats} child` : "",
+    transfer.boosterSeats ? `${transfer.boosterSeats} booster` : "",
+  ].filter(Boolean);
+
+  return parts.length > 0 ? `Seats: ${parts.join(" + ")}` : "Child seat";
+}
+
 function RouteZones({ transfer }: { transfer: TransferRequest }) {
   const notes = [
     zoneNote(transfer.pickup, transfer.pickupZone, transfer.pickupOffsetKm),
@@ -145,7 +156,7 @@ export default function AdminTransfers() {
                         {transfer.flightNumber && transfer.luggage ? " | " : ""}
                         {transfer.luggage ? `Luggage: ${transfer.luggage}` : ""}
                         {(transfer.flightNumber || transfer.luggage) && transfer.childSeat ? " | " : ""}
-                        {transfer.childSeat ? "Child seat" : ""}
+                        {transfer.childSeat ? seatSummary(transfer) : ""}
                         {!transfer.flightNumber && !transfer.luggage && !transfer.childSeat ? "-" : ""}
                       </TableCell>
                       <TableCell className="max-w-xs whitespace-pre-wrap">

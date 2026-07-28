@@ -22,6 +22,10 @@ export type TransferRequest = {
   price?: number | null;
   flightNumber?: string;
   luggage?: string;
+  // True when any seat was asked for. Superseded by the two counts below, and kept
+  // for bookings taken before they existed.
   childSeat?: boolean;
+  childSeats?: number;
+  boosterSeats?: number;
   notes?: string;
 };

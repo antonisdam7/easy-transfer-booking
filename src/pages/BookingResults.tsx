@@ -13,6 +13,7 @@ import { submitTransfer } from "@/lib/transfers";
 import LocationInput from "@/components/LocationInput";
 import { DateInput, TimeInput } from "@/components/DateTimeInput";
 import RouteMap from "@/components/RouteMap";
+import ChildSeats from "@/components/ChildSeats";
 import BookingSummary from "@/components/BookingSummary";
 import VehicleRow, { Vehicle } from "@/components/VehicleRow";
 import {
@@ -75,13 +76,34 @@ function getInitialState(search: string) {
     // get the customer to, not only which one they arrived on.
     returnFlightNumber: "",
     luggage: "",
-    childSeat: false,
+    // Counted, not ticked: a driver needs to know whether to bring a rear-facing seat
+    // for a baby or a booster for an eight-year-old, and how many of each.
+    childSeats: 0,
+    boosterSeats: 0,
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
     notes: "",
   };
+}
+
+// What was chosen and the way forward, floating clear of the page at the foot of the
+// screen. Fixed rather than in flow, so it stays in reach however far down someone
+// has scrolled -- which is also why the columns above carry bottom padding.
+//
+// It sits over the left column only on wide screens: the summary panel on the right
+// is already the thing it would otherwise be repeating.
+function ActionBar({ children }: { children: ReactNode }) {
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 p-3 sm:p-4">
+      <div className="container max-w-6xl">
+        <div className="pointer-events-auto flex items-center justify-between gap-3 rounded-lg border bg-card/95 p-3 shadow-lg backdrop-blur sm:p-4 lg:mr-[23.5rem]">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // A disclosure the customer opens themselves. The cross tells them the section is
@@ -119,6 +141,7 @@ export default function BookingResults() {
   const [step, setStep] = useState(2);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [showSeats, setShowSeats] = useState(false);
   const [formData, setFormData] = useState(() => getInitialState(location.search));
 
   // The zones inside this are never rendered. They exist so the fare can be found and
@@ -174,7 +197,11 @@ export default function BookingResults() {
         price: formData.price,
         flightNumber: formData.flightNumber,
         luggage: formData.luggage,
-        childSeat: formData.childSeat,
+        childSeats: formData.childSeats,
+        boosterSeats: formData.boosterSeats,
+        // Kept in step with the counts so bookings made before seats were counted,
+        // and anything still reading the old column, stay meaningful.
+        childSeat: formData.childSeats + formData.boosterSeats > 0,
         notes: [
           formData.notes,
           formData.returnFlightNumber && `Return flight: ${formData.returnFlightNumber}`,
@@ -282,9 +309,9 @@ export default function BookingResults() {
         // below the cars: the price beside each one is the question being answered, and
         // a screenful of itinerary before reaching them helps nobody.
         <div className="grid grid-cols-1 gap-6 pb-24 lg:grid-cols-[minmax(0,1fr)_22rem]">
+          {/* No heading and no Back button: the map says where, the rows say what is
+              being chosen, and Edit in the summary is the one way back. */}
           <div className="space-y-4">
-            <h2 className="font-display text-2xl font-bold text-primary">Select Car</h2>
-
             <RouteMap pickup={formData.pickup} dropoff={formData.dropoff} />
 
             <p className="text-xs text-muted-foreground">
@@ -305,10 +332,6 @@ export default function BookingResults() {
                 />
               ))}
             </div>
-
-            <Button variant="outline" onClick={() => setStep(1)}>
-              Back
-            </Button>
           </div>
 
           <div className="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
@@ -327,22 +350,16 @@ export default function BookingResults() {
             />
           </div>
 
-          {/* Pinned to the foot of the screen so the chosen car and the way forward
-              stay in reach however far down the list someone has scrolled. Taken out
-              of the grid with position: fixed, which is also why the columns above
-              carry the bottom padding. */}
-          <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-card/95 p-3 backdrop-blur">
-            <div className="container flex max-w-6xl items-center justify-between gap-3">
-              <p className="min-w-0 truncate text-sm">
-                <Car className="mr-1.5 inline h-4 w-4 shrink-0 text-primary" />
-                <span className="text-muted-foreground">Your choice: </span>
-                <span className="font-medium text-primary">{chosen.name}</span>
-              </p>
-              <Button className="shrink-0" onClick={continueToEquipment}>
-                Continue
-              </Button>
-            </div>
-          </div>
+          <ActionBar>
+            <p className="min-w-0 truncate text-sm">
+              <Car className="mr-1.5 inline h-4 w-4 shrink-0 text-primary" />
+              <span className="text-muted-foreground">Your choice: </span>
+              <span className="font-medium text-primary">{chosen.name}</span>
+            </p>
+            <Button size="lg" className="shrink-0" onClick={continueToEquipment}>
+              Continue
+            </Button>
+          </ActionBar>
         </div>
       )}
 
@@ -417,26 +434,31 @@ export default function BookingResults() {
                   boxes on the page invite people to wonder what belongs in them. */}
               <div className="flex flex-wrap gap-2 border-t pt-5">
                 <Pill
-                  open={formData.childSeat}
-                  onClick={() =>
-                    setFormData((prev) => ({ ...prev, childSeat: !prev.childSeat }))
-                  }
+                  open={showSeats}
+                  onClick={() => {
+                    // Closing it puts the seats back to none, so a panel that is out
+                    // of sight cannot leave a seat on the booking.
+                    if (showSeats) {
+                      setFormData((prev) => ({ ...prev, childSeats: 0, boosterSeats: 0 }));
+                    }
+                    setShowSeats((open) => !open);
+                  }}
                 >
-                  Need a child seat?
+                  Need a child or booster seat?
                 </Pill>
                 <Pill open={showNotes} onClick={() => setShowNotes((open) => !open)}>
                   Add notes for the driver
                 </Pill>
               </div>
 
-              {formData.childSeat && (
-                <div className="rounded-lg border bg-muted/40 p-4 text-sm">
-                  <p className="font-medium text-primary">Child seat added — free of charge</p>
-                  <p className="mt-1 text-muted-foreground">
-                    Put the child's age and weight in the notes below and we will bring the right
-                    seat.
-                  </p>
-                </div>
+              {showSeats && (
+                <ChildSeats
+                  value={{
+                    childSeats: formData.childSeats,
+                    boosterSeats: formData.boosterSeats,
+                  }}
+                  onChange={(seats) => setFormData((prev) => ({ ...prev, ...seats }))}
+                />
               )}
 
               {showNotes && (
@@ -525,19 +547,17 @@ export default function BookingResults() {
             />
           </div>
 
-          <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-card/95 p-3 backdrop-blur">
-            <div className="container flex max-w-6xl items-center justify-between gap-3">
-              <p className="min-w-0 truncate text-sm">
-                <span className="text-muted-foreground">Total: </span>
-                <span className="font-bold text-primary">
-                  {formData.price === null ? "To be confirmed" : `€${formData.price}`}
-                </span>
-              </p>
-              <Button type="submit" className="shrink-0" disabled={isSubmitting}>
-                {isSubmitting ? "Sending..." : "Request Booking"}
-              </Button>
-            </div>
-          </div>
+          <ActionBar>
+            <p className="min-w-0 truncate text-sm">
+              <span className="text-muted-foreground">Total: </span>
+              <span className="text-lg font-bold text-primary">
+                {formData.price === null ? "To be confirmed" : `€${formData.price}`}
+              </span>
+            </p>
+            <Button type="submit" size="lg" className="shrink-0" disabled={isSubmitting}>
+              {isSubmitting ? "Sending..." : "Request Booking"}
+            </Button>
+          </ActionBar>
         </form>
       )}
     </section>

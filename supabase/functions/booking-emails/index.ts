@@ -30,8 +30,24 @@ type Transfer = {
   flight_number: string | null;
   luggage: string | null;
   child_seat: boolean | null;
+  child_seats: number | null;
+  booster_seats: number | null;
   notes: string | null;
 };
+
+// Which seats to put in the car. Falls back to the old boolean for bookings taken
+// before the two kinds were counted separately.
+function formatSeats(t: Transfer): string {
+  const parts = [
+    t.child_seats ? `${t.child_seats} child seat${t.child_seats > 1 ? "s" : ""} (0-18 kg)` : "",
+    t.booster_seats
+      ? `${t.booster_seats} booster seat${t.booster_seats > 1 ? "s" : ""} (15-36 kg)`
+      : "",
+  ].filter(Boolean);
+
+  if (parts.length > 0) return parts.join(", ");
+  return t.child_seat ? "Yes, kind not recorded" : "No";
+}
 
 // Routes with no price in the table reach here as null; both emails then say so
 // rather than printing an empty amount.
@@ -82,7 +98,7 @@ function operatorEmail(t: Transfer): Email {
     `Price quoted: ${formatPrice(t.price)}`,
     `Flight Number: ${t.flight_number || "-"}`,
     `Luggage: ${t.luggage || "-"}`,
-    `Child Seat: ${t.child_seat ? "Yes" : "No"}`,
+    `Child Seats: ${formatSeats(t)}`,
     `Notes: ${t.notes || "-"}`,
     "",
     `Request ID: ${t.id}`,
@@ -113,7 +129,7 @@ function customerEmail(t: Transfer): Email {
     `Vehicle: ${t.vehicle_type || "-"}`,
     t.flight_number ? `Flight Number: ${t.flight_number}` : null,
     t.luggage ? `Luggage: ${t.luggage}` : null,
-    t.child_seat ? "Child Seat: Yes" : null,
+    t.child_seat || t.child_seats || t.booster_seats ? `Child Seats: ${formatSeats(t)}` : null,
     "",
     `Price: ${formatPrice(t.price)}`,
     "Payable to the driver, in cash or by card. Nothing is charged online.",
