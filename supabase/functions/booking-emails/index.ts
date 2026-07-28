@@ -74,6 +74,19 @@ function locationLine(
   return `${label}: ${place} (priced as ${zone}${offset})`;
 }
 
+// A Subject header carrying raw UTF-8 is read back as Latin-1 by a good many mail
+// clients: an em dash arrives as three pieces of line noise, a Greek name as gibberish.
+// RFC 2047 is the encoding every client understands, so anything outside ASCII goes
+// out base64'd. Pure ASCII subjects are left alone, since encoding those only makes
+// them unreadable in logs and in any client that skips the decode.
+function encodeSubject(subject: string): string {
+  // deno-lint-ignore no-control-regex
+  if (!/[^\x00-\x7F]/.test(subject)) return subject;
+
+  const base64 = btoa(String.fromCharCode(...new TextEncoder().encode(subject)));
+  return `=?UTF-8?B?${base64}?=`;
+}
+
 type WebhookPayload = {
   type: "INSERT" | "UPDATE" | "DELETE";
   table: string;
@@ -145,7 +158,7 @@ function customerEmail(t: Transfer): Email {
 
   return {
     to: t.email,
-    subject: `Your transfer request — ${t.transfer_date} ${t.transfer_time}`,
+    subject: `Your transfer request - ${t.transfer_date} ${t.transfer_time}`,
     text: lines.join("\n"),
   };
 }
@@ -156,13 +169,13 @@ async function sendBatch(emails: Email[]) {
     method: "POST",
     headers: {
       Authorization: `Bearer ${RESEND_API_KEY}`,
-      "Content-Type": "application/json",
+      "Content-Type": "application/json; charset=utf-8",
     },
     body: JSON.stringify(
       emails.map((email) => ({
         from: MAIL_FROM,
         to: [email.to],
-        subject: email.subject,
+        subject: encodeSubject(email.subject),
         text: email.text,
       })),
     ),
