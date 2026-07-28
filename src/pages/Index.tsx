@@ -65,6 +65,18 @@ const Index = () => {
       toast.error("Please choose where we are picking you up and where you are going.");
       return;
     }
+    // Caught here rather than at the end of the booking. The calendar is a popover and
+    // a tap that lands just off it leaves the field reading "Pick a date" while every
+    // other field looks finished -- and the next page has no date field to put it
+    // right, so the customer met a refusal with nothing on screen to act on.
+    if (!searchData.date) {
+      toast.error("Please pick the date of your transfer.");
+      return;
+    }
+    if (searchData.roundtrip && !searchData.returnDate) {
+      toast.error("Please pick your return date.");
+      return;
+    }
 
     const params = new URLSearchParams({
       roundtrip: String(searchData.roundtrip),

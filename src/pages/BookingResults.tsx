@@ -234,12 +234,28 @@ export default function BookingResults() {
     event.preventDefault();
     const fullName = `${formData.firstName} ${formData.lastName}`.trim();
 
-    if (!fullName || !formData.email || !formData.pickup || !formData.dropoff || !formData.date || !formData.time || !formData.people) {
-      toast.error("Please complete all required fields.");
+    // The trip itself has no fields on this page -- it is edited in the dialog -- so a
+    // gap in it has to be named and the dialog opened on it. Saying only that something
+    // is missing left the customer looking at a page of filled-in boxes.
+    const tripGap = [
+      { missing: !formData.pickup, label: "where we are picking you up" },
+      { missing: !formData.dropoff, label: "where you are going" },
+      { missing: !formData.date, label: "the date of your transfer" },
+      { missing: !formData.time, label: "your pickup time" },
+      { missing: !formData.people, label: "how many of you are travelling" },
+      { missing: formData.roundtrip && !formData.returnDate, label: "your return date" },
+      { missing: formData.roundtrip && !formData.returnTime, label: "your return time" },
+    ].find((field) => field.missing);
+
+    if (tripGap) {
+      toast.error(`Please add ${tripGap.label}.`);
+      setEditing("trip");
       return;
     }
-    if (formData.roundtrip && (!formData.returnDate || !formData.returnTime)) {
-      toast.error("Please add return date and return time for roundtrip booking.");
+    // The browser stops an empty name or email before this runs, so this is only a
+    // backstop for a form submitted some other way.
+    if (!fullName || !formData.email) {
+      toast.error("Please give us the lead passenger's name and email address.");
       return;
     }
     setIsSubmitting(true);
