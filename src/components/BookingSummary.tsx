@@ -1,7 +1,8 @@
 import { addMinutes, format, parse } from "date-fns";
 import { enGB } from "date-fns/locale";
-import { Check, Clock3, Route, Users } from "lucide-react";
+import { Check, Clock3, Luggage, Pencil, Route, Users } from "lucide-react";
 import { LocationValue, TripQuote, VehicleType } from "@/lib/booking";
+import { Vehicle } from "@/components/VehicleRow";
 
 // Everything the customer has told us so far, kept beside the cars so choosing one
 // never means scrolling back to check where they were going.
@@ -20,6 +21,12 @@ type Props = {
   people: string;
   quote: TripQuote;
   vehicle: VehicleType;
+  // Shown once a car has actually been chosen, so the later steps still say what was
+  // picked without making anyone go back to look.
+  chosen?: Vehicle;
+  // Takes the customer back to the search form. This replaces the numbered step bar
+  // that used to sit above the page: one way back, next to what it would change.
+  onEdit?: () => void;
 };
 
 // Claims we already make elsewhere on the site. Nothing here is new to a customer
@@ -111,6 +118,8 @@ export default function BookingSummary({
   people,
   quote,
   vehicle,
+  chosen,
+  onEdit,
 }: Props) {
   const from = pickup?.name ?? "Not set";
   const to = dropoff?.name ?? "Not set";
@@ -125,9 +134,20 @@ export default function BookingSummary({
       <div className="space-y-6 rounded-lg border bg-card p-5 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <span className="font-semibold text-primary">{roundtrip ? "Round trip" : "One way"}</span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-muted-foreground">
-            <Users className="h-3.5 w-3.5" /> {people} {people === "1" ? "passenger" : "passengers"}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-muted-foreground">
+              <Users className="h-3.5 w-3.5" /> {people} {people === "1" ? "passenger" : "passengers"}
+            </span>
+            {onEdit && (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
+              >
+                <Pencil className="h-3 w-3" /> Edit
+              </button>
+            )}
+          </div>
         </div>
 
         <Leg
@@ -152,6 +172,29 @@ export default function BookingSummary({
               minutes={quote.stats?.minutes}
               km={quote.stats?.km}
             />
+          </>
+        )}
+
+        {chosen && (
+          <>
+            <hr />
+            <div className="space-y-2">
+              <p className="font-semibold text-primary">Your choice</p>
+              <div className="flex items-center gap-3">
+                <img src={chosen.image} alt="" className="h-10 w-16 shrink-0 object-contain" />
+                <div className="min-w-0 text-sm">
+                  <p className="truncate font-medium text-primary">{chosen.name}</p>
+                  <p className="flex items-center gap-3 text-muted-foreground">
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-3.5 w-3.5" /> Up to {chosen.passengers}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Luggage className="h-3.5 w-3.5" /> {chosen.suitcases}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
           </>
         )}
 
