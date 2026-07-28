@@ -314,7 +314,11 @@ export type TripQuote = {
   // Null when the zone was picked by name and no matching was involved.
   pickupOffsetKm: number | null;
   dropoffOffsetKm: number | null;
+  // What the customer pays. Already includes the return leg when they asked for one.
   prices: Record<VehicleType, number | null>;
+  // The outward leg on its own, so a roundtrip can be shown split into the two legs
+  // and the discount on the second one is visible rather than asserted.
+  oneWayPrices: Record<VehicleType, number | null>;
   stats: { km: number; minutes: number } | null;
 };
 
@@ -324,6 +328,7 @@ const NO_QUOTE: TripQuote = {
   pickupOffsetKm: null,
   dropoffOffsetKm: null,
   prices: { sedan: null, estate: null, van: null },
+  oneWayPrices: { sedan: null, estate: null, van: null },
   stats: null,
 };
 
@@ -354,19 +359,19 @@ export function quoteTrip(
   const toZone = zoneOf(to, airport);
   if (!fromZone || !toZone) return NO_QUOTE;
 
-  const priced = (vehicle: VehicleType) =>
-    getVehiclePrice(fromZone.zone, toZone.zone, vehicle, roundtrip);
+  const priced = (returning: boolean) => ({
+    sedan: getVehiclePrice(fromZone.zone, toZone.zone, "sedan", returning),
+    estate: getVehiclePrice(fromZone.zone, toZone.zone, "estate", returning),
+    van: getVehiclePrice(fromZone.zone, toZone.zone, "van", returning),
+  });
 
   return {
     pickupZone: fromZone.zone,
     dropoffZone: toZone.zone,
     pickupOffsetKm: fromZone.offsetKm,
     dropoffOffsetKm: toZone.offsetKm,
-    prices: {
-      sedan: priced("sedan"),
-      estate: priced("estate"),
-      van: priced("van"),
-    },
+    prices: priced(roundtrip),
+    oneWayPrices: priced(false),
     stats: getRouteStats(fromZone.zone, toZone.zone),
   };
 }

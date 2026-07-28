@@ -1,12 +1,7 @@
-import { importLibrary, setOptions } from "@googlemaps/js-api-loader";
+import { isMapsConfigured, loadMapsLibrary } from "@/lib/maps";
 
 // Google Places, used only to turn what a customer types into coordinates. The fare
 // still comes from the zone table in booking.ts; nothing here decides a price.
-//
-// The key is public, as browser Maps keys are meant to be. What protects it is the
-// HTTP referrer restriction and the daily quota cap set in the Cloud console, not
-// secrecy. See .env.example.
-const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
 
 // Crete, with enough margin to cover the offshore islets. Keeps a half-typed village
 // name from matching the mainland one.
@@ -31,20 +26,8 @@ export type ResolvedPlace = {
   lng: number;
 };
 
-let placesLibrary: google.maps.PlacesLibrary | null = null;
-
 async function loadPlaces(): Promise<google.maps.PlacesLibrary> {
-  if (placesLibrary) return placesLibrary;
-
-  if (!API_KEY) {
-    throw new Error("VITE_GOOGLE_MAPS_API_KEY is not set");
-  }
-
-  // setOptions has to run before the first importLibrary, and importLibrary is what
-  // actually fetches the API. Nothing is downloaded until a customer starts typing.
-  setOptions({ key: API_KEY, v: "weekly" });
-  placesLibrary = await importLibrary("places");
-  return placesLibrary;
+  return loadMapsLibrary("places");
 }
 
 // Held between keystrokes and spent when a suggestion is chosen. Google bills a
@@ -110,5 +93,5 @@ export async function resolvePlace(id: string): Promise<ResolvedPlace | null> {
 }
 
 export function isPlacesConfigured(): boolean {
-  return Boolean(API_KEY);
+  return isMapsConfigured();
 }

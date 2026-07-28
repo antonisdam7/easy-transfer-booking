@@ -8,21 +8,50 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { CalendarDays, Clock3, Luggage, MapPin, Route, Users } from "lucide-react";
+import { Car } from "lucide-react";
 import { submitTransfer } from "@/lib/transfers";
 import LocationInput from "@/components/LocationInput";
 import { DateInput, TimeInput } from "@/components/DateTimeInput";
+import RouteMap from "@/components/RouteMap";
+import BookingSummary from "@/components/BookingSummary";
+import VehicleRow, { Vehicle } from "@/components/VehicleRow";
 import {
   airportValues,
   locationFromParams,
-  LocationValue,
   quoteTrip,
   VehicleType,
 } from "@/lib/booking";
 
-const CAR_IMAGE = "/vehicle-sedan.png";
-const ESTATE_IMAGE = "/vehicle-estate.png";
-const VAN_IMAGE = "/vehicle-van.png";
+// Passenger and luggage figures are the operator's own. The example models say what
+// actually turns up, so a booking is not read as a promise of one particular car.
+const fleet: Vehicle[] = [
+  {
+    type: "sedan",
+    name: "Mercedes E-Class Sedan",
+    image: "/vehicle-sedan.png",
+    passengers: 4,
+    suitcases: 4,
+    examples: "Mercedes E-Class or similar",
+  },
+  {
+    type: "estate",
+    name: "Mercedes E-Class Estate",
+    image: "/vehicle-estate.png",
+    passengers: 4,
+    suitcases: 7,
+    examples: "Mercedes E-Class Estate or similar",
+    badge: "Same price, more boot",
+  },
+  {
+    type: "van",
+    name: "Minivan Mercedes V-Class",
+    image: "/vehicle-van.png",
+    passengers: 8,
+    suitcases: 8,
+    examples: "Mercedes V-Class or similar",
+    badge: "Largest group",
+  },
+];
 
 function getInitialState(search: string) {
   const query = new URLSearchParams(search);
@@ -35,7 +64,9 @@ function getInitialState(search: string) {
     returnDate: query.get("returnDate") || "",
     returnTime: query.get("returnTime") || "12:00",
     people: query.get("people") || "2",
-    vehicleType: "" as VehicleType | "",
+    // Pre-selected rather than blank: the cheapest car suits most bookings, and an
+    // empty selection makes the price panel beside it meaningless.
+    vehicleType: "sedan" as VehicleType,
     // The fare shown next to the car the customer picked, kept so it can be stored
     // and repeated back in both confirmation emails.
     price: null as number | null,
@@ -51,23 +82,6 @@ function getInitialState(search: string) {
 
 const steps = ["Select Dates", "Select Car", "Select Equipment", "Personal Info"] as const;
 
-// Renders nothing on a route we have no measurements for, which is the same set of
-// routes that show "Price on request" rather than a fare.
-function RouteFacts({ stats }: { stats: { km: number; minutes: number } | null }) {
-  if (!stats) return null;
-
-  return (
-    <>
-      <p className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Route className="h-4 w-4 text-primary" /> {stats.km} km distance
-      </p>
-      <p className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Clock3 className="h-4 w-4 text-primary" /> {stats.minutes} mins duration
-      </p>
-    </>
-  );
-}
-
 export default function BookingResults() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -82,27 +96,17 @@ export default function BookingResults() {
     () => quoteTrip(formData.pickup, formData.dropoff, formData.roundtrip),
     [formData.pickup, formData.dropoff, formData.roundtrip],
   );
-  const { prices, stats: routeStats } = quote;
+  const { prices } = quote;
 
   const isAirportTransfer =
     airportValues.includes(quote.pickupZone) || airportValues.includes(quote.dropoffZone);
 
-  const formatDateWithWeekday = (date: string, time: string) => {
-    if (!date) return `No date selected @ ${time}`;
-    const dt = new Date(`${date}T${time || "00:00"}`);
-    return dt.toLocaleString("en-GB", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      year: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  };
+  const chosen = fleet.find((vehicle) => vehicle.type === formData.vehicleType) ?? fleet[0];
 
-  const setVehicleAndContinue = (vehicleType: VehicleType) => {
-    setFormData((prev) => ({ ...prev, vehicleType, price: prices[vehicleType] }));
+  // The fare is recorded on the way out of this step rather than on every click, so
+  // what gets stored is exactly what was on screen when the customer moved on.
+  const continueToEquipment = () => {
+    setFormData((prev) => ({ ...prev, price: prices[prev.vehicleType] }));
     setStep(3);
   };
 
@@ -257,101 +261,70 @@ export default function BookingResults() {
       )}
 
       {step === 2 && (
-        <div className="space-y-4">
-          <h2 className="text-2xl font-display font-bold text-primary">Select Car</h2>
-          <div className="rounded-lg border bg-secondary/40 p-4 text-sm space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <p className="inline-flex items-center gap-2 font-medium text-primary">
-                <CalendarDays className="h-4 w-4 text-emerald-600" />
-                {formatDateWithWeekday(formData.date, formData.time)}
-              </p>
-              <p className="inline-flex items-center gap-2 font-medium text-primary">
-                <Users className="h-4 w-4 text-emerald-600" /> {`x${formData.people} persons`}
-              </p>
-              {routeStats && (
-                <>
-                  <p className="inline-flex items-center gap-2 text-muted-foreground">
-                    <Route className="h-4 w-4 text-primary" /> {`${routeStats.km} km distance`}
-                  </p>
-                  <p className="inline-flex items-center gap-2 text-muted-foreground">
-                    <Clock3 className="h-4 w-4 text-primary" /> {`${routeStats.minutes} mins duration`}
-                  </p>
-                </>
-              )}
-            </div>
-            <p className="inline-flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4 text-primary" />
-              {`${formData.pickup?.name ?? "Not set"}  ->  ${formData.dropoff?.name ?? "Not set"}`}
+        // The cars on the left, the journey on the right. On a phone the summary drops
+        // below the cars: the price beside each one is the question being answered, and
+        // a screenful of itinerary before reaching them helps nobody.
+        <div className="grid grid-cols-1 gap-6 pb-24 lg:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="space-y-4">
+            <h2 className="font-display text-2xl font-bold text-primary">Select Car</h2>
+
+            <RouteMap pickup={formData.pickup} dropoff={formData.dropoff} />
+
+            <p className="text-xs text-muted-foreground">
+              All prices include VAT, tolls and the driver's waiting time.
             </p>
-            {formData.roundtrip && (
-              <p className="inline-flex items-center gap-2 text-muted-foreground">
-                <CalendarDays className="h-4 w-4 text-emerald-600" />
-                {`${formatDateWithWeekday(formData.returnDate, formData.returnTime)}  | Return route included`}
+
+            <div className="space-y-3">
+              {fleet.map((vehicle) => (
+                <VehicleRow
+                  key={vehicle.type}
+                  vehicle={vehicle}
+                  price={prices[vehicle.type]}
+                  roundtrip={formData.roundtrip}
+                  selected={formData.vehicleType === vehicle.type}
+                  onSelect={() =>
+                    setFormData((prev) => ({ ...prev, vehicleType: vehicle.type }))
+                  }
+                />
+              ))}
+            </div>
+
+            <Button variant="outline" onClick={() => setStep(1)}>
+              Back
+            </Button>
+          </div>
+
+          <div className="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+            <BookingSummary
+              pickup={formData.pickup}
+              dropoff={formData.dropoff}
+              date={formData.date}
+              time={formData.time}
+              returnDate={formData.returnDate}
+              returnTime={formData.returnTime}
+              roundtrip={formData.roundtrip}
+              people={formData.people}
+              quote={quote}
+              vehicle={formData.vehicleType}
+            />
+          </div>
+
+          {/* Pinned to the foot of the screen so the chosen car and the way forward
+              stay in reach however far down the list someone has scrolled. Taken out
+              of the grid with position: fixed, which is also why the columns above
+              carry the bottom padding. */}
+          <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-card/95 p-3 backdrop-blur">
+            <div className="container flex max-w-6xl items-center justify-between gap-3">
+              <p className="min-w-0 truncate text-sm">
+                <Car className="mr-1.5 inline h-4 w-4 shrink-0 text-primary" />
+                <span className="text-muted-foreground">Your choice: </span>
+                <span className="font-medium text-primary">{chosen.name}</span>
               </p>
-            )}
+              <Button className="shrink-0" onClick={continueToEquipment}>
+                Continue
+              </Button>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <article className="rounded-lg border bg-card overflow-hidden">
-              <img src={CAR_IMAGE} alt="Sedan car" className="h-52 w-full object-cover" />
-              <div className="p-4 space-y-2">
-                <h3 className="font-display font-semibold text-lg">Mercedes E Class Sedan</h3>
-                <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
-                  {prices.sedan ? `€${prices.sedan}` : "Price on request"}
-                </p>
-                <div className="space-y-1">
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Luggage className="h-4 w-4 text-primary" /> 4 suitcases
-                  </p>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4 text-primary" /> 4 persons
-                  </p>
-                  <RouteFacts stats={routeStats} />
-                </div>
-                <Button onClick={() => setVehicleAndContinue("sedan")}>Select Car</Button>
-              </div>
-            </article>
-            <article className="rounded-lg border bg-card overflow-hidden">
-              <img src={ESTATE_IMAGE} alt="Mercedes E Class Estate" className="h-52 w-full object-cover" />
-              <div className="p-4 space-y-2">
-                <h3 className="font-display font-semibold text-lg">Mercedes-Benz E-Class Estate</h3>
-                <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
-                  {prices.estate ? `€${prices.estate}` : "Price on request"}
-                </p>
-                <div className="space-y-1">
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Luggage className="h-4 w-4 text-primary" /> 7 suitcases
-                  </p>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4 text-primary" /> 4 persons
-                  </p>
-                  <RouteFacts stats={routeStats} />
-                </div>
-                <Button onClick={() => setVehicleAndContinue("estate")}>Select Estate</Button>
-              </div>
-            </article>
-            <article className="rounded-lg border bg-card overflow-hidden">
-              <img src={VAN_IMAGE} alt="Passenger van" className="h-52 w-full object-cover" />
-              <div className="p-4 space-y-2">
-                <h3 className="font-display font-semibold text-lg">Minivan Mercedes V Class</h3>
-                <p className="text-emerald-600 text-2xl font-extrabold tracking-tight">
-                  {prices.van ? `€${prices.van}` : "Price on request"}
-                </p>
-                <div className="space-y-1">
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Luggage className="h-4 w-4 text-primary" /> 8 suitcases
-                  </p>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4 text-primary" /> 8 persons
-                  </p>
-                  <RouteFacts stats={routeStats} />
-                </div>
-                <Button onClick={() => setVehicleAndContinue("van")}>Select Van</Button>
-              </div>
-            </article>
-          </div>
-          <Button variant="outline" onClick={() => setStep(1)}>
-            Back
-          </Button>
         </div>
       )}
 
