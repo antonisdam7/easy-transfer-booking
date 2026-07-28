@@ -95,8 +95,8 @@ function getInitialState(search: string) {
 function ActionBar({ children }: { children: ReactNode }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 p-3 sm:p-4">
-      <div className="container max-w-6xl">
-        <div className="pointer-events-auto flex items-center justify-between gap-3 rounded-lg border bg-card/95 p-3 shadow-lg backdrop-blur sm:p-4 lg:mr-[23.5rem]">
+      <div className="container max-w-7xl">
+        <div className="pointer-events-auto flex items-center justify-between gap-3 rounded-lg border bg-card/95 p-3 shadow-lg backdrop-blur sm:p-4 lg:mr-[25.5rem]">
           {children}
         </div>
       </div>
@@ -199,11 +199,19 @@ export default function BookingResults() {
 
   const chosen = fleet.find((vehicle) => vehicle.type === formData.vehicleType) ?? fleet[0];
 
+  // Both steps are a full page long, so whichever one is being left was almost
+  // certainly scrolled down. Landing halfway into the next one hides the heading that
+  // says where you now are.
+  const goToStep = (next: "vehicle" | "details") => {
+    setStep(next);
+    window.scrollTo({ top: 0 });
+  };
+
   // The fare is recorded on the way out of this step rather than on every click, so
   // what gets stored is exactly what was on screen when the customer moved on.
   const continueToEquipment = () => {
     setFormData((prev) => ({ ...prev, price: prices[prev.vehicleType] }));
-    setStep("details");
+    goToStep("details");
   };
 
   const submitBooking = async (event: FormEvent<HTMLFormElement>) => {
@@ -265,7 +273,7 @@ export default function BookingResults() {
   };
 
   return (
-    <section className="container max-w-6xl space-y-8 py-10">
+    <section className="container max-w-7xl space-y-8 py-10">
       <TripEditDialog
         open={editing !== null}
         onOpenChange={(open) => !open && setEditing(null)}
@@ -278,7 +286,7 @@ export default function BookingResults() {
         // The cars on the left, the journey on the right. On a phone the summary drops
         // below the cars: the price beside each one is the question being answered, and
         // a screenful of itinerary before reaching them helps nobody.
-        <div className="grid grid-cols-1 gap-6 pb-24 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="grid grid-cols-1 gap-6 pb-24 lg:grid-cols-[minmax(0,1fr)_24rem]">
           {/* No heading and no Back button: the map says where, the rows say what is
               being chosen, and Edit in the summary is the one way back. */}
           <div className="space-y-4">
@@ -335,7 +343,7 @@ export default function BookingResults() {
       )}
 
       {step === "details" && (
-        <form onSubmit={submitBooking} className="grid grid-cols-1 gap-6 pb-24 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <form onSubmit={submitBooking} className="grid grid-cols-1 gap-6 pb-24 lg:grid-cols-[minmax(0,1fr)_24rem]">
           <div className="space-y-6">
             <section className="space-y-5 rounded-lg border bg-card p-6">
               <h2 className="font-display text-xl font-bold text-primary">Booking details</h2>
@@ -496,7 +504,7 @@ export default function BookingResults() {
               </div>
             </section>
 
-            <Button type="button" variant="outline" onClick={() => setStep("vehicle")}>
+            <Button type="button" variant="outline" onClick={() => goToStep("vehicle")}>
               Back
             </Button>
           </div>
@@ -519,15 +527,17 @@ export default function BookingResults() {
             />
           </SummaryColumn>
 
+          {/* The same line as the step before it, so the bar does not change its mind
+              about what it is for halfway through a booking. The total is not repeated
+              here: it is already the largest thing in the panel alongside. */}
           <ActionBar>
             <p className="min-w-0 truncate text-sm">
-              <span className="text-muted-foreground">Total: </span>
-              <span className="text-lg font-bold text-primary">
-                {formData.price === null ? "To be confirmed" : `€${formData.price}`}
-              </span>
+              <Car className="mr-1.5 inline h-4 w-4 shrink-0 text-primary" />
+              <span className="text-muted-foreground">Your choice: </span>
+              <span className="font-medium text-primary">{chosen.name}</span>
             </p>
             <Button type="submit" size="lg" className="shrink-0" disabled={isSubmitting}>
-              {isSubmitting ? "Sending..." : "Request Booking"}
+              {isSubmitting ? "Sending..." : "Book now"}
             </Button>
           </ActionBar>
         </form>
