@@ -1,9 +1,8 @@
-import { useRef, useState } from "react";
+import { Suspense, lazy, useRef, useState } from "react";
 import { format, parse } from "date-fns";
 import { enGB } from "date-fns/locale";
 import { CalendarDays, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -16,6 +15,14 @@ import { cn } from "@/lib/utils";
 //
 // The value handed back is unchanged from before: yyyy-MM-dd and HH:mm, which is what
 // the database columns and both emails expect.
+
+// The grid itself is the largest thing on the landing page that most visitors never
+// look at -- it only exists once the popover is open. Fetching it on the click keeps
+// it out of the first load; the popover holds its own size meanwhile, so opening it
+// does not shuffle the page about.
+const Calendar = lazy(() =>
+  import("@/components/ui/calendar").then((m) => ({ default: m.Calendar })),
+);
 
 type DateProps = {
   label: string;
@@ -53,19 +60,21 @@ export function DateInput({ label, value, onChange, min }: DateProps) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start" side="bottom" avoidCollisions={false}>
-          <Calendar
-            mode="single"
-            locale={enGB}
-            selected={selected}
-            defaultMonth={selected ?? earliest}
-            disabled={{ before: earliest }}
-            onSelect={(day) => {
-              if (!day) return;
-              onChange(format(day, "yyyy-MM-dd"));
-              setOpen(false);
-            }}
-            initialFocus
-          />
+          <Suspense fallback={<div className="h-[21rem] w-[17.25rem]" />}>
+            <Calendar
+              mode="single"
+              locale={enGB}
+              selected={selected}
+              defaultMonth={selected ?? earliest}
+              disabled={{ before: earliest }}
+              onSelect={(day) => {
+                if (!day) return;
+                onChange(format(day, "yyyy-MM-dd"));
+                setOpen(false);
+              }}
+              initialFocus
+            />
+          </Suspense>
         </PopoverContent>
       </Popover>
     </div>
