@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -148,6 +149,8 @@ function Pill({
 }
 
 export default function BookingResults() {
+  useSeo("/booking-results");
+
   const location = useLocation();
   const navigate = useNavigate();
   // Two steps: choose the car, then say who is travelling. Changing the trip itself is

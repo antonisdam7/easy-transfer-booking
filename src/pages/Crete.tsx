@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { MapPin } from "lucide-react";
 
 const destinations = [
@@ -12,26 +13,30 @@ const destinations = [
   { name: "Sitia", desc: "A peaceful eastern town known for its wine and hospitality." },
 ];
 
-const Crete = () => (
-  <div className="min-h-screen bg-background">
-    <div className="container max-w-4xl py-16 px-4">
-      <h1 className="text-3xl font-display font-bold text-primary mb-2">Discover Crete</h1>
-      <p className="text-muted-foreground text-lg mb-10">
-        We cover every corner of the island. Here are some of the top destinations we serve.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {destinations.map((d) => (
-          <div key={d.name} className="bg-card rounded-lg p-5 shadow-card border border-border/30">
-            <div className="flex items-center gap-2 mb-2">
-              <MapPin className="h-4 w-4 text-accent" />
-              <h3 className="font-display font-semibold text-primary">{d.name}</h3>
+const Crete = () => {
+  useSeo("/crete");
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-4xl py-16 px-4">
+        <h1 className="text-3xl font-display font-bold text-primary mb-2">Discover Crete</h1>
+        <p className="text-muted-foreground text-lg mb-10">
+          We cover every corner of the island. Here are some of the top destinations we serve.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {destinations.map((d) => (
+            <div key={d.name} className="bg-card rounded-lg p-5 shadow-card border border-border/30">
+              <div className="flex items-center gap-2 mb-2">
+                <MapPin className="h-4 w-4 text-accent" />
+                <h3 className="font-display font-semibold text-primary">{d.name}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">{d.desc}</p>
             </div>
-            <p className="text-sm text-muted-foreground">{d.desc}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Crete;

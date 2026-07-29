@@ -2,12 +2,7 @@ import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
 
 export default function PrivateTaxiCrete() {
-  useSeo({
-    title: "Private Taxi Crete",
-    description:
-      "Private taxi in Crete for airport transfers, port pickups, and custom routes with comfortable vehicles and local drivers.",
-    canonicalPath: "/private-taxi-crete",
-  });
+  useSeo("/private-taxi-crete");
 
   return (
     <section className="container max-w-5xl py-12 space-y-8">

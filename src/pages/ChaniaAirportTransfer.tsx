@@ -2,12 +2,7 @@ import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
 
 export default function ChaniaAirportTransfer() {
-  useSeo({
-    title: "Chania Airport Transfer",
-    description:
-      "Private Chania Airport transfer service to Chania town, Platanias, resorts, and west Crete with reliable local drivers.",
-    canonicalPath: "/chania-airport-transfer",
-  });
+  useSeo("/chania-airport-transfer");
 
   return (
     <section className="container max-w-5xl py-12 space-y-8">

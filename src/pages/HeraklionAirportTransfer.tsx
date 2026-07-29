@@ -2,12 +2,7 @@ import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
 
 export default function HeraklionAirportTransfer() {
-  useSeo({
-    title: "Heraklion Airport Transfer",
-    description:
-      "Book Heraklion Airport transfer with local drivers for hotels, villas, ports, and all major destinations in Crete.",
-    canonicalPath: "/heraklion-airport-transfer",
-  });
+  useSeo("/heraklion-airport-transfer");
 
   return (
     <section className="container max-w-5xl py-12 space-y-8">

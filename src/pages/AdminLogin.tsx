@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -10,6 +11,8 @@ import { signIn } from "@/lib/auth";
 import { useSession } from "@/hooks/useSession";
 
 export default function AdminLogin() {
+  useSeo("/admin/login");
+
   const navigate = useNavigate();
   const { session } = useSession();
   const [email, setEmail] = useState("");

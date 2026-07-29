@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -56,6 +57,8 @@ function RouteZones({ transfer }: { transfer: TransferRequest }) {
 }
 
 export default function AdminTransfers() {
+  useSeo("/admin");
+
   const navigate = useNavigate();
   const [transfers, setTransfers] = useState<TransferRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);

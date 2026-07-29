@@ -1,26 +1,26 @@
 import { useEffect } from "react";
+import { OG_IMAGE, SITE_NAME, SITE_URL, pageSeo } from "@/lib/seo";
 
-type SeoOptions = {
-  title: string;
-  description: string;
-  canonicalPath: string;
-  ogImage?: string;
-  structuredData?: Record<string, unknown> | Record<string, unknown>[];
-};
+// Writes the head for whichever page is showing. The same tags are already baked into
+// the HTML by the prerender step, so this is what keeps them right as the customer
+// moves between routes without the page ever reloading.
+//
+// Takes a path rather than an object so there is exactly one place a title is written.
 
-const SITE_URL = "https://habibitransferscrete.com";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/logo.jpeg`;
+export function useSeo(path: string) {
+  const seo = pageSeo[path];
 
-export function useSeo({
-  title,
-  description,
-  canonicalPath,
-  ogImage = DEFAULT_OG_IMAGE,
-  structuredData,
-}: SeoOptions) {
   useEffect(() => {
-    const fullTitle = `${title} | habibitransferscrete`;
-    const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+    if (!seo) {
+      if (import.meta.env.DEV) {
+        console.warn(`useSeo: no entry in pageSeo for "${path}"`);
+      }
+      return;
+    }
+
+    const fullTitle = `${seo.title} | ${SITE_NAME}`;
+    const canonicalUrl = `${SITE_URL}${seo.canonicalPath}`;
+    const ogImage = seo.ogImage ?? OG_IMAGE;
 
     document.title = fullTitle;
 
@@ -29,11 +29,7 @@ export function useSeo({
       let el = document.querySelector<HTMLMetaElement>(selector);
       if (!el) {
         el = document.createElement("meta");
-        if (isProperty) {
-          el.setAttribute("property", key);
-        } else {
-          el.setAttribute("name", key);
-        }
+        el.setAttribute(isProperty ? "property" : "name", key);
         document.head.appendChild(el);
       }
       el.setAttribute("content", value);
@@ -49,31 +45,37 @@ export function useSeo({
       link.href = href;
     };
 
-    upsertMeta("description", description);
+    upsertMeta("description", seo.description);
+    upsertMeta("og:site_name", SITE_NAME, true);
+    upsertMeta("og:locale", "en_GB", true);
     upsertMeta("og:title", fullTitle, true);
-    upsertMeta("og:description", description, true);
+    upsertMeta("og:description", seo.description, true);
     upsertMeta("og:type", "website", true);
     upsertMeta("og:url", canonicalUrl, true);
     upsertMeta("og:image", ogImage, true);
     upsertMeta("twitter:card", "summary_large_image");
     upsertMeta("twitter:title", fullTitle);
-    upsertMeta("twitter:description", description);
+    upsertMeta("twitter:description", seo.description);
     upsertMeta("twitter:image", ogImage);
     upsertCanonical(canonicalUrl);
 
-    const scriptId = "seo-structured-data";
-    const existingScript = document.getElementById(scriptId);
-    if (existingScript) {
-      existingScript.remove();
+    // Removed rather than set to "index" on a public page: a stale noindex left behind
+    // after a client-side navigation would quietly drop a page that should rank.
+    if (seo.noindex) {
+      upsertMeta("robots", "noindex, nofollow");
+    } else {
+      document.querySelector("meta[name='robots']")?.remove();
     }
 
-    if (structuredData) {
+    const scriptId = "seo-structured-data";
+    document.getElementById(scriptId)?.remove();
+
+    if (seo.structuredData) {
       const script = document.createElement("script");
       script.id = scriptId;
       script.type = "application/ld+json";
-      script.text = JSON.stringify(structuredData);
+      script.text = JSON.stringify(seo.structuredData);
       document.head.appendChild(script);
     }
-  }, [title, description, canonicalPath, ogImage, structuredData]);
+  }, [seo, path]);
 }
-

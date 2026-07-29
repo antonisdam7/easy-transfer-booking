@@ -1,3 +1,10 @@
 User-agent: *
 Allow: /
+
+# The results page only means anything with a search already in the query string, and
+# every different search would be another near-identical URL. The operator's pages are
+# nobody's business but the operator's. Both also carry a noindex tag.
+Disallow: /booking-results
+Disallow: /admin
+
 Sitemap: https://habibitransferscrete.com/sitemap.xml

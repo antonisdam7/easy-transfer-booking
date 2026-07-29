@@ -2,12 +2,7 @@ import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
 
 export default function CreteTransfers() {
-  useSeo({
-    title: "Crete Transfers",
-    description:
-      "Reliable Crete transfers from airports, ports, and hotels with fixed pricing, local drivers, and fast booking confirmation.",
-    canonicalPath: "/crete-transfers",
-  });
+  useSeo("/crete-transfers");
 
   return (
     <section className="container max-w-5xl py-12 space-y-8">

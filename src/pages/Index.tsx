@@ -29,35 +29,7 @@ const Index = () => {
     people: "2",
   });
 
-  useSeo({
-    title: "Crete Transfers & Airport Taxi",
-    description:
-      "Book private Crete transfers for Heraklion and Chania airports, ports, hotels, and resorts with professional local drivers.",
-    canonicalPath: "/",
-    structuredData: [
-      {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        name: "Habibi Come to Crete Transfers",
-        url: "https://habibitransferscrete.com/",
-        telephone: "+30 697 626 3677",
-        email: "habibitransferscrete@gmail.com",
-        areaServed: "Crete, Greece",
-        sameAs: ["https://www.facebook.com/profile.php?id=61575578152214"],
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        name: "Crete Airport Transfer Service",
-        provider: {
-          "@type": "LocalBusiness",
-          name: "Habibi Come to Crete Transfers",
-        },
-        areaServed: "Crete, Greece",
-        serviceType: "Private airport and hotel transfers",
-      },
-    ],
-  });
+  useSeo("/");
 
   const onSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
