@@ -87,7 +87,10 @@ function prerender(): Plugin {
       const before = template.slice(0, start);
       const after = template.slice(end + "<!-- seo:end -->".length);
 
-      for (const routePath of indexablePaths) {
+      // Every route, not only the indexable ones. The noindex pages get a file too so
+      // the tag is in the HTML as served: robots.txt keeps crawlers off them, but a
+      // crawler that ignores robots.txt still has to be told in the page itself.
+      for (const routePath of Object.keys(pageSeo)) {
         const html = before + headFor(routePath).trimStart() + after;
         // "/" is the file Vite already wrote; the rest each get a directory so the URL
         // stays clean and Vercel serves the file before it reaches the SPA rewrite.
@@ -104,7 +107,10 @@ function prerender(): Plugin {
       // renamed or a page we decided not to index.
       fs.writeFileSync(path.join(outDir, "sitemap.xml"), sitemap());
 
-      console.log(`\nprerendered ${indexablePaths.length} routes and sitemap.xml`);
+      console.log(
+        `\nprerendered ${Object.keys(pageSeo).length} routes ` +
+          `(${indexablePaths.length} in sitemap.xml)`,
+      );
     },
   };
 }
