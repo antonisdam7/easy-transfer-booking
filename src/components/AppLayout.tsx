@@ -1,7 +1,9 @@
 import { Outlet } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { Home, Info, MapPin, Phone, HelpCircle } from "lucide-react";
-import logo from "@/assets/logo.jpeg";
+// The 1024px original is 1.4 MB. Nothing on the site draws it larger than 64 CSS
+// pixels, so every page was paying for an image it then threw away.
+import logo from "@/assets/logo-160.jpg";
 
 const navItems = [
   { title: "Home", url: "/", icon: Home },

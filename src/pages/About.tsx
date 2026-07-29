@@ -1,5 +1,5 @@
 import { useSeo } from "@/hooks/useSeo";
-import logo from "@/assets/logo.jpeg";
+import logo from "@/assets/logo-160.jpg";
 
 const About = () => {
   useSeo("/about");
