@@ -3,7 +3,14 @@ import react from "@vitejs/plugin-react-swc";
 import fs from "node:fs";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import { OG_IMAGE, SITE_NAME, SITE_URL, pageSeo, indexablePaths } from "./src/lib/seo";
+import {
+  OG_IMAGE,
+  SITE_NAME,
+  SITE_URL,
+  pageSeo,
+  indexablePaths,
+  structuredDataFor,
+} from "./src/lib/seo";
 
 // The site is one HTML file that React fills in. Google runs JavaScript and copes, but
 // Facebook, WhatsApp, LinkedIn and the rest read the HTML as served and stop -- so every
@@ -49,9 +56,11 @@ function headFor(routePath: string) {
 
   if (seo.noindex) tags.push(meta("name", "robots", "noindex, nofollow"));
 
-  if (seo.structuredData) {
+  const structuredData = structuredDataFor(routePath);
+
+  if (structuredData.length) {
     // The escape keeps a "</script>" inside any string from ending the block early.
-    const json = JSON.stringify(seo.structuredData).replace(/</g, "\\u003c");
+    const json = JSON.stringify(structuredData).replace(/</g, "\\u003c");
     tags.push(
       `    <script type="application/ld+json" id="seo-structured-data">${json}</script>`,
     );

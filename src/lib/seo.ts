@@ -12,7 +12,11 @@
 import { faqs } from "./faqs";
 
 export const SITE_URL = "https://habibitransferscrete.com";
-export const SITE_NAME = "habibitransferscrete";
+// What every title ends with, and what a search result calls the business. This was
+// the bare domain in lowercase, which matched nothing else: the header says "Habibi
+// Come to Crete", the schema below says "Habibi Come to Crete Transfers", and a
+// result reading "habibitransferscrete" looked like a machine had filled it in.
+export const SITE_NAME = "Habibi Come to Crete";
 export const BUSINESS_NAME = "Habibi Come to Crete Transfers";
 
 // A share card sized for the platforms that crop it, not the logo. See public/og-image.jpg.
@@ -48,6 +52,10 @@ const business = {
     "@type": "AdministrativeArea",
     name: "Crete, Greece",
   },
+  // Two bands, from the published fare table: a short airport run and a crossing of
+  // the island. Not a claim, an arithmetic fact about the prices already on the site.
+  priceRange: "€22–€484",
+  currenciesAccepted: "EUR",
   openingHoursSpecification: {
     "@type": "OpeningHoursSpecification",
     dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -84,7 +92,7 @@ export const pageSeo: Record<string, PageSeo> = {
   "/": {
     title: "Crete Transfers & Airport Taxi",
     description:
-      "Book private Crete transfers for Heraklion and Chania airports, ports, hotels, and resorts with professional local drivers.",
+      "Private Crete transfers from Heraklion and Chania airports to hotels, resorts and ports across the island. Fixed fares, local drivers, booking in minutes.",
     canonicalPath: "/",
     structuredData: [
       business,
@@ -94,14 +102,14 @@ export const pageSeo: Record<string, PageSeo> = {
   "/crete-transfers": {
     title: "Crete Transfers",
     description:
-      "Reliable Crete transfers from airports, ports, and hotels with fixed pricing, local drivers, and fast booking confirmation.",
+      "Crete transfers from Heraklion and Chania airports, ports and hotels. See the fixed fare to your destination from both airports before you book anything.",
     canonicalPath: "/crete-transfers",
     structuredData: [business, service("Crete Transfers", "Private transfers across Crete")],
   },
   "/heraklion-airport-transfer": {
     title: "Heraklion Airport Transfer",
     description:
-      "Book Heraklion Airport transfer with local drivers for hotels, villas, ports, and all major destinations in Crete.",
+      "Heraklion Airport transfer to hotels, villas and resorts across Crete. Fixed fares listed for every destination, flight monitoring, and local drivers.",
     canonicalPath: "/heraklion-airport-transfer",
     structuredData: [
       business,
@@ -111,7 +119,7 @@ export const pageSeo: Record<string, PageSeo> = {
   "/chania-airport-transfer": {
     title: "Chania Airport Transfer",
     description:
-      "Private Chania Airport transfer service to Chania town, Platanias, resorts, and west Crete with reliable local drivers.",
+      "Chania Airport transfer to Chania town, Platanias, Kissamos and west Crete. Every fare from CHQ published in full, with flight tracking and local drivers.",
     canonicalPath: "/chania-airport-transfer",
     structuredData: [
       business,
@@ -121,35 +129,35 @@ export const pageSeo: Record<string, PageSeo> = {
   "/private-taxi-crete": {
     title: "Private Taxi Crete",
     description:
-      "Private taxi in Crete for airport transfers, port pickups, and custom routes with comfortable vehicles and local drivers.",
+      "Private taxi in Crete for airport arrivals, port pickups and routes of your own. Priced per car, not per person, with every fare published before you book.",
     canonicalPath: "/private-taxi-crete",
     structuredData: [business, service("Private Taxi Crete", "Private taxi hire across Crete")],
   },
   "/about": {
     title: "About Us",
     description:
-      "A private transfer service across Crete with a modern Mercedes fleet, licensed English-speaking drivers, fixed prices, and cover 24 hours a day.",
+      "A private transfer service across Crete, with a modern Mercedes fleet, licensed English-speaking drivers, fixed prices, and cover twenty-four hours a day.",
     canonicalPath: "/about",
     structuredData: [business],
   },
   "/crete": {
     title: "Discover Crete",
     description:
-      "The destinations we drive to across Crete, from Heraklion and Chania to Elounda, Rethymno, Matala, and the villages between them.",
+      "The destinations we drive to across Crete, from Heraklion and Chania to Elounda, Rethymno, Matala and Plakias, and the mountain villages in between.",
     canonicalPath: "/crete",
     structuredData: [business],
   },
   "/contact": {
     title: "Contact Us",
     description:
-      "Reach Habibi Come to Crete Transfers by phone, WhatsApp, or email, any hour of the day, to ask a question or book a transfer directly.",
+      "Reach Habibi Come to Crete Transfers by phone, WhatsApp or email at any hour, to ask a question, change a booking, or arrange a transfer directly with us.",
     canonicalPath: "/contact",
     structuredData: [business],
   },
   "/faqs": {
     title: "Frequently Asked Questions",
     description:
-      "How booking works, which vehicles we run, what happens when a flight is delayed, how cancellation works, and how to pay your driver.",
+      "How booking works, which vehicles we run, what happens when a flight is delayed, how cancellation works, how child seats are arranged, and how to pay.",
     canonicalPath: "/faqs",
     structuredData: [business, faqSchema],
   },
@@ -178,3 +186,37 @@ export const pageSeo: Record<string, PageSeo> = {
 
 // Routes that get their own HTML file at build time, and that belong in the sitemap.
 export const indexablePaths = Object.keys(pageSeo).filter((path) => !pageSeo[path].noindex);
+
+// A two-step trail, home then here. Google reads it to draw the path under a result
+// instead of the bare URL, and it is the one piece of schema every inner page can
+// carry truthfully -- the site really is one level deep.
+function breadcrumb(routePath: string) {
+  const seo = pageSeo[routePath];
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: seo.title,
+        item: `${SITE_URL}${seo.canonicalPath}`,
+      },
+    ],
+  };
+}
+
+// The whole JSON-LD block for a route. Both the prerender step and the useSeo hook go
+// through here, so neither can end up shipping a different set from the other.
+export function structuredDataFor(routePath: string): Record<string, unknown>[] {
+  const seo = pageSeo[routePath];
+  if (!seo?.structuredData) return [];
+
+  // The homepage is the root of the trail, so a trail to it would be a single step
+  // pointing at itself.
+  if (routePath === "/") return seo.structuredData;
+
+  return [...seo.structuredData, breadcrumb(routePath)];
+}

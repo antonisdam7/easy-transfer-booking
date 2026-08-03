@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { OG_IMAGE, SITE_NAME, SITE_URL, pageSeo } from "@/lib/seo";
+import { OG_IMAGE, SITE_NAME, SITE_URL, pageSeo, structuredDataFor } from "@/lib/seo";
 
 // Writes the head for whichever page is showing. The same tags are already baked into
 // the HTML by the prerender step, so this is what keeps them right as the customer
@@ -70,11 +70,13 @@ export function useSeo(path: string) {
     const scriptId = "seo-structured-data";
     document.getElementById(scriptId)?.remove();
 
-    if (seo.structuredData) {
+    const structuredData = structuredDataFor(path);
+
+    if (structuredData.length) {
       const script = document.createElement("script");
       script.id = scriptId;
       script.type = "application/ld+json";
-      script.text = JSON.stringify(seo.structuredData);
+      script.text = JSON.stringify(structuredData);
       document.head.appendChild(script);
     }
   }, [seo, path]);
