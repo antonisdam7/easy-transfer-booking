@@ -1,8 +1,8 @@
 import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import balos from "@/assets/balos-beach.webp";
-import { Phone, Mail, Star, MapPin, Facebook, MessageCircle } from "lucide-react";
+import { Phone, Star, MapPin } from "lucide-react";
 import { useSeo } from "@/hooks/useSeo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,10 +67,16 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Hero over Balos */}
       <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden py-12 px-4">
+        {/* The largest thing painted on the page, and so the one Core Web Vitals
+            measures. Left to itself the browser discovers it partway down the
+            stylesheet and queues it behind the scripts; the hint moves it to the
+            front, which is the whole of the LCP on this page. */}
         <img
           src={balos}
           alt=""
           aria-hidden="true"
+          fetchPriority="high"
+          decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
         />
         {/* Just enough veil to keep the labels legible over the dark headland,
@@ -183,39 +189,49 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-primary text-primary-foreground py-10">
-        <div className="container max-w-4xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-center md:text-left">
-            <p className="font-display font-bold text-lg">Habibi Come to Crete Transfers</p>
-            <p className="text-primary-foreground/70 text-sm mt-1">Professional transfers in Crete, Greece</p>
-          </div>
-          <div className="flex flex-col items-center md:items-end gap-2 text-sm">
-            <a
-              href="https://wa.me/306976263677?text=Hi%2C%20I%20want%20to%20book%20a%20transfer%20in%20Crete"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors font-medium"
+      {/* The four transfer pages, in the body rather than only in the footer. A link
+          from here is what tells a search engine these are the pages the site is
+          actually about, and it is the only way a visitor reaches them without
+          scrolling past everything else. */}
+      <section className="container max-w-4xl py-12">
+        <h2 className="font-display font-bold text-2xl text-primary">Where we drive</h2>
+        <p className="text-muted-foreground mt-1">
+          Fixed fares, measured routes, and a local driver on every journey.
+        </p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {[
+            {
+              to: "/heraklion-airport-transfer",
+              title: "Heraklion Airport Transfer",
+              desc: "Private pickups from HER to hotels and resorts across the island.",
+            },
+            {
+              to: "/chania-airport-transfer",
+              title: "Chania Airport Transfer",
+              desc: "CHQ to Chania town, Platanias, Kissamos, and the west.",
+            },
+            {
+              to: "/crete-transfers",
+              title: "Crete Transfers",
+              desc: "Airports, ports, and hotels anywhere on Crete.",
+            },
+            {
+              to: "/private-taxi-crete",
+              title: "Private Taxi Crete",
+              desc: "Port pickups, day trips, and routes of your own choosing.",
+            },
+          ].map(({ to, title, desc }) => (
+            <Link
+              key={to}
+              to={to}
+              className="block bg-card rounded-lg p-5 shadow-card hover:shadow-md transition-shadow"
             >
-              <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
-            </a>
-            <a
-              href="https://www.facebook.com/profile.php?id=61575578152214"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 transition-colors font-medium"
-            >
-              <Facebook className="h-4 w-4" /> Visit us on Facebook
-            </a>
-            <a href="mailto:habibitransferscrete@gmail.com" className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-              <Mail className="h-4 w-4" /> habibitransferscrete@gmail.com
-            </a>
-            <a href="tel:+306976263677" className="flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-              <Phone className="h-4 w-4" /> +30 697 626 3677
-            </a>
-          </div>
+              <h3 className="font-display font-semibold text-primary">{title}</h3>
+              <p className="text-sm text-muted-foreground mt-1">{desc}</p>
+            </Link>
+          ))}
         </div>
-      </footer>
+      </section>
     </div>
   );
 };

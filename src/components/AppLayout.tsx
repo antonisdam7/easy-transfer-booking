@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
+import AppFooter from "@/components/AppFooter";
 import { Home, Info, MapPin, Phone, HelpCircle } from "lucide-react";
 // The 1024px original is 1.4 MB. Nothing on the site draws it larger than 64 CSS
 // pixels, so every page was paying for an image it then threw away.
@@ -50,6 +51,7 @@ export default function AppLayout() {
       <main className="flex-1">
         <Outlet />
       </main>
+      <AppFooter />
     </div>
   );
 }
