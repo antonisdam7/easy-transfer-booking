@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
+import { FareTable } from "@/components/FareTable";
+import { CHANIA_AIRPORT } from "@/lib/booking";
 
 export default function ChaniaAirportTransfer() {
   useSeo("/chania-airport-transfer");
@@ -37,6 +39,17 @@ export default function ChaniaAirportTransfer() {
           <li>Support for early morning and late night arrivals</li>
           <li>Simple online booking and quick confirmation</li>
         </ul>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-xl font-display font-semibold text-primary">
+          Chania Airport transfer prices
+        </h2>
+        <p className="text-sm md:text-base text-muted-foreground">
+          Fixed fares from CHQ, confirmed before you book. West-Crete resorts are close enough to
+          be quick and cheap; the far east of the island is a long drive, and the price says so.
+        </p>
+        <FareTable airport={CHANIA_AIRPORT} />
       </div>
 
       <div className="flex flex-wrap gap-3">

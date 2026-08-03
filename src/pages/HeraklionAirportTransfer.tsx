@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
+import { FareTable } from "@/components/FareTable";
+import { HERAKLION_AIRPORT } from "@/lib/booking";
 
 export default function HeraklionAirportTransfer() {
   useSeo("/heraklion-airport-transfer");
@@ -38,6 +40,18 @@ export default function HeraklionAirportTransfer() {
           <li>24/7 availability in high season</li>
           <li>Clear communication before pickup</li>
         </ul>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-xl font-display font-semibold text-primary">
+          Heraklion Airport transfer prices
+        </h2>
+        <p className="text-sm md:text-base text-muted-foreground">
+          Every fare below is fixed and quoted before you book. Distances and driving times are
+          measured on the road, not in a straight line, and the summer roadworks east of Agios
+          Nikolaos are already counted in.
+        </p>
+        <FareTable airport={HERAKLION_AIRPORT} />
       </div>
 
       <div className="flex flex-wrap gap-3">

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
+import { IslandFareTable } from "@/components/FareTable";
 
 export default function CreteTransfers() {
   useSeo("/crete-transfers");
@@ -39,6 +40,18 @@ export default function CreteTransfers() {
           <li>Chania Airport to Chania town, Platanias, and west Crete</li>
           <li>Port transfers to villas, apartments, and holiday accommodation</li>
         </ul>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-xl font-display font-semibold text-primary">
+          Crete transfer prices from both airports
+        </h2>
+        <p className="text-sm md:text-base text-muted-foreground">
+          The same destination costs very different money depending on which airport you land at,
+          so both are listed side by side. If you have a choice of flights, this is the table to
+          check before you book one.
+        </p>
+        <IslandFareTable />
       </div>
 
       <div className="flex flex-wrap gap-3">

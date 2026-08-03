@@ -246,6 +246,42 @@ function getRouteStats(pickup: string, dropoff: string) {
   return { km: fare.km, minutes: fare.minutes };
 }
 
+export type RouteFare = {
+  name: string;
+  km: number;
+  minutes: number;
+  // The sedan and estate fare. Both carry the multiplier 1, so this is the table's
+  // own number; the van is dearer and the pages say so rather than listing it twice.
+  oneWay: number;
+};
+
+// The fare table, read out for one airport so the landing pages can publish real
+// prices instead of asking people to run a search to find one.
+//
+// It goes through getFare rather than reading the columns directly, so the pages
+// price a journey exactly the way the booking form prices it -- including the
+// airport-to-airport case, which is stored on one entry and found from either end.
+// Hubs stay in: a port is somewhere people genuinely book to.
+export function faresFrom(airport: string): RouteFare[] {
+  const rows: RouteFare[] = [];
+
+  for (const destination of destinations) {
+    if (destination.name === airport) continue;
+
+    const fare = getFare(airport, destination.name);
+    if (!fare) continue;
+
+    rows.push({
+      name: destination.name,
+      km: fare.km,
+      minutes: fare.minutes,
+      oneWay: fare.oneWay,
+    });
+  }
+
+  return rows.sort((a, b) => a.oneWay - b.oneWay || a.name.localeCompare(b.name));
+}
+
 // One end of a journey as the customer chose it: the hotel they searched for, or an
 // airport or port they picked by name.
 export type LocationValue = {

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
+import { IslandFareTable } from "@/components/FareTable";
 
 export default function PrivateTaxiCrete() {
   useSeo("/private-taxi-crete");
@@ -37,6 +38,17 @@ export default function PrivateTaxiCrete() {
           <li>Late-night or early-morning arrivals</li>
           <li>Direct point-to-point transport without stops</li>
         </ul>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-xl font-display font-semibold text-primary">
+          What a private taxi costs in Crete
+        </h2>
+        <p className="text-sm md:text-base text-muted-foreground">
+          A private taxi is priced by the journey, not by the meter and not by the head, so four
+          people pay what one person pays. These are the fares from either airport.
+        </p>
+        <IslandFareTable />
       </div>
 
       <div className="flex flex-wrap gap-3">
