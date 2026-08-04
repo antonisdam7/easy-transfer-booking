@@ -42,13 +42,13 @@ export default function TransferRoute({ path }: { path: string }) {
         <div className="rounded-lg border bg-card p-4">
           <dt className="text-xs uppercase tracking-wide text-muted-foreground">One way from</dt>
           <dd className="text-2xl font-display font-bold text-primary tabular-nums">
-            €{route.oneWay}
+            {`€${route.oneWay}`}
           </dd>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <dt className="text-xs uppercase tracking-wide text-muted-foreground">Distance</dt>
           <dd className="text-2xl font-display font-bold text-primary tabular-nums">
-            {route.km} km
+            {`${route.km} km`}
           </dd>
         </div>
         <div className="rounded-lg border bg-card p-4">

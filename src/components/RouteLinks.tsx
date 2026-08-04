@@ -17,8 +17,10 @@ export function RouteLinks({ routes, columns = 3 }: { routes: RouteFacts[]; colu
             className="block rounded-lg border bg-card px-4 py-3 text-sm hover:border-primary/50"
           >
             <span className="font-medium text-primary">{route.label}</span>
+            {/* One string, so the prerendered markup carries "€78 · 1 h 7 min" rather
+                than three text nodes with hydration comments wedged between them. */}
             <span className="block text-muted-foreground tabular-nums">
-              €{route.oneWay} · {route.duration}
+              {`€${route.oneWay} · ${route.duration}`}
             </span>
           </Link>
         </li>

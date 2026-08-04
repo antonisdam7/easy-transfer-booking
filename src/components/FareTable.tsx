@@ -35,12 +35,21 @@ export function FareTable({ airport }: { airport: string }) {
             {rows.map((row) => (
               <tr key={row.name} className="border-t">
                 <th scope="row" className="px-4 py-2 text-left font-normal">{row.name}</th>
-                <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">{row.km} km</td>
+                {/* One string per cell, not a number sitting next to a unit. Rendered at
+                    build time, "€{row.oneWay}" becomes two text nodes with a <!-- --> put
+                    between them to tell them apart during hydration, so the cell reads
+                    "€<!-- -->78". Every browser and every real parser drops the comment and
+                    reads €78 -- but the point of writing these tables into the file was to
+                    be read by things that are not browsers, and the crudest of those pull
+                    a cell out with a regex and would come away holding a bare euro sign. */}
+                <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">
+                  {`${row.km} km`}
+                </td>
                 <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">
                   {durationLabel(row.minutes)}
                 </td>
                 <td className="px-4 py-2 text-right tabular-nums font-semibold text-primary">
-                  €{row.oneWay}
+                  {`€${row.oneWay}`}
                 </td>
               </tr>
             ))}
