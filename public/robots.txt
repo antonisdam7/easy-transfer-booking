@@ -7,4 +7,20 @@ Allow: /
 Disallow: /booking-results
 Disallow: /admin
 
+# The assistants people now ask "how much is a taxi from Heraklion airport to Elounda"
+# before they ever open a search engine. The wildcard above already allows them; naming
+# them is a statement of intent, so that a future blanket block on AI crawlers has to be
+# a decision somebody makes rather than a default nobody noticed.
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /booking-results
+Disallow: /admin
+
 Sitemap: https://habibitransferscrete.com/sitemap.xml

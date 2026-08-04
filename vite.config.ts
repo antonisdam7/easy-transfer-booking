@@ -4,6 +4,8 @@ import fs from "node:fs";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import {
+  BUSINESS_NAME,
+  CONTACT,
   OG_IMAGE,
   SITE_NAME,
   SITE_URL,
@@ -11,6 +13,12 @@ import {
   indexablePaths,
   structuredDataFor,
 } from "./src/lib/seo";
+import {
+  CHANIA_AIRPORT,
+  HERAKLION_AIRPORT,
+  durationLabel,
+  faresFrom,
+} from "./src/lib/booking";
 
 // The site is one HTML file that React fills in. Google runs JavaScript and copes, but
 // Facebook, WhatsApp, LinkedIn and the rest read the HTML as served and stop -- so every
@@ -77,6 +85,73 @@ function sitemap() {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
+// The site as one plain-text file, at /llms.txt.
+//
+// The reason it exists is narrow and worth stating. Google runs JavaScript, so it sees the
+// fare tables React draws. The assistants people increasingly ask first -- GPTBot,
+// ClaudeBot, PerplexityBot -- mostly do not, and what they fetch from this site is a head
+// and an empty <div id="root">. Every fare we publish is invisible to them.
+//
+// This is the cheap half of the answer: one fetch, no JavaScript, every price we charge.
+// The expensive half is rendering the body at build time, which is a larger change.
+//
+// The format follows the llms.txt convention, which is young and honoured by nobody in
+// particular. It costs a few hundred lines of text to be wrong about, and the file is
+// readable by anything that fetches it whether or not the convention ever takes.
+function llmsTxt() {
+  const fareSection = (airport: string) => {
+    const rows = faresFrom(airport)
+      .map(
+        (row) =>
+          `| ${row.name} | ${row.km} km | ${durationLabel(row.minutes)} | €${row.oneWay} |`,
+      )
+      .join("\n");
+
+    return (
+      `## One-way fares from ${airport}\n\n` +
+      `| Destination | Distance | Driving time | One way from |\n` +
+      `| --- | --- | --- | --- |\n${rows}\n`
+    );
+  };
+
+  const pages = indexablePaths
+    .map((routePath) => {
+      const seo = pageSeo[routePath];
+      return `- [${seo.title}](${SITE_URL}${routePath}): ${seo.description}`;
+    })
+    .join("\n");
+
+  return [
+    `# ${BUSINESS_NAME}`,
+    "",
+    `> Private airport and hotel transfers across Crete, from Heraklion Airport (HER) and`,
+    `> Chania Airport (CHQ) to hotels, resorts, villas and ports anywhere on the island.`,
+    `> Every fare is fixed and quoted before booking.`,
+    "",
+    `Phone and WhatsApp: ${CONTACT.telephone}`,
+    `Email: ${CONTACT.email}`,
+    `Website: ${SITE_URL}/`,
+    "Hours: 24 hours a day, every day.",
+    "Payment: cash or card, after the transfer.",
+    "",
+    "Fares are per vehicle, not per person, and include VAT, tolls and the driver's waiting",
+    "time. They are quoted for the Mercedes E-Class sedan and estate, each seating up to",
+    "four; the Mercedes V-Class minivan carries more and costs more. A return is charged as",
+    "one full leg plus a second at 20% off. Flights are monitored and a delayed arrival moves",
+    "the pickup at no extra cost. Free cancellation up to 24 hours before pickup.",
+    "",
+    "Driving times are measured on the road rather than in a straight line. Those east of",
+    "Agios Nikolaos allow for roadworks expected to last into 2028.",
+    "",
+    "## Pages",
+    "",
+    pages,
+    "",
+    fareSection(HERAKLION_AIRPORT),
+    fareSection(CHANIA_AIRPORT),
+  ].join("\n");
+}
+
 function prerender(): Plugin {
   return {
     name: "prerender-routes",
@@ -123,10 +198,11 @@ function prerender(): Plugin {
       // Generated from the same list, so the sitemap cannot advertise a page that was
       // renamed or a page we decided not to index.
       fs.writeFileSync(path.join(outDir, "sitemap.xml"), sitemap());
+      fs.writeFileSync(path.join(outDir, "llms.txt"), llmsTxt());
 
       console.log(
         `\nprerendered ${Object.keys(pageSeo).length} routes ` +
-          `(${indexablePaths.length} in sitemap.xml)`,
+          `(${indexablePaths.length} in sitemap.xml, llms.txt written)`,
       );
     },
   };

@@ -23,6 +23,14 @@ export const BUSINESS_NAME = "Habibi Come to Crete Transfers";
 // A share card sized for the platforms that crop it, not the logo. See public/og-image.jpg.
 export const OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 
+// Exported because the schema below and the llms.txt written at build time both state it,
+// and a business reachable on two different numbers depending on where you read is worse
+// than one that publishes neither.
+export const CONTACT = {
+  telephone: "+30 697 626 3677",
+  email: "habibitransferscrete@gmail.com",
+};
+
 export type PageSeo = {
   title: string;
   description: string;
@@ -41,8 +49,8 @@ const business = {
   "@id": `${SITE_URL}/#business`,
   name: BUSINESS_NAME,
   url: `${SITE_URL}/`,
-  telephone: "+30 697 626 3677",
-  email: "habibitransferscrete@gmail.com",
+  telephone: CONTACT.telephone,
+  email: CONTACT.email,
   image: OG_IMAGE,
   address: {
     "@type": "PostalAddress",
