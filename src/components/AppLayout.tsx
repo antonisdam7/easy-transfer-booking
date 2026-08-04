@@ -5,6 +5,7 @@ import { Home, Info, MapPin, Phone, HelpCircle } from "lucide-react";
 // The 1024px original is 1.4 MB. Nothing on the site draws it larger than 64 CSS
 // pixels, so every page was paying for an image it then threw away.
 import logo from "@/assets/logo-160.jpg";
+import { BUSINESS_NAME } from "@/lib/seo";
 
 const navItems = [
   { title: "Home", url: "/", icon: Home },
@@ -23,11 +24,15 @@ export default function AppLayout() {
           <div className="flex items-center gap-3">
             <img
               src={logo}
-              alt="Habibi Come to Crete"
+              alt={BUSINESS_NAME}
               className="w-10 h-10 rounded-full object-cover"
             />
+            {/* The name in full, because this is the one place a visitor reads it and the
+                schema, the About page and the Facebook page all say "Transfers" too. The
+                break puts the brand on one line and what it does on the next, rather than
+                cutting the brand itself in half the way "Habibi Come / to Crete" did. */}
             <span className="font-display font-bold text-primary text-sm leading-tight hidden sm:block">
-              Habibi Come<br />to Crete
+              Habibi Come to Crete<br />Transfers
             </span>
           </div>
 
