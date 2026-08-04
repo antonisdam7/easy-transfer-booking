@@ -282,6 +282,16 @@ export function faresFrom(airport: string): RouteFare[] {
   return rows.sort((a, b) => a.oneWay - b.oneWay || a.name.localeCompare(b.name));
 }
 
+// A driving time as a reader says it out loud. Lives here rather than in the fare table
+// because the FAQs quote the same durations, and two copies would eventually disagree.
+export function durationLabel(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+
+  if (!hours) return `${rest} min`;
+  return rest ? `${hours} h ${rest} min` : `${hours} h`;
+}
+
 // One end of a journey as the customer chose it: the hotel they searched for, or an
 // airport or port they picked by name.
 export type LocationValue = {

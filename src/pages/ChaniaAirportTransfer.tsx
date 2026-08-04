@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
 import { FareTable } from "@/components/FareTable";
+import { FaqList } from "@/components/FaqList";
 import { CHANIA_AIRPORT } from "@/lib/booking";
 
 export default function ChaniaAirportTransfer() {
@@ -51,6 +52,8 @@ export default function ChaniaAirportTransfer() {
         </p>
         <FareTable airport={CHANIA_AIRPORT} />
       </div>
+
+      <FaqList route="/chania-airport-transfer" heading="Chania Airport transfer questions" />
 
       <div className="flex flex-wrap gap-3">
         <Link to="/" className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium">

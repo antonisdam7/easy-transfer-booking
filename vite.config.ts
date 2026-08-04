@@ -101,12 +101,20 @@ function prerender(): Plugin {
       // crawler that ignores robots.txt still has to be told in the page itself.
       for (const routePath of Object.keys(pageSeo)) {
         const html = before + headFor(routePath).trimStart() + after;
-        // "/" is the file Vite already wrote; the rest each get a directory so the URL
-        // stays clean and Vercel serves the file before it reaches the SPA rewrite.
+        // "/" is the file Vite already wrote. "/404" is the name Vercel looks for when a
+        // request matches nothing else. The rest each get a directory, so the URL stays
+        // clean and Vercel finds a real file at it.
+        //
+        // Because every route in pageSeo lands on disk here, vercel.json no longer needs a
+        // catch-all rewrite -- which is what lets an unknown URL reach 404.html and answer
+        // with the status it should. The cost is that a React route with no pageSeo entry
+        // would 404 in production, so the two lists have to stay in step.
         const target =
           routePath === "/"
             ? indexPath
-            : path.join(outDir, routePath.replace(/^\//, ""), "index.html");
+            : routePath === "/404"
+              ? path.join(outDir, "404.html")
+              : path.join(outDir, routePath.replace(/^\//, ""), "index.html");
 
         fs.mkdirSync(path.dirname(target), { recursive: true });
         fs.writeFileSync(target, html);

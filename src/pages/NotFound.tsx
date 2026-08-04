@@ -1,8 +1,14 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useSeo } from "@/hooks/useSeo";
 
 const NotFound = () => {
   const location = useLocation();
+
+  // The served 404.html already carries these tags. This is for the other way in: a
+  // customer who clicks a dead link while the app is running never reloads the page, so
+  // without this they would keep the previous page's title and its missing noindex.
+  useSeo("/404");
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);

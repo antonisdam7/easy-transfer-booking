@@ -1,4 +1,4 @@
-import { CHANIA_AIRPORT, HERAKLION_AIRPORT, faresFrom } from "@/lib/booking";
+import { CHANIA_AIRPORT, HERAKLION_AIRPORT, durationLabel, faresFrom } from "@/lib/booking";
 
 // Published fares, straight from the table the booking form prices with. Nothing here
 // is typed by hand, so a fare the operator changes changes here too, and the page can
@@ -7,14 +7,6 @@ import { CHANIA_AIRPORT, HERAKLION_AIRPORT, faresFrom } from "@/lib/booking";
 // The reason to publish them at all: a price is the first thing a traveller looks for,
 // and the only place this site had one was behind a search, on a page marked noindex.
 // Every competitor publishes a route list. This is the same list, and it is real.
-
-function durationLabel(minutes: number) {
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-
-  if (!hours) return `${rest} min`;
-  return rest ? `${hours} h ${rest} min` : `${hours} h`;
-}
 
 // The rows are not links. They could deep-link into the results page, but that page is
 // noindex and blocked in robots.txt, so eighty of them per landing page would be eighty

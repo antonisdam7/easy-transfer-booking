@@ -9,7 +9,7 @@
 // Imports here stay relative. This module is pulled into the Vite config, which resolves
 // its own imports before the "@/" alias exists.
 
-import { faqs } from "./faqs";
+import { Faq, faqs, pageFaqs } from "./faqs";
 
 export const SITE_URL = "https://habibitransferscrete.com";
 // What every title ends with, and what a search result calls the business. This was
@@ -78,15 +78,19 @@ function service(name: string, serviceType: string) {
   };
 }
 
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqs.map((faq) => ({
-    "@type": "Question",
-    name: faq.q,
-    acceptedAnswer: { "@type": "Answer", text: faq.a },
-  })),
-};
+// Only ever called with a list the page also puts on screen. Structured data describing
+// answers a visitor cannot read is the one FAQ mistake Google acts on.
+function faqSchema(list: Faq[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: list.map((faq) => ({
+      "@type": "Question",
+      name: faq.q,
+      acceptedAnswer: { "@type": "Answer", text: faq.a },
+    })),
+  };
+}
 
 export const pageSeo: Record<string, PageSeo> = {
   "/": {
@@ -159,7 +163,7 @@ export const pageSeo: Record<string, PageSeo> = {
     description:
       "How booking works, which vehicles we run, what happens when a flight is delayed, how cancellation works, how child seats are arranged, and how to pay.",
     canonicalPath: "/faqs",
-    structuredData: [business, faqSchema],
+    structuredData: [business, faqSchema(faqs)],
   },
   // Reached only with a search already filled in. There is nothing here for someone
   // arriving cold from a search engine, and the query string would spawn endless
@@ -180,6 +184,16 @@ export const pageSeo: Record<string, PageSeo> = {
     title: "Sign in",
     description: "Operator sign in.",
     canonicalPath: "/admin/login",
+    noindex: true,
+  },
+  // Not a page anyone links to. It becomes dist/404.html, which Vercel serves -- with a
+  // real 404 status -- for any URL that matches no other file. Before this, the catch-all
+  // rewrite answered every wrong URL with the homepage under a 200, so Google recorded a
+  // "soft 404" and had to guess that a page it had been handed was not really there.
+  "/404": {
+    title: "Page Not Found",
+    description: "This page does not exist. Head back to the home page to book a transfer.",
+    canonicalPath: "/404",
     noindex: true,
   },
 };
@@ -214,9 +228,14 @@ export function structuredDataFor(routePath: string): Record<string, unknown>[] 
   const seo = pageSeo[routePath];
   if (!seo?.structuredData) return [];
 
+  // Keyed off the route rather than listed per page, so the schema is built from the very
+  // list the page renders. There is no way to describe questions the page does not ask.
+  const routeFaqs = pageFaqs[routePath];
+  const withFaqs = routeFaqs ? [...seo.structuredData, faqSchema(routeFaqs)] : seo.structuredData;
+
   // The homepage is the root of the trail, so a trail to it would be a single step
   // pointing at itself.
-  if (routePath === "/") return seo.structuredData;
+  if (routePath === "/") return withFaqs;
 
-  return [...seo.structuredData, breadcrumb(routePath)];
+  return [...withFaqs, breadcrumb(routePath)];
 }

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
 import { IslandFareTable } from "@/components/FareTable";
+import { FaqList } from "@/components/FaqList";
 
 export default function PrivateTaxiCrete() {
   useSeo("/private-taxi-crete");
@@ -50,6 +51,8 @@ export default function PrivateTaxiCrete() {
         </p>
         <IslandFareTable />
       </div>
+
+      <FaqList route="/private-taxi-crete" heading="Private taxi questions" />
 
       <div className="flex flex-wrap gap-3">
         <Link to="/" className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium">

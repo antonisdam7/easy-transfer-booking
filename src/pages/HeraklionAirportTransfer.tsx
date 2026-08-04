@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
 import { FareTable } from "@/components/FareTable";
+import { FaqList } from "@/components/FaqList";
 import { HERAKLION_AIRPORT } from "@/lib/booking";
 
 export default function HeraklionAirportTransfer() {
@@ -53,6 +54,11 @@ export default function HeraklionAirportTransfer() {
         </p>
         <FareTable airport={HERAKLION_AIRPORT} />
       </div>
+
+      <FaqList
+        route="/heraklion-airport-transfer"
+        heading="Heraklion Airport transfer questions"
+      />
 
       <div className="flex flex-wrap gap-3">
         <Link to="/" className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium">
