@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
 import { IslandFareTable } from "@/components/FareTable";
 import { FaqList } from "@/components/FaqList";
+import { Reviews } from "@/components/Reviews";
 
 export default function CreteTransfers() {
   useSeo("/crete-transfers");
@@ -56,6 +57,8 @@ export default function CreteTransfers() {
       </div>
 
       <FaqList route="/crete-transfers" heading="Crete transfer questions" />
+
+      <Reviews limit={2} />
 
       <div className="flex flex-wrap gap-3">
         <Link to="/" className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium">

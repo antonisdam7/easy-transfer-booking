@@ -1,5 +1,6 @@
 import { useSeo } from "@/hooks/useSeo";
 import logo from "@/assets/logo-160.jpg";
+import { Reviews } from "@/components/Reviews";
 
 const About = () => {
   useSeo("/about");
@@ -30,6 +31,10 @@ const About = () => {
             <li>✓ Flight monitoring for airport pickups</li>
             <li>✓ Child seats available on request</li>
           </ul>
+
+          <div className="mt-10">
+            <Reviews />
+          </div>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import balos from "@/assets/balos-beach.webp";
-import { Phone, Star, MapPin } from "lucide-react";
+import { Phone, MapPin, Receipt } from "lucide-react";
 import { useSeo } from "@/hooks/useSeo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import LocationInput from "@/components/LocationInput";
+import { Reviews } from "@/components/Reviews";
 import { DateInput, TimeInput } from "@/components/DateTimeInput";
 import { HERAKLION_AIRPORT, locationFromName, locationToParams, LocationValue } from "@/lib/booking";
 
@@ -172,7 +173,11 @@ const Index = () => {
       <div className="bg-secondary py-10">
         <div className="container grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl">
           {[
-            { icon: Star, title: "5-Star Service", desc: "Rated excellent by hundreds of travelers" },
+            // Was "5-Star Service -- rated excellent by hundreds of travelers". There are
+            // five recommendations, on a platform that stopped collecting stars in 2018.
+            // The real recommendations are printed further down the page; a claim that
+            // large sitting above them would only make them look small.
+            { icon: Receipt, title: "Fixed Fares", desc: "Quoted per vehicle before you book, VAT and tolls in" },
             { icon: MapPin, title: "All of Crete", desc: "Airports, ports, hotels — anywhere" },
             { icon: Phone, title: "24/7 Available", desc: "Always here when you need us" },
           ].map(({ icon: Icon, title, desc }) => (
@@ -187,6 +192,10 @@ const Index = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="container max-w-4xl py-12">
+        <Reviews />
       </div>
 
       {/* The four transfer pages, in the body rather than only in the footer. A link
