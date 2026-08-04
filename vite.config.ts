@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import fs from "node:fs";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { pathToFileURL } from "node:url";
 import {
   BUSINESS_NAME,
   CONTACT,
@@ -11,6 +12,7 @@ import {
   SITE_URL,
   pageSeo,
   indexablePaths,
+  prerenderedBodyPaths,
   structuredDataFor,
 } from "./src/lib/seo";
 import {
@@ -152,11 +154,35 @@ function llmsTxt() {
   ].join("\n");
 }
 
+// The server bundle written by the first of the two builds. Absent on a first run, or if
+// somebody runs `vite build` on its own, in which case the heads are still written and the
+// bodies simply stay empty -- the site works either way, which is the point of it being a
+// separate step rather than a requirement.
+async function loadRenderer(): Promise<((routePath: string) => string) | null> {
+  const entry = path.resolve(__dirname, "dist-ssr/entry-server.js");
+  if (!fs.existsSync(entry)) return null;
+
+  // A file path, not a specifier: on Windows an absolute path is not a valid import URL.
+  const mod = await import(pathToFileURL(entry).href);
+  return mod.render;
+}
+
 function prerender(): Plugin {
+  let isSsrBuild = false;
+
   return {
     name: "prerender-routes",
     apply: "build",
-    closeBundle() {
+    configResolved(config) {
+      // The SSR pass builds entry-server.js and nothing else. Writing HTML files from it
+      // would mean writing them before the client build has emitted the CSS and JS they
+      // point at, so this pass sits it out.
+      isSsrBuild = Boolean(config.build.ssr);
+    },
+    async closeBundle() {
+      if (isSsrBuild) return;
+
+      const renderBody = await loadRenderer();
       const outDir = path.resolve(__dirname, "dist");
       const indexPath = path.join(outDir, "index.html");
       if (!fs.existsSync(indexPath)) return;
@@ -174,8 +200,21 @@ function prerender(): Plugin {
       // Every route, not only the indexable ones. The noindex pages get a file too so
       // the tag is in the HTML as served: robots.txt keeps crawlers off them, but a
       // crawler that ignores robots.txt still has to be told in the page itself.
+      const bodyPaths = new Set(renderBody ? prerenderedBodyPaths : []);
+      let bodiesWritten = 0;
+
       for (const routePath of Object.keys(pageSeo)) {
-        const html = before + headFor(routePath).trimStart() + after;
+        let html = before + headFor(routePath).trimStart() + after;
+
+        // The mount point React looks for, filled in rather than left empty. main.tsx
+        // checks whether it has children and hydrates instead of mounting when it does.
+        if (bodyPaths.has(routePath)) {
+          const body = renderBody(routePath);
+          if (!body) throw new Error(`prerender: ${routePath} rendered to nothing`);
+          html = html.replace('<div id="root"></div>', `<div id="root">${body}</div>`);
+          bodiesWritten += 1;
+        }
+
         // "/" is the file Vite already wrote. "/404" is the name Vercel looks for when a
         // request matches nothing else. The rest each get a directory, so the URL stays
         // clean and Vercel finds a real file at it.
@@ -202,7 +241,10 @@ function prerender(): Plugin {
 
       console.log(
         `\nprerendered ${Object.keys(pageSeo).length} routes ` +
-          `(${indexablePaths.length} in sitemap.xml, llms.txt written)`,
+          `(${indexablePaths.length} in sitemap.xml, llms.txt written)\n` +
+          (renderBody
+            ? `rendered ${bodiesWritten} page bodies into their files`
+            : "no server bundle found -- bodies left to the browser"),
       );
     },
   };

@@ -236,6 +236,18 @@ export const pageSeo: Record<string, PageSeo> = {
 // Routes that get their own HTML file at build time, and that belong in the sitemap.
 export const indexablePaths = Object.keys(pageSeo).filter((path) => !pageSeo[path].noindex);
 
+// Routes whose body is rendered into the file too, not just the head.
+//
+// Everything on these pages is content: text, fares, questions, links. Nothing on them
+// needs a browser to mean anything, so all of it can be written once at build time and
+// handed to whoever asks -- including the readers that never run the JavaScript.
+//
+// The homepage is left out on purpose. It carries the booking form and the Google Maps
+// loader, and a form rendered into a file is markup that has to be replaced the moment
+// anyone touches it. The results page is a search, the admin screens are a session, and
+// the 404 is by definition a page with nothing behind it.
+export const prerenderedBodyPaths = indexablePaths.filter((path) => path !== "/");
+
 // A two-step trail, home then here. Google reads it to draw the path under a result
 // instead of the bare URL, and it is the one piece of schema every inner page can
 // carry truthfully -- the site really is one level deep.

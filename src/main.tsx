@@ -1,4 +1,4 @@
-import { createRoot } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
@@ -9,4 +9,14 @@ import "./index.css";
 // The title used to be forced to the bare site name, which overwrote whatever the page
 // had already put there. Both are the head's job, and the head is written once.
 
-createRoot(document.getElementById("root")!).render(<App />);
+const container = document.getElementById("root")!;
+
+// The content pages arrive with their markup already in the file, written at build time by
+// entry-server.tsx. Hydrating attaches React to what is there; mounting would clear it
+// first, so the reader would watch a finished page blank itself and come back. The
+// homepage, the booking flow and the admin screens arrive empty and are mounted normally.
+if (container.firstChild) {
+  hydrateRoot(container, <App />);
+} else {
+  createRoot(container).render(<App />);
+}
