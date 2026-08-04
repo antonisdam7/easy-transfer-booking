@@ -6,6 +6,7 @@
 // seo.ts, which resolves before the "@/" alias exists.
 
 import { CHANIA_AIRPORT, HERAKLION_AIRPORT, durationLabel, faresFrom } from "./booking";
+import { RouteFacts, transferRoutes } from "./transferRoutes";
 
 export type Faq = { q: string; a: string };
 
@@ -149,9 +150,25 @@ function privateTaxiFaqs(): Faq[] {
   ];
 }
 
+// The two questions a route page exists to answer. Both are answered in the page's first
+// paragraph as well; these are the version Google can lift into the result itself.
+function routeFaqs(route: RouteFacts): Faq[] {
+  return [
+    {
+      q: `How much is a taxi from Heraklion Airport to ${route.label}?`,
+      a: `€${route.oneWay} one way, fixed at the moment you book. That is the fare for the whole vehicle rather than per person, and it includes VAT, tolls and the driver's waiting time. Booked as a return, the second leg is 20% off.`,
+    },
+    {
+      q: `How long does the transfer from Heraklion Airport to ${route.label} take?`,
+      a: `${route.label} is ${route.km} km from the terminal, about ${route.duration} in normal traffic. That is a driving time measured on the road, not a straight-line estimate.`,
+    },
+  ];
+}
+
 export const pageFaqs: Record<string, Faq[]> = {
   "/heraklion-airport-transfer": heraklionFaqs(),
   "/chania-airport-transfer": chaniaFaqs(),
   "/crete-transfers": creteTransfersFaqs(),
   "/private-taxi-crete": privateTaxiFaqs(),
+  ...Object.fromEntries(transferRoutes.map((route) => [route.path, routeFaqs(route)])),
 };

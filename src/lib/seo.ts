@@ -10,6 +10,7 @@
 // its own imports before the "@/" alias exists.
 
 import { Faq, faqs, pageFaqs } from "./faqs";
+import { RouteFacts, transferRoutes } from "./transferRoutes";
 
 export const SITE_URL = "https://habibitransferscrete.com";
 // What every title ends with, and what a search result calls the business. This was
@@ -92,7 +93,7 @@ function faqSchema(list: Faq[]) {
   };
 }
 
-export const pageSeo: Record<string, PageSeo> = {
+const staticPages: Record<string, PageSeo> = {
   "/": {
     title: "Crete Transfers & Airport Taxi",
     description:
@@ -196,6 +197,32 @@ export const pageSeo: Record<string, PageSeo> = {
     canonicalPath: "/404",
     noindex: true,
   },
+};
+
+// A route page's head, built from the fare rather than written. The price in the
+// description is the point: it is what a searcher wants and what almost no competing
+// result shows before the click.
+function routeSeo(route: RouteFacts): PageSeo {
+  return {
+    title: route.title,
+    description:
+      `Private transfer from Heraklion Airport to ${route.label}, ${route.km} km and about ` +
+      `${route.duration}. Fixed fare from €${route.oneWay} per vehicle, with flight tracking ` +
+      `and local drivers.`,
+    canonicalPath: route.path,
+    structuredData: [
+      business,
+      service(route.title, `Private transfers from Heraklion Airport (HER) to ${route.label}`),
+    ],
+  };
+}
+
+// The route pages are folded in from the list that builds them, so they get everything a
+// hand-written entry gets -- their own prerendered file, a line in the sitemap, a
+// breadcrumb -- and nobody has to remember to add them twice.
+export const pageSeo: Record<string, PageSeo> = {
+  ...staticPages,
+  ...Object.fromEntries(transferRoutes.map((route) => [route.path, routeSeo(route)])),
 };
 
 // Routes that get their own HTML file at build time, and that belong in the sitemap.

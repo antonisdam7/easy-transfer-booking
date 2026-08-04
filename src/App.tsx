@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import AppLayout from "./components/AppLayout";
 import Index from "./pages/Index";
+import { transferRoutes } from "./lib/transferRoutes";
 
 // The landing page is imported directly: it is what most visitors ask for first, and
 // waiting on a second request to draw it would only slow the common case down.
@@ -23,6 +24,7 @@ const HeraklionAirportTransfer = lazy(() => import("./pages/HeraklionAirportTran
 const ChaniaAirportTransfer = lazy(() => import("./pages/ChaniaAirportTransfer"));
 const PrivateTaxiCrete = lazy(() => import("./pages/PrivateTaxiCrete"));
 const BookingResults = lazy(() => import("./pages/BookingResults"));
+const TransferRoute = lazy(() => import("./pages/TransferRoute"));
 
 // Deliberately blank, and tall enough to hold the header still while a page arrives.
 // A spinner that flashes for 80ms reads as a fault; empty space does not.
@@ -49,6 +51,16 @@ const App = () => (
             <Route path="/chania-airport-transfer" element={<ChaniaAirportTransfer />} />
             <Route path="/private-taxi-crete" element={<PrivateTaxiCrete />} />
             <Route path="/booking-results" element={<BookingResults />} />
+            {/* Registered from the same list that writes their heads and prerenders them,
+                so a route can never exist in the sitemap without existing here. Without a
+                catch-all rewrite in front of the site, that gap would be a live 404. */}
+            {transferRoutes.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={<TransferRoute path={route.path} />}
+              />
+            ))}
           </Route>
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route

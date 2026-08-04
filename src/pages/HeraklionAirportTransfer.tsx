@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import { useSeo } from "@/hooks/useSeo";
 import { FareTable } from "@/components/FareTable";
 import { FaqList } from "@/components/FaqList";
+import { RouteLinks } from "@/components/RouteLinks";
 import { HERAKLION_AIRPORT } from "@/lib/booking";
+import { transferRoutes } from "@/lib/transferRoutes";
 
 export default function HeraklionAirportTransfer() {
   useSeo("/heraklion-airport-transfer");
@@ -53,6 +55,16 @@ export default function HeraklionAirportTransfer() {
           Nikolaos are already counted in.
         </p>
         <FareTable airport={HERAKLION_AIRPORT} />
+      </div>
+
+      <div className="space-y-3">
+        <h2 className="text-xl font-display font-semibold text-primary">
+          The routes we drive most
+        </h2>
+        <p className="text-sm md:text-base text-muted-foreground">
+          Each of these has a page of its own, with the drive described and the fare in full.
+        </p>
+        <RouteLinks routes={transferRoutes} />
       </div>
 
       <FaqList
