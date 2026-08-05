@@ -1,7 +1,9 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import balos from "@/assets/balos-beach.webp";
+import balos1024 from "@/assets/balos-beach-1024.webp";
+import balos1440 from "@/assets/balos-beach-1440.webp";
+import balos1672 from "@/assets/balos-beach-1672.webp";
 import { Phone, MapPin, Receipt } from "lucide-react";
 import { useSeo } from "@/hooks/useSeo";
 import { Button } from "@/components/ui/button";
@@ -72,8 +74,22 @@ const Index = () => {
             measures. Left to itself the browser discovers it partway down the
             stylesheet and queues it behind the scripts; the hint moves it to the
             front, which is the whole of the LCP on this page. */}
+        {/* Three widths of the same photograph, so a phone is not made to carry the
+            desktop one. The browser picks before it downloads anything: it reads the
+            widths below, works out how many pixels this <img> will actually occupy,
+            and asks for the smallest file that covers it.
+
+            sizes says 75vw under 640px rather than the 100vw the image really spans,
+            which sounds like a lie and is a deliberate one. A retina phone multiplies
+            by its pixel ratio -- 390 CSS px at 3x asks for 1170 -- and would take the
+            1440 file for detail that lands behind a translucent card, under a veil,
+            cropped top and bottom. Three quarters puts it on the 1024 instead: 94 kB
+            against 167, on the connection least able to afford it. Anything wider is
+            told the truth and gets the full file. */}
         <img
-          src={balos}
+          src={balos1440}
+          srcSet={`${balos1024} 1024w, ${balos1440} 1440w, ${balos1672} 1672w`}
+          sizes="(max-width: 640px) 75vw, 100vw"
           alt=""
           aria-hidden="true"
           fetchPriority="high"
