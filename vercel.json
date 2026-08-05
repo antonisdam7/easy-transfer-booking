@@ -1,3 +1,11 @@
 {
-  "trailingSlash": false
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.habibitransferscrete.com" }],
+      "destination": "https://habibitransferscrete.com/:path*",
+      "permanent": true
+    }
+  ]
 }
