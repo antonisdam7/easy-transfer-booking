@@ -80,20 +80,31 @@ export const AppRoutes = () => (
   </Suspense>
 );
 
+// Everything inside the router, so the build and the browser mount the same children in
+// the same order. Only the router differs: BrowserRouter here, StaticRouter in
+// entry-server.tsx.
+//
+// Sonner used to sit outside this, on the reading that it draws nothing until something
+// raises a toast. It draws nothing visible; it does render a <section> to hold the
+// notifications, and it renders it on the very first pass. Left out of the build, that
+// section was an extra first child appearing from nowhere during hydration -- and a
+// mismatch at the first child is a mismatch at the root, so React discarded the whole
+// prerendered page and rebuilt it. Every page, not just this one.
+export const AppTree = () => (
+  <>
+    <Sonner />
+    <AppRoutes />
+  </>
+);
+
 // The shell used to mount a QueryClientProvider, a TooltipProvider and a second
 // Toaster. Nothing ever called a query, drew a tooltip, or raised a toast through
 // that Toaster -- every message on the site comes from sonner. They were scaffolding,
 // and each one was paid for on the first page view.
-//
-// Sonner stays outside AppRoutes: it draws nothing until something raises a toast, and
-// during the build there is nobody to raise one.
 const App = () => (
-  <>
-    <Sonner />
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
-  </>
+  <BrowserRouter>
+    <AppTree />
+  </BrowserRouter>
 );
 
 export default App;

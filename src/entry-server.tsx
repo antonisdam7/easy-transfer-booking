@@ -1,6 +1,6 @@
 import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom/server";
-import { AppRoutes } from "./App";
+import { AppTree } from "./App";
 
 // The build's half of the site.
 //
@@ -22,7 +22,7 @@ import { AppRoutes } from "./App";
 export function render(routePath: string): string {
   return renderToString(
     <StaticRouter location={routePath}>
-      <AppRoutes />
+      <AppTree />
     </StaticRouter>,
   );
 }

@@ -16,7 +16,17 @@ const container = document.getElementById("root")!;
 // first, so the reader would watch a finished page blank itself and come back. The
 // homepage, the booking flow and the admin screens arrive empty and are mounted normally.
 if (container.firstChild) {
-  hydrateRoot(container, <App />);
+  // React recovers from a failed hydration by silently rebuilding the page, which is
+  // why the site spent a week discarding every prerendered body without anything
+  // saying so: the pages looked right, and they were being thrown away and redrawn.
+  // This is the only thing that would have said so, and it costs nothing while
+  // hydration succeeds.
+  hydrateRoot(container, <App />, {
+    onRecoverableError: (error, info) => {
+      // eslint-disable-next-line no-console
+      console.error("Hydration failed, page rebuilt from scratch:", error, info?.componentStack);
+    },
+  });
 } else {
   createRoot(container).render(<App />);
 }
