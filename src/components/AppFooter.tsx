@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Facebook, Mail, MessageCircle, Phone } from "lucide-react";
+import { Facebook, Mail, Phone } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
 // The footer used to live inside the homepage, so it appeared on exactly one of the
 // eleven pages. Every other page ended at its last paragraph with no way onward and
@@ -76,7 +77,7 @@ export default function AppFooter() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors font-medium"
           >
-            <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
+            <WhatsAppIcon className="h-4 w-4" /> Chat on WhatsApp
           </a>
           <a
             href="https://www.facebook.com/profile.php?id=61575578152214"
