@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import badge from "@/assets/badge-20-off.webp";
 import balos1024 from "@/assets/balos-beach-1024.webp";
 import balos1440 from "@/assets/balos-beach-1440.webp";
 import balos1672 from "@/assets/balos-beach-1672.webp";
@@ -108,16 +109,29 @@ const Index = () => {
           </h1>
           <p className="text-primary/80 text-sm mb-6">Search available options in seconds.</p>
           <form onSubmit={onSearch} className="space-y-4">
-            <div className="flex items-center justify-end gap-3">
-              <Label htmlFor="roundtrip" className="text-sm font-medium">
-                Roundtrip
-              </Label>
-              <Switch
-                id="roundtrip"
-                checked={searchData.roundtrip}
-                onCheckedChange={(checked) => setSearchData((prev) => ({ ...prev, roundtrip: checked === true }))}
-                className="data-[state=checked]:bg-green-600"
+            {/* The discount sits over the switch that earns it. The site has always
+                charged a return at one full leg plus a second at 20% off; until now the
+                only place that said so was the small print under the fare tables, which
+                nobody reads before deciding. Here it is next to the control. */}
+            <div className="flex flex-col items-end gap-1">
+              <img
+                src={badge}
+                alt="Book a return and the second leg is 20% off"
+                width={108}
+                height={106}
+                className="h-14 w-auto drop-shadow-md select-none"
               />
+              <div className="flex items-center gap-3">
+                <Label htmlFor="roundtrip" className="text-sm font-medium">
+                  Roundtrip
+                </Label>
+                <Switch
+                  id="roundtrip"
+                  checked={searchData.roundtrip}
+                  onCheckedChange={(checked) => setSearchData((prev) => ({ ...prev, roundtrip: checked === true }))}
+                  className="data-[state=checked]:bg-green-600"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
