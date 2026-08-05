@@ -1,51 +1,118 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 558" width="1024" height="558" role="img" aria-label="Illustration of a 16-seat minibus">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 558" width="1024" height="558" role="img" aria-label="Illustration of a long-wheelbase high-roof 16-seat minibus, seen from the side">
   <!--
     Drawn here rather than photographed, because there is no photograph of this vehicle
-    yet and the only other one to hand belonged to a competitor. It is deliberately a
-    drawing and not an attempt at one: nobody looking at it will think they have been
-    shown the exact bus that turns up, which is the honest position until the operator
-    sends a picture of his own. Replace the file and the card changes; nothing else does.
+    yet. The one to hand was taken off the internet and belongs to whoever shot it, and
+    recolouring someone else's photograph does not make it ours; it only makes the
+    borrowing harder to spot, which is the wrong direction. So this is a drawing, and
+    deliberately reads as one: nobody looking at it will think they have been shown the
+    exact bus that turns up.
+
+    It is matched to the other three cards on purpose (side on, nose to the right,
+    silver, on white) so the four sit in a row instead of looking like a collage.
+    Replace the file with a real photograph and the card changes; nothing else does.
   -->
-  <rect width="1024" height="558" fill="#eef2f4"/>
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8edf0"/>
+      <stop offset="0.55" stop-color="#ccd5da"/>
+      <stop offset="1" stop-color="#aab6bd"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8497a3"/>
+      <stop offset="1" stop-color="#63757f"/>
+    </linearGradient>
+    <radialGradient id="hub" cx="0.4" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#e9eef1"/>
+      <stop offset="1" stop-color="#b3bec5"/>
+    </radialGradient>
+  </defs>
 
-  <g transform="translate(72 96)">
-    <!-- body -->
-    <path d="M40 250 L40 96 Q40 60 78 56 L520 30 Q604 26 664 62 L806 148 Q844 172 844 210 L844 250 Q844 268 826 268 L58 268 Q40 268 40 250 Z"
-          fill="#cfd9e0" stroke="#8fa3b0" stroke-width="6" stroke-linejoin="round"/>
-    <!-- roof line -->
-    <path d="M52 92 Q52 70 82 68 L520 42" fill="none" stroke="#e7edf1" stroke-width="8" stroke-linecap="round"/>
+  <rect width="1024" height="558" fill="#ffffff"/>
 
-    <!-- windscreen -->
-    <path d="M672 82 L788 152 Q812 168 814 190 L700 190 Q684 190 682 174 L672 96 Z"
-          fill="#9db6c6" stroke="#8fa3b0" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Scaled to fill the card the way the three photographs fill theirs. Drawn at 1:1
+       the bus sat visibly smaller than the cars beside it, which made the biggest
+       vehicle on the page look like the smallest. -->
+  <g transform="translate(23 77) scale(1.1)">
+    <!-- the shadow the vehicle stands in, kept soft so it reads as studio floor -->
+    <ellipse cx="450" cy="332" rx="404" ry="15" fill="#7b8b95" opacity="0.18"/>
 
-    <!-- passenger windows -->
-    <g fill="#9db6c6" stroke="#8fa3b0" stroke-width="5">
-      <rect x="86" y="94" width="126" height="86" rx="8"/>
-      <rect x="228" y="88" width="126" height="90" rx="8"/>
-      <rect x="370" y="82" width="126" height="94" rx="8"/>
-      <rect x="512" y="76" width="126" height="98" rx="8"/>
-    </g>
-
-    <!-- door seam -->
-    <path d="M362 84 L362 264" stroke="#8fa3b0" stroke-width="5" stroke-linecap="round"/>
-
-    <!-- sill -->
-    <path d="M44 236 L840 236" stroke="#8fa3b0" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
-
-    <!-- lamps -->
-    <rect x="806" y="196" width="36" height="22" rx="8" fill="#f2f6f8" stroke="#8fa3b0" stroke-width="4"/>
-    <rect x="42" y="196" width="26" height="22" rx="8" fill="#d98a8a" stroke="#8fa3b0" stroke-width="4"/>
-
-    <!-- wheels -->
+    <!-- Wheels sit under the body so the arch cut-outs frame them, which only works if
+         the tyre is wider than the hole: same centre as the arch, larger radius. Give
+         the arch a bigger radius than the tyre and the white floor shows through the
+         gap as a crescent above each wheel. -->
     <g>
-      <circle cx="204" cy="268" r="58" fill="#3f4c55"/>
-      <circle cx="204" cy="268" r="26" fill="#cfd9e0" stroke="#8fa3b0" stroke-width="5"/>
-      <circle cx="700" cy="268" r="58" fill="#3f4c55"/>
-      <circle cx="700" cy="268" r="26" fill="#cfd9e0" stroke="#8fa3b0" stroke-width="5"/>
+      <circle cx="215" cy="268" r="62" fill="#333c42"/>
+      <circle cx="215" cy="268" r="30" fill="url(#hub)" stroke="#8a99a3" stroke-width="4"/>
+      <circle cx="215" cy="268" r="8" fill="#8a99a3"/>
+      <circle cx="745" cy="268" r="62" fill="#333c42"/>
+      <circle cx="745" cy="268" r="30" fill="url(#hub)" stroke="#8a99a3" stroke-width="4"/>
+      <circle cx="745" cy="268" r="8" fill="#8a99a3"/>
     </g>
 
-    <!-- ground -->
-    <path d="M0 330 L880 330" stroke="#d5dee4" stroke-width="8" stroke-linecap="round"/>
+    <!-- body: flat tail on the left, high roof stepping down to the cab, raked screen,
+         short bonnet, and the two arches cut out along the bottom edge -->
+    <path d="M14 268
+             L14 62
+             Q14 28 48 24
+             L588 24
+             L606 50
+             L692 48
+             Q702 48 708 56
+             L796 152
+             Q800 158 792 160
+             L848 172
+             Q872 178 875 202
+             L876 244
+             Q876 268 852 268
+             L800 268
+             A55 55 0 0 0 690 268
+             L270 268
+             A55 55 0 0 0 160 268
+             Z"
+          fill="url(#body)" stroke="#8a99a3" stroke-width="5" stroke-linejoin="round"/>
+
+    <!-- highlight along the roof, the one thing that makes silver look like metal -->
+    <path d="M52 32 Q46 32 46 44 L46 66" fill="none" stroke="#f3f7f9" stroke-width="6" stroke-linecap="round" opacity="0.9"/>
+    <path d="M60 28 L584 28" stroke="#f3f7f9" stroke-width="6" stroke-linecap="round" opacity="0.75"/>
+
+    <!-- passenger glass: one band down the side, high roof panel left blank above it -->
+    <g fill="url(#glass)" stroke="#8a99a3" stroke-width="4">
+      <rect x="44" y="88" width="126" height="64" rx="7"/>
+      <rect x="182" y="88" width="126" height="64" rx="7"/>
+      <rect x="320" y="88" width="126" height="64" rx="7"/>
+      <rect x="458" y="88" width="126" height="64" rx="7"/>
+      <rect x="616" y="92" width="80" height="60" rx="7"/>
+    </g>
+
+    <!-- windscreen, drawn as the whole raked front the way a flat side view has to -->
+    <path d="M700 56 L790 150 Q796 156 788 158 L730 158 Q716 158 714 146 L700 66 Z"
+          fill="url(#glass)" stroke="#8a99a3" stroke-width="4" stroke-linejoin="round"/>
+
+    <!-- Door mirror, straddling the pillar rather than sitting out on the glass, where
+         it reads as a thumbprint on the windscreen instead of a mirror. -->
+    <path d="M688 116 L702 114" stroke="#4a565e" stroke-width="6" stroke-linecap="round"/>
+    <rect x="698" y="100" width="20" height="34" rx="6" fill="#4a565e"/>
+
+    <!-- seams: the sliding door, and the cab door behind the pillar -->
+    <g stroke="#8a99a3" stroke-width="4" stroke-linecap="round" opacity="0.85">
+      <path d="M314 64 L314 262"/>
+      <path d="M452 64 L452 262"/>
+      <path d="M604 60 L604 262"/>
+    </g>
+
+    <!-- Sill line, broken where the arches are so it does not draw itself across the
+         open wheel wells and over the tyres. -->
+    <g stroke="#8a99a3" stroke-width="4" stroke-linecap="round" opacity="0.55">
+      <path d="M22 246 L163 246"/>
+      <path d="M267 246 L693 246"/>
+      <path d="M797 246 L846 246"/>
+    </g>
+    <rect x="300" y="262" width="170" height="10" rx="5" fill="#8a99a3" opacity="0.8"/>
+
+    <!-- lamps: headlamp and grille at the nose, tail lamp on the flat rear -->
+    <path d="M836 176 L870 184 Q876 186 876 192 L876 200 Q876 206 869 205 L836 200 Z"
+          fill="#f4f8fa" stroke="#8a99a3" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="844" y="212" width="30" height="26" rx="6" fill="#7f8f99" stroke="#8a99a3" stroke-width="4"/>
+    <rect x="16" y="106" width="22" height="104" rx="7" fill="#d98a8a" stroke="#8a99a3" stroke-width="4"/>
   </g>
 </svg>
