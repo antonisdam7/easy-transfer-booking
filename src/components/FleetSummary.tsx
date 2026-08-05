@@ -16,15 +16,15 @@ export function FleetSummary() {
           The cars
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Three vehicles cover everything we drive. The sedan and the estate carry the same
-          four people and cost the same; the estate simply swallows more luggage, which is
-          the difference between a comfortable airport run and a boot that will not shut.
-          The minivan takes larger groups and costs more, because it is a bigger car with a
+          The sedan and the estate carry the same four people and cost the same; the estate
+          simply swallows more luggage, which is the difference between a comfortable airport
+          run and a boot that will not shut. Above them the minivan takes eight and the
+          minibus sixteen, each dearer than the last, because each is a bigger vehicle with a
           bigger fuel bill behind it.
         </p>
       </div>
 
-      <ul className="grid gap-4 sm:grid-cols-3">
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {fleet.map((vehicle) => (
           <li key={vehicle.type} className="rounded-lg border bg-card overflow-hidden">
             <img

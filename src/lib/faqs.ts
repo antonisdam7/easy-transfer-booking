@@ -17,7 +17,7 @@ export const faqs: Faq[] = [
   },
   {
     q: "What vehicles do you have?",
-    a: "We operate a modern Mercedes fleet including sedans (up to 4 passengers), minivans (up to 6), and vans (up to 8).",
+    a: "Four: a Mercedes E-Class sedan and an E-Class estate, both seating up to 4 and costing the same, with the estate taking more luggage; a Mercedes V-Class minivan for up to 8; and a minibus for up to 16.",
   },
   {
     q: "Do you offer child seats?",

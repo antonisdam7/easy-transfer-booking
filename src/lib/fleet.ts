@@ -55,6 +55,24 @@ export const fleet: Vehicle[] = [
     passengers: 8,
     suitcases: 8,
     examples: "Mercedes V-Class or similar",
+  },
+  {
+    type: "minibus",
+    name: "Minibus",
+    // A drawing, not a photograph. There is no picture of this vehicle yet, and it is
+    // better to show something obviously illustrative than to pass off a stock image
+    // as the bus that turns up. Swap the file when a real photograph exists.
+    image: "/vehicle-minibus.svg",
+    width: 1024,
+    height: 558,
+    passengers: 16,
+    suitcases: 16,
+    examples: "16-seat minibus",
     badge: "Largest group",
   },
 ];
+
+// The biggest party we can carry, read off the fleet rather than typed into the booking
+// form. The form used to stop at eight because the minivan did; buy a bigger vehicle,
+// add it here, and the seats appear in the form the same day.
+export const largestParty = Math.max(...fleet.map((vehicle) => vehicle.passengers));

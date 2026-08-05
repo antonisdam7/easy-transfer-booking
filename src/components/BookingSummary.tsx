@@ -3,7 +3,7 @@ import { addMinutes, format, parse } from "date-fns";
 import { enGB } from "date-fns/locale";
 import { Check, Clock3, Luggage, Pencil, Repeat, Route, Users } from "lucide-react";
 import { LocationValue, TripQuote, VehicleType } from "@/lib/booking";
-import { Vehicle } from "@/components/VehicleRow";
+import { Vehicle } from "@/lib/fleet";
 
 // Everything the customer has told us so far, kept beside the cars so choosing one
 // never means scrolling back to check where they were going.

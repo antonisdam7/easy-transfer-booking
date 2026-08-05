@@ -16,6 +16,7 @@ import LocationInput from "@/components/LocationInput";
 import { Reviews } from "@/components/Reviews";
 import { HowItWorks } from "@/components/HowItWorks";
 import { FleetSummary } from "@/components/FleetSummary";
+import { largestParty } from "@/lib/fleet";
 import { RouteLinks } from "@/components/RouteLinks";
 import { transferRoutes } from "@/lib/transferRoutes";
 import { DateInput, TimeInput } from "@/components/DateTimeInput";
@@ -170,7 +171,10 @@ const Index = () => {
                     <SelectValue placeholder="Select people" />
                   </SelectTrigger>
                   <SelectContent>
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                    {/* Up to the largest thing we drive. The list used to stop at eight,
+                        which is the minivan -- a party of twelve had no way to say so and
+                        no reason to think we could carry them. */}
+                    {Array.from({ length: largestParty }, (_, index) => index + 1).map((n) => (
                       <SelectItem key={n} value={String(n)}>
                         {n}
                       </SelectItem>

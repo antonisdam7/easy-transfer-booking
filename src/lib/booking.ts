@@ -206,20 +206,24 @@ export function matchZone(lat: number, lng: number, airport: string): ZoneMatch 
   return best;
 }
 
-export type VehicleType = "sedan" | "estate" | "van";
+export type VehicleType = "sedan" | "estate" | "van" | "minibus";
 
 export const vehicleLabels: Record<VehicleType, string> = {
   sedan: "Mercedes E-Class Sedan",
   estate: "Mercedes E-Class Estate",
   van: "Minivan Mercedes V-Class",
+  minibus: "Minibus",
 };
 
 // The estate carries the same passengers as the sedan and only adds boot space,
-// so it costs the same. The van is a bigger car with a bigger driver's fee.
+// so it costs the same. The van is a bigger car with a bigger driver's fee, and the
+// minibus a bigger one again. Both figures are the operator's, not a curve fitted to
+// the seats: 2.2 is what he charges, and a price list is not somewhere to guess.
 const vehicleMultipliers: Record<VehicleType, number> = {
   sedan: 1,
   estate: 1,
   van: 1.3,
+  minibus: 2.2,
 };
 
 function getVehiclePrice(
@@ -368,13 +372,22 @@ export type TripQuote = {
   stats: { km: number; minutes: number } | null;
 };
 
+// Every vehicle we run, taken from the labels rather than listed again here. Adding a
+// type to VehicleType forces a label, and a label puts the vehicle in every price
+// record automatically -- which is how the minibus was quietly left unpriced the first
+// time round, listed on the page with an empty euro sign beside it.
+export const vehicleTypes = Object.keys(vehicleLabels) as VehicleType[];
+
+const emptyPrices = (): Record<VehicleType, number | null> =>
+  Object.fromEntries(vehicleTypes.map((type) => [type, null])) as Record<VehicleType, number | null>;
+
 const NO_QUOTE: TripQuote = {
   pickupZone: null,
   dropoffZone: null,
   pickupOffsetKm: null,
   dropoffOffsetKm: null,
-  prices: { sedan: null, estate: null, van: null },
-  oneWayPrices: { sedan: null, estate: null, van: null },
+  prices: emptyPrices(),
+  oneWayPrices: emptyPrices(),
   stats: null,
 };
 
@@ -405,11 +418,10 @@ export function quoteTrip(
   const toZone = zoneOf(to, airport);
   if (!fromZone || !toZone) return NO_QUOTE;
 
-  const priced = (returning: boolean) => ({
-    sedan: getVehiclePrice(fromZone.zone, toZone.zone, "sedan", returning),
-    estate: getVehiclePrice(fromZone.zone, toZone.zone, "estate", returning),
-    van: getVehiclePrice(fromZone.zone, toZone.zone, "van", returning),
-  });
+  const priced = (returning: boolean): Record<VehicleType, number | null> =>
+    Object.fromEntries(
+      vehicleTypes.map((type) => [type, getVehiclePrice(fromZone.zone, toZone.zone, type, returning)]),
+    ) as Record<VehicleType, number | null>;
 
   return {
     pickupZone: fromZone.zone,

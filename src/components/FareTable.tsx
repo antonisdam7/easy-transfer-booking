@@ -113,8 +113,8 @@ function FareNote() {
     <p className="text-xs text-muted-foreground">
       Fares are per vehicle, not per person, and include VAT, tolls and the driver's waiting time.
       Shown for the Mercedes E-Class sedan and estate, each seating up to four; the Mercedes
-      V-Class minivan carries more and costs more. A return trip is charged as one full leg plus a
-      second at 20% off.
+      V-Class minivan takes up to eight and the minibus up to sixteen, and both cost more.
+      A return trip is charged as one full leg plus a second at 20% off.
     </p>
   );
 }
