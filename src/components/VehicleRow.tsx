@@ -1,23 +1,14 @@
 import { Luggage, Users } from "lucide-react";
-import { VehicleType } from "@/lib/booking";
+import { Vehicle } from "@/lib/fleet";
 import { cn } from "@/lib/utils";
 
 // A car as a wide row rather than a card in a grid. Three cards side by side made the
 // prices hard to compare and left no room for what each one actually carries, which
 // is the only question a customer is really answering here.
-
-export type Vehicle = {
-  type: VehicleType;
-  name: string;
-  image: string;
-  passengers: number;
-  suitcases: number;
-  // The cars an operator this size actually runs, so nobody arrives expecting a
-  // particular model.
-  examples: string;
-  // Only ever a fact about the fleet or the price list -- never a nudge we made up.
-  badge?: string;
-};
+//
+// The shape of a Vehicle lives in lib/fleet with the cars themselves, because the
+// homepage lists them too and a second copy of "how many suitcases" is a second copy
+// that can disagree.
 
 type Props = {
   vehicle: Vehicle;

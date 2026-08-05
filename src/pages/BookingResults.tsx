@@ -14,7 +14,8 @@ import RouteMap from "@/components/RouteMap";
 import TripEditDialog, { TripDraft } from "@/components/TripEditDialog";
 import ChildSeats from "@/components/ChildSeats";
 import BookingSummary from "@/components/BookingSummary";
-import VehicleRow, { Vehicle } from "@/components/VehicleRow";
+import VehicleRow from "@/components/VehicleRow";
+import { fleet } from "@/lib/fleet";
 import {
   airportValues,
   locationFromParams,
@@ -22,36 +23,6 @@ import {
   VehicleType,
 } from "@/lib/booking";
 
-// Passenger and luggage figures are the operator's own. The example models say what
-// actually turns up, so a booking is not read as a promise of one particular car.
-const fleet: Vehicle[] = [
-  {
-    type: "sedan",
-    name: "Mercedes E-Class Sedan",
-    image: "/vehicle-sedan.png",
-    passengers: 4,
-    suitcases: 4,
-    examples: "Mercedes E-Class or similar",
-  },
-  {
-    type: "estate",
-    name: "Mercedes E-Class Estate",
-    image: "/vehicle-estate.png",
-    passengers: 4,
-    suitcases: 7,
-    examples: "Mercedes E-Class Estate or similar",
-    badge: "Same price, more boot",
-  },
-  {
-    type: "van",
-    name: "Minivan Mercedes V-Class",
-    image: "/vehicle-van.png",
-    passengers: 8,
-    suitcases: 8,
-    examples: "Mercedes V-Class or similar",
-    badge: "Largest group",
-  },
-];
 
 function getInitialState(search: string) {
   const query = new URLSearchParams(search);

@@ -14,6 +14,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import LocationInput from "@/components/LocationInput";
 import { Reviews } from "@/components/Reviews";
+import { HowItWorks } from "@/components/HowItWorks";
+import { FleetSummary } from "@/components/FleetSummary";
+import { RouteLinks } from "@/components/RouteLinks";
+import { transferRoutes } from "@/lib/transferRoutes";
 import { DateInput, TimeInput } from "@/components/DateTimeInput";
 import { HERAKLION_AIRPORT, locationFromName, locationToParams, LocationValue } from "@/lib/booking";
 
@@ -224,7 +228,29 @@ const Index = () => {
         </div>
       </div>
 
-      <div className="container max-w-4xl py-12">
+      {/* What the page was missing. It opened with a form and closed with links, and
+          never once said what the service is, what turns up, or what happens if the
+          flight is late -- the three things a stranger weighing up a stranger's car
+          actually wants answered. All of it was already written somewhere on the site;
+          none of it was on the page every visitor lands on. */}
+      <div className="container max-w-4xl py-12 space-y-14">
+        <HowItWorks />
+        <FleetSummary />
+
+        <section className="space-y-4" aria-labelledby="popular-routes">
+          <div className="space-y-2">
+            <h2 id="popular-routes" className="text-xl font-display font-semibold text-primary">
+              Most booked routes from Heraklion Airport
+            </h2>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              These ten come up more than anything else we drive. The price is the whole car
+              one way, and each one has a page of its own with the road, the driving time and
+              what the journey is actually like.
+            </p>
+          </div>
+          <RouteLinks routes={transferRoutes} />
+        </section>
+
         <Reviews />
       </div>
 
