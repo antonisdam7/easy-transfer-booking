@@ -1,3 +1,4 @@
+import { ReviewAvatar } from "@/components/ReviewAvatar";
 import { FACEBOOK_REVIEWS_URL, reviews } from "@/lib/reviews";
 
 // What customers wrote on Facebook, shown as what it is: recommendations, with the name
@@ -27,13 +28,20 @@ export function Reviews({ limit }: { limit?: number }) {
 
       <ul className="grid gap-3 md:grid-cols-2">
         {shown.map((review) => (
-          <li key={review.name} className="rounded-lg border bg-card p-5 space-y-2">
+          <li key={review.name} className="rounded-lg border bg-card p-5 space-y-3">
+            {/* Name and face first, then what they said -- the order Facebook uses, and
+                the order that matters: the reader decides whether to believe the sentence
+                by looking at who wrote it. */}
+            <div className="flex items-center gap-3">
+              <ReviewAvatar review={review} />
+              <p className="text-sm leading-tight">
+                <span className="block font-medium text-primary">{review.name}</span>
+                <time dateTime={review.date} className="text-muted-foreground">
+                  {review.dateLabel}
+                </time>
+              </p>
+            </div>
             <p className="text-sm md:text-base leading-relaxed">{review.text}</p>
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium text-primary">{review.name}</span>
-              {" · "}
-              <time dateTime={review.date}>{review.dateLabel}</time>
-            </p>
           </li>
         ))}
       </ul>

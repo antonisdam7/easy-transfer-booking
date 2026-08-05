@@ -20,6 +20,15 @@ export type Review = {
   date: string;
   dateLabel: string;
   text: string;
+  // The reviewer's own photograph, imported from src/assets/reviews and set here.
+  //
+  // Left unset on purpose. These are five identifiable private people, and copying their
+  // photographs off Facebook onto a commercial site republishes them somewhere they never
+  // agreed to appear -- a different act from leaving a public recommendation, and one that
+  // in Greece needs their say-so, not ours. Ask them, then drop the file in and add the
+  // line. Until then the avatar falls back to initials, which names nobody who has not
+  // already put their name here themselves.
+  photo?: string;
 };
 
 export const FACEBOOK_REVIEWS_URL =
