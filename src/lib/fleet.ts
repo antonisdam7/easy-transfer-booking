@@ -67,7 +67,7 @@ export const fleet: Vehicle[] = [
     height: 558,
     passengers: 16,
     suitcases: 16,
-    examples: "16-seat minibus",
+    examples: "Mercedes Sprinter or similar",
     badge: "Largest group",
   },
 ];
