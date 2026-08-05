@@ -7,9 +7,12 @@ import { Search, MailCheck, PlaneLanding } from "lucide-react";
 // Every claim here is one the site already makes somewhere else: the confirmation
 // window and the flight monitoring come from the FAQ answers, the cancellation window
 // from the line under the form, the fixed fare from the note under every fare table.
-// Nothing was invented to fill the section out. In particular there is nothing here
-// about name boards or meeting points, because the site has never said how the driver
-// finds you and a plausible guess is still a guess.
+// Nothing was invented to fill the section out.
+//
+// The name board in step three is the one fact that was not written down anywhere. It
+// came from the operator, on being asked, and is now also an FAQ answer -- because
+// "how will I know which car is mine" is the question a stranger in a strange airport
+// is really asking, and it was the one thing this page could not tell them.
 
 const steps = [
   {
@@ -25,7 +28,7 @@ const steps = [
   {
     icon: PlaneLanding,
     title: "Land and go",
-    body: "We watch the arrivals board. A delayed flight moves your pickup to the time you actually land, at no extra cost, and the fare you were quoted is the fare you pay — VAT, tolls and the driver's waiting time included.",
+    body: "Your driver is waiting in the arrivals hall with a sign showing your name. We watch the arrivals board, so a delayed flight moves the pickup to the time you actually land at no extra cost, and the fare you were quoted is the fare you pay — VAT, tolls and waiting time included.",
   },
 ];
 

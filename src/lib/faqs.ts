@@ -28,6 +28,10 @@ export const faqs: Faq[] = [
     a: "Yes, all prices are agreed upon in advance. There are no hidden charges or surge pricing.",
   },
   {
+    q: "How will I find my driver at the airport?",
+    a: "Your driver waits in the arrivals hall holding a sign with your name on it. Walk out of baggage reclaim and look for your name — there is no meeting point to find and no rank to queue at.",
+  },
+  {
     q: "What if my flight is delayed?",
     a: "We monitor all flight arrivals. If your flight is delayed, we'll adjust pickup time automatically at no extra cost.",
   },
