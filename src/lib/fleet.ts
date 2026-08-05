@@ -59,10 +59,12 @@ export const fleet: Vehicle[] = [
   {
     type: "minibus",
     name: "Minibus",
-    // A drawing, not a photograph. There is no picture of this vehicle yet, and it is
-    // better to show something obviously illustrative than to pass off a stock image
-    // as the bus that turns up. Swap the file when a real photograph exists.
-    image: "/vehicle-minibus.svg",
+    // Not a photograph of our own bus: an image the operator generated with Gemini,
+    // cut off its grey studio backdrop and set on the same light background as the
+    // three photographs beside it. It shows the model accurately, which is what the
+    // card claims and all the card claims. Swap the file when a real photograph of
+    // the actual vehicle exists.
+    image: "/vehicle-minibus.webp",
     width: 1024,
     height: 558,
     passengers: 16,
