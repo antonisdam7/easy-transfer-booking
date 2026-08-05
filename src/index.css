@@ -94,3 +94,16 @@
     @apply font-display;
   }
 }
+
+@layer utilities {
+  /* The reviews row scrolls sideways and says so with its cards and arrows; a scrollbar
+     under them adds a second, uglier announcement of the same fact. Touch platforms hide
+     theirs already, so this only equalises the desktop ones. */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
