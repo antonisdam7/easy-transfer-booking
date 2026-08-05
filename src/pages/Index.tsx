@@ -119,7 +119,7 @@ const Index = () => {
                 alt="Book a return and the second leg is 20% off"
                 width={108}
                 height={106}
-                className="h-14 w-auto drop-shadow-md select-none"
+                className="h-7 w-auto drop-shadow select-none"
               />
               <div className="flex items-center gap-3">
                 <Label htmlFor="roundtrip" className="text-sm font-medium">
