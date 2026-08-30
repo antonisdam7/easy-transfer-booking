@@ -24,6 +24,7 @@ const siteLinks = [
   { to: "/crete", label: "Discover Crete" },
   { to: "/faqs", label: "Frequently Asked Questions" },
   { to: "/contact", label: "Contact Us" },
+  { to: "/privacy", label: "Privacy Policy" },
 ];
 
 export default function AppFooter() {

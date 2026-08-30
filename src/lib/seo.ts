@@ -167,6 +167,16 @@ const staticPages: Record<string, PageSeo> = {
     canonicalPath: "/contact",
     structuredData: [business],
   },
+  // Indexed rather than hidden. A privacy policy a search engine cannot see is one a
+  // visitor has to take on trust, and it is the page people look for precisely when
+  // they are deciding whether to trust the site with a phone number.
+  "/privacy": {
+    title: "Privacy Policy",
+    description:
+      "What we collect when you book a Crete transfer, who processes it, how long it is kept, and how to ask us to correct or delete it.",
+    canonicalPath: "/privacy",
+    structuredData: [business],
+  },
   "/faqs": {
     title: "Frequently Asked Questions",
     description:

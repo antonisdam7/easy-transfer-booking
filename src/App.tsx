@@ -25,6 +25,7 @@ import About from "./pages/About";
 import Crete from "./pages/Crete";
 import Contact from "./pages/Contact";
 import Faqs from "./pages/Faqs";
+import Privacy from "./pages/Privacy";
 import CreteTransfers from "./pages/CreteTransfers";
 import HeraklionAirportTransfer from "./pages/HeraklionAirportTransfer";
 import ChaniaAirportTransfer from "./pages/ChaniaAirportTransfer";
@@ -55,6 +56,7 @@ export const AppRoutes = () => (
         <Route path="/crete" element={<Crete />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/faqs" element={<Faqs />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/crete-transfers" element={<CreteTransfers />} />
         <Route path="/heraklion-airport-transfer" element={<HeraklionAirportTransfer />} />
         <Route path="/chania-airport-transfer" element={<ChaniaAirportTransfer />} />

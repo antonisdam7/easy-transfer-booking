@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   analyticsConfigured,
@@ -75,10 +75,16 @@ export default function Analytics() {
     >
       <div className="container max-w-3xl rounded-lg border bg-card p-4 shadow-lg sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          {/* The link matters as much as the buttons. Consent counts for nothing
+              unless it is informed, and "informed" means the detail was reachable
+              before the choice was made, not filed somewhere afterwards. */}
           <p className="text-sm leading-relaxed text-muted-foreground">
             We would like to count visits, so we can see which pages people find useful.
             It uses Google Analytics cookies. Decline and the site works exactly the same
-            — nothing is stored and nothing is sent.
+            — nothing is stored and nothing is sent.{" "}
+            <Link to="/privacy" className="underline underline-offset-2 hover:text-primary">
+              What we collect
+            </Link>
           </p>
           {/* Decline sits first and reads as plainly as Accept. Consent has to be
               freely given to count for anything, and a refusal hidden behind a
