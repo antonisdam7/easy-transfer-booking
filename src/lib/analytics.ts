@@ -68,9 +68,15 @@ export function startAnalytics() {
   document.head.appendChild(script);
 
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag(...args: GtagArguments) {
-    window.dataLayer!.push(args);
-  };
+  // Pushes the `arguments` object, not a rest array, which is the one detail worth
+  // copying letter for letter from the snippet Google hands out. gtag.js reads the
+  // queue back expecting what its own shim put there, and an array is not quite the
+  // same object however alike the two look from here. The cost of being wrong is not
+  // an error -- it is a property that silently records nothing.
+  window.gtag = function () {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer!.push(arguments as unknown as GtagArguments);
+  } as (...args: GtagArguments) => void;
 
   window.gtag("js", new Date());
   // send_page_view off: this is a single page application, so Google's own idea of a
