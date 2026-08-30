@@ -2,6 +2,13 @@
 // Sends two emails through Resend: the booking details to the operator,
 // and a confirmation to the customer.
 
+// Deno loads this as a module. TypeScript only treats a file as one once it has an
+// import or an export, and with neither, both edge functions look like plain scripts
+// sharing a single global scope -- so an editor reports every top-level name here as
+// clashing with the same name in the function next door. Nothing is exported; saying
+// so is what makes the file a module.
+export {};
+
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const MAIL_FROM = Deno.env.get("MAIL_FROM") ?? "";
 const MAIL_TO = Deno.env.get("MAIL_TO") ?? "";
@@ -234,14 +241,15 @@ function customerEmail(t: Transfer): Email {
     "",
     `Reference: ${t.id}`,
     "",
-    // The address in the From line is a sending identity on a verified domain, not a
-    // mailbox: nothing arrives there. A reply reaches us because of the Reply-To
-    // header, which the customer never sees -- so the way to us is also written out
-    // here in full, for anyone who copies the sender address by hand instead.
+    // This used to say "just reply to this email", which was an instruction the site
+    // could not honour: the From line is a sending identity on a verified domain, not
+    // a mailbox, and nothing arrives there. The Reply-To header below does route a
+    // reply to somewhere real, but it is invisible to the reader and to us -- so the
+    // mail no longer asks anyone to trust it, and names the two ways in that can be
+    // checked by dialling them.
     "If any of the details above are wrong, or you need to cancel,",
-    "just reply to this email.",
+    "get in touch any time:",
     "",
-    "You can also reach us any time:",
     `  WhatsApp / phone: ${CONTACT.phone}`,
     `  Email: ${CONTACT.email}`,
     "",

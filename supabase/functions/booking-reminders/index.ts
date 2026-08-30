@@ -11,6 +11,10 @@
 // a booking and the clock at once. This file decides nothing about timing; it sends
 // what it is handed and records that it did.
 
+// See booking-emails: nothing is exported, but saying so is what stops an editor
+// reading the two functions as one shared global scope.
+export {};
+
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const MAIL_FROM = Deno.env.get("MAIL_FROM") ?? "";
 const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET") ?? "";
@@ -158,10 +162,11 @@ function reminderEmail(r: DueReminder): Email {
       ? "We track the flight, so a delay moves your pickup rather than costing you it."
       : "If your plans move, tell us and we will move the pickup with them.",
     "",
-    // Written out rather than left to the Reply-To header, which the customer cannot
-    // see: the sender address on this mail is a sending identity on a verified domain
-    // and receives nothing, so anyone who copies it by hand needs the real way here.
-    "Anything wrong above, or need to cancel? Reply to this email, or reach us at:",
+    // Named outright rather than left to "reply to this email". The sender address is
+    // a sending identity on a verified domain and receives nothing; the Reply-To
+    // header does land somewhere real, but it is invisible to the reader, so the mail
+    // does not ask anyone to rely on it.
+    "Anything wrong above, or need to cancel? Reach us any time:",
     `  WhatsApp / phone: ${CONTACT.phone}`,
     `  Email: ${CONTACT.email}`,
     "",
