@@ -22,6 +22,12 @@ import {
   quoteTrip,
   VehicleType,
 } from "@/lib/booking";
+import {
+  trackBooking,
+  trackDetailsReached,
+  trackResultsViewed,
+  trackVehicleChosen,
+} from "@/lib/analytics";
 
 
 function getInitialState(search: string) {
@@ -189,6 +195,17 @@ export default function BookingResults() {
     if (roomy) setFormData((prev) => ({ ...prev, vehicleType: roomy.type }));
   }, [people, formData.vehicleType]);
 
+  // The second step of the funnel: a search that actually produced prices. The gap
+  // between this and the search before it is people who never got a quote at all.
+  //
+  // Keyed on the two place names rather than on the objects, so re-pricing after an
+  // edit to the date or the party size does not count as a second arrival.
+  const pickupName = formData.pickup?.name;
+  const dropoffName = formData.dropoff?.name;
+  useEffect(() => {
+    if (pickupName && dropoffName) trackResultsViewed(pickupName, dropoffName);
+  }, [pickupName, dropoffName]);
+
   // Both steps are a full page long, so whichever one is being left was almost
   // certainly scrolled down. Landing halfway into the next one hides the heading that
   // says where you now are.
@@ -200,6 +217,7 @@ export default function BookingResults() {
   // The fare is recorded on the way out of this step rather than on every click, so
   // what gets stored is exactly what was on screen when the customer moved on.
   const continueToEquipment = () => {
+    trackDetailsReached(formData.vehicleType, prices[formData.vehicleType]);
     setFormData((prev) => ({ ...prev, price: prices[prev.vehicleType] }));
     goToStep("details");
   };
@@ -271,6 +289,10 @@ export default function BookingResults() {
         // give the operator two sources for one fact.
         notes: formData.notes.trim(),
       });
+      // After the insert succeeded, never before it. A booking counted at the moment
+      // the button was pressed would put failed submissions in the revenue figures.
+      trackBooking(formData.vehicleType, formData.price, formData.roundtrip);
+
       toast.success("Booking confirmed. Check your email for the details.");
       navigate("/");
     } catch (error) {
@@ -318,9 +340,10 @@ export default function BookingResults() {
                       ? `Seats ${vehicle.passengers}, and you are ${people}`
                       : undefined
                   }
-                  onSelect={() =>
-                    setFormData((prev) => ({ ...prev, vehicleType: vehicle.type }))
-                  }
+                  onSelect={() => {
+                    trackVehicleChosen(vehicle.type, prices[vehicle.type]);
+                    setFormData((prev) => ({ ...prev, vehicleType: vehicle.type }));
+                  }}
                 />
               ))}
             </div>

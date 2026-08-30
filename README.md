@@ -99,6 +99,43 @@ the booking is more than an hour old — that last one so a booking made for tom
 not "reminded" moments after its own confirmation. Nothing is marked sent until Resend
 has accepted it, so a failed run retries on the next hour rather than going silent.
 
+## Analytics
+
+Off unless `VITE_GA_MEASUREMENT_ID` is set. With no ID the site loads no Google
+script, writes no cookie and shows no consent banner — which is the honest state of a
+site that measures nothing, so this can ship before the GA property exists.
+
+Set it in Vercel's project settings only, not in your local `.env`: measuring
+development would put your own clicking through the funnel reports.
+
+With an ID present, the banner appears once per visitor and nothing loads until they
+accept. Declining is stored the same way accepting is, so the question is asked once
+either way, and a decline means Google's tag is never fetched at all — there is no
+consent-mode half-measure where the script loads while the answer is pending.
+
+The answer lives in `localStorage`, not a cookie: recording a refusal of cookies by
+setting a cookie is a joke a regulator has heard before.
+
+Five events are sent, all names GA4 recognises, so the funnel and revenue reports
+build themselves with nothing configured in the dashboard:
+
+| Event | Sent when |
+| --- | --- |
+| `page_view` | Every route change. GA's own fires once and never again in a SPA |
+| `search` | The homepage form is submitted |
+| `view_item_list` | Prices are shown for a route |
+| `select_item` | A vehicle is chosen |
+| `begin_checkout` | Continue is pressed into the passenger details |
+| `purchase` | The insert succeeded — never on the click, or failures would earn revenue |
+
+The gaps between those are the drop-off. Booking counts and quoted totals are also on
+`/admin`, taken straight off the rows, which is the only figure here that is money
+rather than a proxy for it.
+
+**Still missing: a privacy policy.** A consent banner is half of what the GDPR asks
+for; the other half is a page saying what is collected and who gets it. Worth writing
+before the ID goes live.
+
 ## Deployment
 
 Vercel, connected to this repository. Build command `npm run build`, output `dist`.

@@ -81,6 +81,41 @@ function extrasSummary(transfer: TransferRequest): string {
   return parts.length > 0 ? parts.join(" | ") : "-";
 }
 
+// Bookings and takings, counted off the rows already on the page.
+//
+// No query of its own and no analytics account behind it: the table below has every
+// booking in it, and the arithmetic on a few hundred rows costs nothing. It is also
+// the only figure here that is actually the operator's money rather than a proxy for
+// it -- Google can say how many people reached the last step, but only this knows
+// what was booked.
+//
+// Counted by transfer date, not by when the booking was taken: "this month" is the
+// month being driven, which is the number that matches the diary.
+function Totals({ transfers }: { transfers: TransferRequest[] }) {
+  const month = new Date().toISOString().slice(0, 7);
+  const thisMonth = transfers.filter((t) => t.date?.startsWith(month));
+  const sum = (rows: TransferRequest[]) =>
+    rows.reduce((total, row) => total + (row.price ?? 0), 0);
+
+  const cells = [
+    { label: "Bookings, all time", value: String(transfers.length) },
+    { label: "This month", value: String(thisMonth.length) },
+    { label: "Quoted this month", value: `€${sum(thisMonth).toLocaleString("en-GB")}` },
+    { label: "Quoted, all time", value: `€${sum(transfers).toLocaleString("en-GB")}` },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-3 pb-6 lg:grid-cols-4">
+      {cells.map(({ label, value }) => (
+        <div key={label} className="rounded-lg border bg-card p-4">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+          <p className="font-display text-2xl font-bold tabular-nums text-primary">{value}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function RouteZones({ transfer }: { transfer: TransferRequest }) {
   const notes = [
     zoneNote(transfer.pickup, transfer.pickupZone, transfer.pickupOffsetKm),
@@ -139,6 +174,10 @@ export default function AdminTransfers() {
             </div>
           </CardHeader>
           <CardContent>
+            {/* Only once there is something to count. A row of zeroes while the
+                request is still in flight reads as "no bookings", which is a
+                different and much worse claim than "not loaded yet". */}
+            {!isLoading && transfers.length > 0 && <Totals transfers={transfers} />}
             <Table>
               <TableHeader>
                 <TableRow>

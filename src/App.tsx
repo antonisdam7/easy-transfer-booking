@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import AppLayout from "./components/AppLayout";
+import Analytics from "./components/Analytics";
 import Index from "./pages/Index";
 import { transferRoutes } from "./lib/transferRoutes";
 
@@ -90,10 +91,14 @@ export const AppRoutes = () => (
 // section was an extra first child appearing from nowhere during hydration -- and a
 // mismatch at the first child is a mismatch at the root, so React discarded the whole
 // prerendered page and rebuilt it. Every page, not just this one.
+// Analytics renders nothing on the server and nothing on the browser's first pass --
+// see the note in the component. That is what lets it sit inside the prerendered tree
+// without being the same mistake Sonner was.
 export const AppTree = () => (
   <>
     <Sonner />
     <AppRoutes />
+    <Analytics />
   </>
 );
 

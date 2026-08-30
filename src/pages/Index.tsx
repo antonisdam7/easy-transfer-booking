@@ -20,6 +20,7 @@ import { largestParty } from "@/lib/fleet";
 import { RouteLinks } from "@/components/RouteLinks";
 import { transferRoutes } from "@/lib/transferRoutes";
 import { DateInput, TimeInput } from "@/components/DateTimeInput";
+import { trackSearch } from "@/lib/analytics";
 import { HERAKLION_AIRPORT, locationFromName, locationToParams, LocationValue } from "@/lib/booking";
 
 const Index = () => {
@@ -58,6 +59,10 @@ const Index = () => {
       toast.error("Please pick your return date.");
       return;
     }
+
+    // The top of the funnel. Everything after this is measured against it: how many
+    // who searched went on to see prices, and how many of those booked.
+    trackSearch(searchData.pickup.name, searchData.dropoff.name, searchData.people);
 
     const params = new URLSearchParams({
       roundtrip: String(searchData.roundtrip),
