@@ -16,6 +16,12 @@ type TransferRow = {
   dropoff_offset_km: string | number | null;
   transfer_date: string;
   transfer_time: string;
+  // Columns since the reminders needed them. Null on rows whose return leg was only
+  // ever a line of text in notes and could not be parsed back out.
+  roundtrip: boolean | null;
+  return_date: string | null;
+  return_time: string | null;
+  return_flight_number: string | null;
   passengers: string;
   vehicle_type: string | null;
   // numeric comes back from PostgREST as a string, so that it never loses precision
@@ -47,6 +53,10 @@ function toTransferRequest(row: TransferRow): TransferRequest {
     dropoffOffsetKm: row.dropoff_offset_km === null ? null : Number(row.dropoff_offset_km),
     date: row.transfer_date,
     time: row.transfer_time,
+    roundtrip: Boolean(row.roundtrip),
+    returnDate: row.return_date,
+    returnTime: row.return_time,
+    returnFlightNumber: row.return_flight_number,
     passengers: row.passengers,
     vehicleType: row.vehicle_type ?? "",
     price: row.price === null ? null : Number(row.price),
@@ -74,6 +84,12 @@ export async function submitTransfer(transfer: NewTransfer) {
     dropoff_offset_km: transfer.dropoffOffsetKm ?? null,
     transfer_date: transfer.date,
     transfer_time: transfer.time,
+    roundtrip: Boolean(transfer.roundtrip),
+    // Empty string to null: the reminder query treats null as "no return leg", and a
+    // blank string would be a leg it then failed to parse a date out of.
+    return_date: transfer.returnDate || null,
+    return_time: transfer.returnTime || null,
+    return_flight_number: transfer.returnFlightNumber || null,
     passengers: transfer.passengers,
     vehicle_type: transfer.vehicleType || null,
     price: transfer.price ?? null,

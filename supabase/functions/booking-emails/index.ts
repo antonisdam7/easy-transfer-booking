@@ -5,6 +5,14 @@
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const MAIL_FROM = Deno.env.get("MAIL_FROM") ?? "";
 const MAIL_TO = Deno.env.get("MAIL_TO") ?? "";
+// Where a customer's reply lands.
+//
+// MAIL_FROM only has to sit on a domain verified in Resend. Verification proves the
+// domain may send; it creates no mailbox and adds no MX record, so unless the domain
+// is separately set up to receive, a reply to that address bounces. This email tells
+// the customer to reply, so it has to name an address that someone reads. Defaults to
+// the operator's own notification address, which by definition is one.
+const MAIL_REPLY_TO = Deno.env.get("MAIL_REPLY_TO") || MAIL_TO;
 const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET") ?? "";
 
 type Transfer = {
@@ -23,6 +31,12 @@ type Transfer = {
   dropoff_offset_km: string | number | null;
   transfer_date: string;
   transfer_time: string;
+  // The return leg. Columns since the 48-hour reminders needed a date something other
+  // than a person could read; before that they were text inside notes.
+  roundtrip: boolean | null;
+  return_date: string | null;
+  return_time: string | null;
+  return_flight_number: string | null;
   passengers: string;
   vehicle_type: string | null;
   // numeric arrives as a string in the webhook payload.
@@ -80,8 +94,11 @@ function locationLine(
 // out base64'd. Pure ASCII subjects are left alone, since encoding those only makes
 // them unreadable in logs and in any client that skips the decode.
 function encodeSubject(subject: string): string {
-  // deno-lint-ignore no-control-regex
-  if (!/[^\x00-\x7F]/.test(subject)) return subject;
+  // Spelled out rather than matched with /[^\x00-\x7F]/, which needs a control
+  // character inside a character class and trips both linters over a rule that is
+  // right nearly everywhere else.
+  const isAscii = [...subject].every((character) => character.charCodeAt(0) < 128);
+  if (isAscii) return subject;
 
   const base64 = btoa(String.fromCharCode(...new TextEncoder().encode(subject)));
   return `=?UTF-8?B?${base64}?=`;
@@ -106,9 +123,17 @@ function operatorEmail(t: Transfer): Email {
     locationLine("Dropoff", t.dropoff, t.dropoff_zone, t.dropoff_offset_km),
     `Date: ${t.transfer_date}`,
     `Time: ${t.transfer_time}`,
+    `Trip: ${t.roundtrip ? "Return" : "One way"}`,
+    ...(t.roundtrip
+      ? [
+          `Return Date: ${t.return_date || "-"}`,
+          `Return Time: ${t.return_time || "-"}`,
+          `Return Flight: ${t.return_flight_number || "-"}`,
+        ]
+      : []),
     `Passengers: ${t.passengers}`,
     `Vehicle: ${t.vehicle_type || "-"}`,
-    `Price quoted: ${formatPrice(t.price)}`,
+    `Price quoted: ${formatPrice(t.price)}${t.roundtrip ? " (both legs)" : ""}`,
     `Flight Number: ${t.flight_number || "-"}`,
     `Luggage: ${t.luggage || "-"}`,
     `Child Seats: ${formatSeats(t)}`,
@@ -138,13 +163,27 @@ function customerEmail(t: Transfer): Email {
     `Dropoff: ${t.dropoff}`,
     `Date: ${t.transfer_date}`,
     `Time: ${t.transfer_time}`,
+    // The way back, stated as its own journey rather than as a line saying a return
+    // was "requested". The ends are swapped because that is the direction it runs.
+    ...(t.roundtrip
+      ? [
+          "",
+          "Your return:",
+          `Pickup: ${t.dropoff}`,
+          `Dropoff: ${t.pickup}`,
+          `Date: ${t.return_date || "-"}`,
+          `Time: ${t.return_time || "-"}`,
+          ...(t.return_flight_number ? [`Flight Number: ${t.return_flight_number}`] : []),
+          "",
+        ]
+      : []),
     `Passengers: ${t.passengers}`,
     `Vehicle: ${t.vehicle_type || "-"}`,
     t.flight_number ? `Flight Number: ${t.flight_number}` : null,
     t.luggage ? `Luggage: ${t.luggage}` : null,
     t.child_seat || t.child_seats || t.booster_seats ? `Child Seats: ${formatSeats(t)}` : null,
     "",
-    `Price: ${formatPrice(t.price)}`,
+    `Price: ${formatPrice(t.price)}${t.roundtrip ? " for both legs" : ""}`,
     "Payable to the driver, in cash or by card. Nothing is charged online.",
     "",
     `Reference: ${t.id}`,
@@ -175,6 +214,7 @@ async function sendBatch(emails: Email[]) {
       emails.map((email) => ({
         from: MAIL_FROM,
         to: [email.to],
+        ...(MAIL_REPLY_TO ? { reply_to: MAIL_REPLY_TO } : {}),
         subject: encodeSubject(email.subject),
         text: email.text,
       })),

@@ -1,7 +1,12 @@
 project_id = "easy-transfer-booking"
 
-# The function authenticates the database webhook with its own shared secret
+# Both functions authenticate their caller with the same shared secret
 # (x-webhook-secret), so Supabase JWT verification is turned off. Leaving it on
 # would not help anyway: the anon key is a valid JWT and is public.
 [functions.booking-emails]
+verify_jwt = false
+
+# Called by pg_cron rather than by a database webhook, but reached over the same
+# public URL and so gated the same way.
+[functions.booking-reminders]
 verify_jwt = false

@@ -15,6 +15,13 @@ export type TransferRequest = {
   dropoffOffsetKm?: number | null;
   date: string;
   time: string;
+  // The return leg, when there is one. These were a sentence inside `notes` until the
+  // reminders needed a date a scheduler could read; on bookings taken before that they
+  // are backfilled from the old text.
+  roundtrip?: boolean;
+  returnDate?: string | null;
+  returnTime?: string | null;
+  returnFlightNumber?: string | null;
   passengers: string;
   vehicleType?: string;
   // The fare quoted at booking time. Null on routes we have no price for, and on

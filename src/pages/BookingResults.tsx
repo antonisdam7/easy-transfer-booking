@@ -248,6 +248,14 @@ export default function BookingResults() {
         dropoffOffsetKm: quote.dropoffOffsetKm,
         date: formData.date,
         time: formData.time,
+        // The return leg as its own fields rather than a sentence appended to the
+        // notes. It used to be the latter, which was legible to the operator and to
+        // nobody else -- and the 48-hour reminder has to be scheduled off the return
+        // time, which means something other than a person has to be able to read it.
+        roundtrip: formData.roundtrip,
+        returnDate: formData.roundtrip ? formData.returnDate : null,
+        returnTime: formData.roundtrip ? formData.returnTime : null,
+        returnFlightNumber: formData.returnFlightNumber || null,
         passengers: formData.people,
         vehicleType: formData.vehicleType,
         price: formData.price,
@@ -258,15 +266,10 @@ export default function BookingResults() {
         // Kept in step with the counts so bookings made before seats were counted,
         // and anything still reading the old column, stay meaningful.
         childSeat: formData.childSeats + formData.boosterSeats > 0,
-        notes: [
-          formData.notes,
-          formData.returnFlightNumber && `Return flight: ${formData.returnFlightNumber}`,
-          formData.roundtrip &&
-            `Roundtrip requested: Yes\nReturn Date: ${formData.returnDate}\nReturn Time: ${formData.returnTime}`,
-        ]
-          .filter(Boolean)
-          .join("\n")
-          .trim(),
+        // Only what the customer actually wrote. The return details used to be
+        // concatenated on here; they are columns now, and duplicating them would
+        // give the operator two sources for one fact.
+        notes: formData.notes.trim(),
       });
       toast.success("Booking confirmed. Check your email for the details.");
       navigate("/");

@@ -26,6 +26,21 @@ function formatDateTime(date: string, time: string) {
   return `${date} ${time}`;
 }
 
+// The way back, on its own line under the outward one.
+//
+// This used to arrive as part of the notes, because that is where the booking form
+// put it. It is columns now, so it has to be read from them -- otherwise a return
+// booked today would show in this table as a one-way trip.
+function ReturnLeg({ transfer }: { transfer: TransferRequest }) {
+  if (!transfer.roundtrip) return null;
+
+  const when = transfer.returnDate
+    ? formatDateTime(transfer.returnDate, transfer.returnTime ?? "")
+    : "date not recorded";
+
+  return <div className="text-xs text-muted-foreground">{`return ${when}`}</div>;
+}
+
 // Which priced zone a hotel was charged as, and how far it sat from it. Shown only
 // when it differs from what the customer typed, so a booking made straight from an
 // airport or a village name stays a single line.
@@ -43,6 +58,27 @@ function seatSummary(transfer: TransferRequest) {
   ].filter(Boolean);
 
   return parts.length > 0 ? `Seats: ${parts.join(" + ")}` : "Child seat";
+}
+
+// Flight, luggage and seats, joined only where there is something on both sides.
+//
+// This was written inline as a run of conditional separators, one per gap, which was
+// already hard to read at three fields and became wrong at four: the return flight
+// hung off a separator that tested the outward one. Building the list first and
+// joining it once cannot get that wrong however many fields arrive later.
+function extrasSummary(transfer: TransferRequest): string {
+  const flights = [
+    transfer.flightNumber && `Flight: ${transfer.flightNumber}`,
+    transfer.returnFlightNumber && `Return flight: ${transfer.returnFlightNumber}`,
+  ].filter(Boolean);
+
+  const parts = [
+    ...flights,
+    transfer.luggage && `Luggage: ${transfer.luggage}`,
+    transfer.childSeat && seatSummary(transfer),
+  ].filter(Boolean);
+
+  return parts.length > 0 ? parts.join(" | ") : "-";
 }
 
 function RouteZones({ transfer }: { transfer: TransferRequest }) {
@@ -148,20 +184,18 @@ export default function AdminTransfers() {
                           <RouteZones transfer={transfer} />
                         </div>
                       </TableCell>
-                      <TableCell>{formatDateTime(transfer.date, transfer.time)}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div>{formatDateTime(transfer.date, transfer.time)}</div>
+                          <ReturnLeg transfer={transfer} />
+                        </div>
+                      </TableCell>
                       <TableCell>{transfer.passengers}</TableCell>
                       <TableCell>{transfer.vehicleType || "-"}</TableCell>
                       <TableCell className="whitespace-nowrap font-medium">
                         {transfer.price == null ? "-" : `€${transfer.price}`}
                       </TableCell>
-                      <TableCell>
-                        {transfer.flightNumber ? `Flight: ${transfer.flightNumber}` : ""}
-                        {transfer.flightNumber && transfer.luggage ? " | " : ""}
-                        {transfer.luggage ? `Luggage: ${transfer.luggage}` : ""}
-                        {(transfer.flightNumber || transfer.luggage) && transfer.childSeat ? " | " : ""}
-                        {transfer.childSeat ? seatSummary(transfer) : ""}
-                        {!transfer.flightNumber && !transfer.luggage && !transfer.childSeat ? "-" : ""}
-                      </TableCell>
+                      <TableCell>{extrasSummary(transfer)}</TableCell>
                       <TableCell className="max-w-xs whitespace-pre-wrap">
                         {transfer.notes || "-"}
                       </TableCell>
