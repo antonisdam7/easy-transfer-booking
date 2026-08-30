@@ -143,9 +143,16 @@ function reminderEmail(r: DueReminder): Email {
   const lines = [
     `Hi ${r.name},`,
     "",
+    // "Less than 48 hours" rather than "the day after tomorrow", which was only true
+    // for the reminder that goes out on the mark. A booking made inside the window --
+    // and last-minute transfers are ordinary -- is reminded about an hour after it is
+    // taken, and telling somebody travelling tonight that their car comes the day
+    // after tomorrow is worse than saying nothing. The SQL only ever hands over legs
+    // that depart within 48 hours and have not yet departed, so this phrasing holds
+    // whichever of the two it is.
     isReturn
-      ? "Your return transfer is the day after tomorrow. Here are the details again."
-      : "Your transfer is the day after tomorrow. Here are the details again.",
+      ? "Your return transfer is less than 48 hours away. Here are the details again."
+      : "Your transfer is less than 48 hours away. Here are the details again.",
     "",
     `Pickup: ${r.pickup}`,
     `Dropoff: ${r.dropoff}`,
