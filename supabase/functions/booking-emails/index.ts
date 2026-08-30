@@ -5,15 +5,30 @@
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const MAIL_FROM = Deno.env.get("MAIL_FROM") ?? "";
 const MAIL_TO = Deno.env.get("MAIL_TO") ?? "";
+const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET") ?? "";
+
+// What the site publishes as its own contact details -- the same number and address
+// as src/lib/seo.ts, which is where they are edited. Repeated rather than imported
+// because an edge function runs in Deno and cannot reach into the Vite app; the check
+// on them is that they are printed on the Contact page, in the footer and in the
+// schema, so a stale copy here is visible against three others.
+const CONTACT = {
+  phone: "+30 697 626 3677",
+  email: "habibitransferscrete@gmail.com",
+};
+
 // Where a customer's reply lands.
 //
 // MAIL_FROM only has to sit on a domain verified in Resend. Verification proves the
 // domain may send; it creates no mailbox and adds no MX record, so unless the domain
-// is separately set up to receive, a reply to that address bounces. This email tells
-// the customer to reply, so it has to name an address that someone reads. Defaults to
-// the operator's own notification address, which by definition is one.
-const MAIL_REPLY_TO = Deno.env.get("MAIL_REPLY_TO") || MAIL_TO;
-const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET") ?? "";
+// is separately set up to receive, a reply to that address bounces -- which is exactly
+// the case here, and why this header exists at all.
+//
+// It falls back to the published address rather than to MAIL_TO. MAIL_TO is wherever
+// booking notifications happen to be pointed, which is a different question from
+// where a customer should write, and the email below names this address in its own
+// text: the two must be the same or the mail contradicts itself.
+const MAIL_REPLY_TO = Deno.env.get("MAIL_REPLY_TO") || CONTACT.email;
 
 type Transfer = {
   id: string;
@@ -150,6 +165,38 @@ function operatorEmail(t: Transfer): Email {
   };
 }
 
+// What the customer will be asked for, and when.
+//
+// A return is one fare, collected once, at the very start of the holiday. The panel
+// on the site arrives at that figure by listing the two legs separately -- outward,
+// return at 20% off, total -- which is honest arithmetic and reads to plenty of
+// people as two payments due on two different days. Somebody who believes that keeps
+// half the fare aside for a fortnight, or worse, comes to the airport on the way home
+// expecting to hand over money nobody is going to ask for. So the confirmation says
+// it plainly instead of leaving it to be inferred.
+function paymentLines(t: Transfer): string[] {
+  if (t.price === null || t.price === "") {
+    return [
+      `Price: ${formatPrice(t.price)}`,
+      "We will confirm the fare with you directly, before the day.",
+    ];
+  }
+
+  if (t.roundtrip) {
+    return [
+      `Price: ${formatPrice(t.price)} in total, covering both journeys.`,
+      "You pay the whole amount to your driver when we collect you on arrival,",
+      "in cash or by card. Nothing is charged online, and there is nothing left",
+      "to pay on the day you travel home.",
+    ];
+  }
+
+  return [
+    `Price: ${formatPrice(t.price)}`,
+    "Payable to the driver, in cash or by card. Nothing is charged online.",
+  ];
+}
+
 function customerEmail(t: Transfer): Email {
   const lines = [
     `Hi ${t.name},`,
@@ -183,13 +230,20 @@ function customerEmail(t: Transfer): Email {
     t.luggage ? `Luggage: ${t.luggage}` : null,
     t.child_seat || t.child_seats || t.booster_seats ? `Child Seats: ${formatSeats(t)}` : null,
     "",
-    `Price: ${formatPrice(t.price)}${t.roundtrip ? " for both legs" : ""}`,
-    "Payable to the driver, in cash or by card. Nothing is charged online.",
+    ...paymentLines(t),
     "",
     `Reference: ${t.id}`,
     "",
+    // The address in the From line is a sending identity on a verified domain, not a
+    // mailbox: nothing arrives there. A reply reaches us because of the Reply-To
+    // header, which the customer never sees -- so the way to us is also written out
+    // here in full, for anyone who copies the sender address by hand instead.
     "If any of the details above are wrong, or you need to cancel,",
-    "just reply to this email and we will sort it out.",
+    "just reply to this email.",
+    "",
+    "You can also reach us any time:",
+    `  WhatsApp / phone: ${CONTACT.phone}`,
+    `  Email: ${CONTACT.email}`,
     "",
     "Habibi Come to Crete Transfers",
     "https://habibitransferscrete.com",

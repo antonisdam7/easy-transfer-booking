@@ -13,12 +13,21 @@
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const MAIL_FROM = Deno.env.get("MAIL_FROM") ?? "";
-const MAIL_TO = Deno.env.get("MAIL_TO") ?? "";
-// Where a customer's reply lands. The From address only has to live on a domain
-// verified in Resend -- it is a header, not a mailbox, and nothing receives there.
-// Without this, "just reply to this email" is an instruction to write into the void.
-const MAIL_REPLY_TO = Deno.env.get("MAIL_REPLY_TO") || MAIL_TO;
 const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET") ?? "";
+
+// The same published contact details booking-emails prints, and for the same reason:
+// src/lib/seo.ts holds them, and Deno cannot import from the Vite app.
+const CONTACT = {
+  phone: "+30 697 626 3677",
+  email: "habibitransferscrete@gmail.com",
+};
+
+// Where a customer's reply lands. The From address only has to live on a domain
+// verified in Resend -- it is a sending identity, not a mailbox, and nothing receives
+// there. Without this, "just reply to this email" is an instruction to write into the
+// void. Falls back to the address this email names in its own text, so the header and
+// the words can never point at two different places.
+const MAIL_REPLY_TO = Deno.env.get("MAIL_REPLY_TO") || CONTACT.email;
 
 // Injected into every Supabase edge function. The service role bypasses row level
 // security, which is what lets this read customer rows that no browser may read.
@@ -32,6 +41,10 @@ type Leg = "outward" | "return";
 
 type DueReminder = {
   leg: Leg;
+  // Whether the booking has a return leg at all. What the customer owes depends on
+  // it: one fare covers both journeys and is collected on arrival, so the outward
+  // reminder names an amount and the homeward one says there is nothing left.
+  roundtrip: boolean;
   id: string;
   name: string;
   email: string;
@@ -87,6 +100,38 @@ function encodeSubject(subject: string): string {
   return `=?UTF-8?B?${base64}?=`;
 }
 
+// What the customer owes on the day, which is not the same question on each leg.
+//
+// A return is one fare, collected once, when the driver meets them on arrival. The
+// price column holds that whole figure, so quoting it beside the journey home would
+// read as a second charge for the same booking -- and saying nothing at all leaves
+// someone standing at their hotel door wondering whether to find cash. The way out
+// says the amount covers both journeys; the way home says there is nothing to find.
+function paymentLines(r: DueReminder): string[] {
+  if (r.leg === "return") {
+    return [
+      "Nothing to pay today: your fare was settled in full with your driver",
+      "when we picked you up on arrival. This journey is already covered.",
+    ];
+  }
+
+  if (r.price === null || r.price === "") {
+    return ["We will confirm the fare with you directly before the day."];
+  }
+
+  const amount = `EUR ${Number(r.price).toFixed(2)}`;
+
+  if (r.roundtrip) {
+    return [
+      `Your fare is ${amount} in total, and it covers both journeys.`,
+      "You settle the whole amount with your driver when we collect you now,",
+      "in cash or by card, and there is nothing further to pay on the way home.",
+    ];
+  }
+
+  return [`Your fare is ${amount}, payable to your driver in cash or by card.`];
+}
+
 function reminderEmail(r: DueReminder): Email {
   const isReturn = r.leg === "return";
   const seats = formatSeats(r);
@@ -107,18 +152,18 @@ function reminderEmail(r: DueReminder): Email {
     r.flight_number ? `Flight: ${r.flight_number}` : null,
     seats ? `Child seats: ${seats}` : null,
     "",
-    // Only on the outward leg. `price` is the total for the whole booking, so
-    // repeating it beside the return would read as a second charge.
-    !isReturn && r.price !== null && r.price !== ""
-      ? `Total for your booking: EUR ${Number(r.price).toFixed(2)}, payable to the driver in cash or by card.`
-      : null,
-    !isReturn && (r.price === null || r.price === "") ? "We will confirm the fare with you directly." : null,
+    ...paymentLines(r),
     "",
     r.flight_number
       ? "We track the flight, so a delay moves your pickup rather than costing you it."
-      : "If your plans move, reply to this email and we will move the pickup with them.",
+      : "If your plans move, tell us and we will move the pickup with them.",
     "",
-    "Anything wrong above, or need to cancel? Just reply to this email.",
+    // Written out rather than left to the Reply-To header, which the customer cannot
+    // see: the sender address on this mail is a sending identity on a verified domain
+    // and receives nothing, so anyone who copies it by hand needs the real way here.
+    "Anything wrong above, or need to cancel? Reply to this email, or reach us at:",
+    `  WhatsApp / phone: ${CONTACT.phone}`,
+    `  Email: ${CONTACT.email}`,
     "",
     "See you soon,",
     "Habibi Come to Crete Transfers",

@@ -250,8 +250,15 @@ export default function BookingSummary({
               </div>
             </dl>
           )}
+          {/* The breakdown above reaches the total by listing the legs apart -- the
+              outward fare, then the return at 20% off. That is the honest way to show
+              where the discount lands, and it reads to plenty of people as two bills
+              falling due on two different days. It is one fare, handed over once, at
+              the start of the holiday, so the line under it has to say so. */}
           <p className="text-xs text-muted-foreground">
-            Payable to the driver, in cash or by card. Nothing is charged online.
+            {roundtrip
+              ? "Paid in full to your driver when we collect you on arrival, in cash or by card. Nothing is charged online, and nothing more to pay on the way home."
+              : "Payable to the driver, in cash or by card. Nothing is charged online."}
           </p>
         </div>
 
