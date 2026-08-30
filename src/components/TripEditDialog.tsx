@@ -11,6 +11,7 @@ import {
 import LocationInput from "@/components/LocationInput";
 import { DateInput, TimeInput } from "@/components/DateTimeInput";
 import { LocationValue } from "@/lib/booking";
+import { largestParty } from "@/lib/fleet";
 
 // Changing the trip after prices are on screen. It opens over the results rather than
 // sending anyone back a page: the fare beside each car is the thing being changed, and
@@ -30,7 +31,10 @@ export type TripDraft = {
   people: string;
 };
 
-const MAX_PEOPLE = 8;
+// The largest party we can carry, read off the fleet like the search form does. The
+// dialog used to stop at 8 -- the minivan -- so a group that had booked the minibus
+// from the homepage could not keep their headcount when they edited the trip.
+const MAX_PEOPLE = largestParty;
 
 type Props = {
   open: boolean;
